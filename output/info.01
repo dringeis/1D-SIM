@@ -1,0 +1,41 @@
+ PHYSICAL PARAMETERS
+ 
+ C =
+           20.0000000000
+ Pstar =
+        27500.0000000000
+ e =
+            2.0000000000
+ zetamin =
+            0.0000000000
+ zetamax parameter =
+    500000000.0000000000
+ 
+ DEFINITION OF THE RUN
+ 
+ dx (m) =
+        20000.0000000000
+ dt (s) =
+          900.0000000000
+ linear water drag =
+ F
+ linear viscous =
+ F
+ constant wind =
+ T
+ 
+ SOLVER AND NUMERICS
+ 
+ SOLVER = 
+2
+ precond = 
+2
+ EVP precond
+ dte (s) =
+            4.0000000000
+ nb of sub cycles =
+025
+ max nb of gmres ite = 
+900
+ gamma_nl (tol) =
+            0.0010000000
