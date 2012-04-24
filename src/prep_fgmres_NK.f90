@@ -20,8 +20,6 @@
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
       double precision :: eps, eta_e, eta_e_ini, epsilon
 
-!      double precision  res_t, eta_e, eta_e_ini, epsilon, phi_e, alp_e
-
 !------------------------------------------------------------------------
 !     This routine solves J(u)du = -F(u) where u = u^k, du = du^k using the
 !     Jacobian free Newton Krylov method. The Krylov method is the precon-
@@ -78,7 +76,7 @@
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
-         epsilon = 1d-06 ! approximates Jv below
+         epsilon = 1d-07 ! approximates Jv below
          call JacfreeVec (wk1, wk2, F_uk1, uk1, b, epsilon) 
          GOTO 10
       ENDIF

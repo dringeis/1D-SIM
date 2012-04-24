@@ -33,6 +33,7 @@ program ice
   logical :: p_flag, restart
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, precond
   integer :: out_step(5), expnb, expres, ts_res
+  integer, save :: Nfail ! nb of failures
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: upts(1:nx+1)      ! u previous time step
   double precision :: tauair(1:nx+1)    ! tauair
@@ -45,6 +46,7 @@ program ice
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
+  Nfail    = 0
 
 !------------------------------------------------------------------------
 !     Input by user
@@ -162,7 +164,7 @@ program ice
 !------------------------------------------------------------------------
 
   call ini_get (restart, expres, ts_res)
-
+  
   do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
      
      call cpu_time(timecrap)
@@ -200,6 +202,8 @@ program ice
                               L2norm, k, ts, precond)
         endif
 
+        if (k .eq. Nmax_OL) Nfail = Nfail + 1
+
      enddo
 
      else ! EVP1 solver
@@ -233,7 +237,7 @@ program ice
      endif
 
 !------------------------------------------------------------------------
-!     calculate diagnostics and check stability conditions                                                                               
+!     calculate diagnostics and check stability conditions            
 !------------------------------------------------------------------------
 
      call check_neg_vel(u)
@@ -243,6 +247,12 @@ program ice
 !     call stab_condition(Cw, zeta)
 
   enddo
+  
+  if (solver .eq. 1) then
+     print *, 'Nb of failures of Picard: ', Nfail
+  elseif (solver .eq. 2) then
+     print *, 'Nb of failures of JFNK: ', Nfail
+  endif
 
 end program ice
       
