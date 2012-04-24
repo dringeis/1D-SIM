@@ -1,27 +1,20 @@
 !*************************************************************************
-!     subroutine stepper:
-!       Calculate the ice thickness (h), concentration (A) and ice velocity
-!       (u) at the next time step, for a given forcing.
+!     program ice:
+!       1D model that calculate the ice thickness (h), concentration (A) 
+!       and ice velocity (u).
 !       
-!       momentum equation:  rho*h(u^t-u^t-1)/tdyn = f(u^t,h^t-1/2,A^t-1/2)
-!                           This equation is solved implicitly for u^t
-!                           (u). u^t-1 is the previous time step solution.
-!                           h and A are defined in the middle of t-1 and t.  
+!       momentum equation:  rho*h(u^n-u^n-1)/Deltat = f(u^n,h^n-1,A^n-1)
+!                           This equation is solved implicitly for u^n
+!                           (u). u^n-1 is the previous time step solution.
 !
-!       continuity equation:h^t+1/2 = f(h^t-1/2, u^t)  
-!                           The new value of h (and A) between t and t+1 is 
-!                           obtained by advecting h^t-1/2 with u^t. 
-!
-!     ----t-1-----------------t----------------t+1---------
-!      
-!        u^t-1   h,A^t-1/2   u^t   h,A^t+1/2   u^t+1
-!
-!     When you output the result at time t, u is defined at t while
-!     h and A are defined at t+1/2 (even though they have the same date as 
-!     u).
+!       continuity equation:h^n = f(h^n-1, u^n)  
+!                           The new value of h (and A) is obtained by 
+!                           advecting h^n-1 with u^n. 
+!       
+!       author: JF Lemieux
+!       version: 1.0 (20 april 2012)
 !
 !************************************************************************
-
 
 program ice
 
@@ -37,9 +30,9 @@ program ice
   
   implicit none
 
-  logical :: p_flag
-  integer :: i, ts, nstep, k, s, Nmax_OL, solver, expnb, precond
-  integer :: out_step(5)
+  logical :: p_flag, restart
+  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, precond
+  integer :: out_step(5), expnb, expres, ts_res
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: upts(1:nx+1)      ! u previous time step
   double precision :: tauair(1:nx+1)    ! tauair
@@ -61,16 +54,17 @@ program ice
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   implicit       = .true. ! T: solvers 1, 2 or 3, F: EVP solver
+  restart        = .true.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  precond    = 2        ! precond for solver 2, 1: SOR, 2: EVP2
+  precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
 
   Deltat     = 900d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
-  Nmax_OL    = 10000
+  nstep      = 2000     ! lenght of the run in nb of time steps
+  Nmax_OL    = 500
 
   if (implicit) then
-     N_sub = 25                       ! nb of subcycles for precond
+     N_sub = 25                        ! nb of subcycles for precond
      Deltate = 4d0                     ! EVP as a precond
      Eo    = 0.05d0                    ! Hunke 1997, eq (44)
   elseif (.not. implicit) then
@@ -87,9 +81,23 @@ program ice
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-03
 
-  expnb      = 1
+  expnb      = 3
+  expres     = 2
+  ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)= 100   
 
+!------------------------------------------------------------------------ 
+!     Set first time level depending on restart specifications                
+!------------------------------------------------------------------------
+
+  if (restart) then
+     tsini = ts_res + 1
+  else
+     tsini = 1
+  endif
+  
+  tsfin = tsini - 1 + nstep
+  
 !------------------------------------------------------------------------
 !     Define a flag for the precond (T) or solver (F)
 !------------------------------------------------------------------------
@@ -153,14 +161,14 @@ program ice
 !     initial conditions
 !------------------------------------------------------------------------
 
-  call ini_get (upts)
+  call ini_get (restart, expres, ts_res)
 
-  do ts = 1, nstep ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
+  do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
      
      call cpu_time(timecrap)
      call cpu_time(time1)
 
-      if (ts .gt. 1) upts = u ! for t=1, upts = 0d0
+     upts = u
 
 !------- Create forcing vector b (independent of u) ----------------------
 
@@ -224,7 +232,16 @@ program ice
         call output_file(e, gamma_nl, solver, precond, expnb)
      endif
 
-     print *, 'u50=', u(50)
+!------------------------------------------------------------------------
+!     calculate diagnostics and check stability conditions                                                                               
+!------------------------------------------------------------------------
+
+     call check_neg_vel(u)
+     call minmaxtracer(h,1)
+     call minmaxtracer(A,2)
+!     call minmaxtracer(zeta,3)
+     call stab_condition(Cw, zeta)
+
   enddo
 
 end program ice

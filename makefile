@@ -17,7 +17,7 @@ LIBS  = #-llapack -lblas #-lnag
 #FFlAGS  = -O0  
 
 EXE = 'zoupa'
-SRC	= src/ice.f90 src/parameter_mod.f90 src/constants_mod.f90 src/global_var_mod.f90 src/option_mod.f90 src/ini_get.f90 src/wind_forcing.f90 src/pressure.f90 src/bvect.f90 src/viscouscoefficient.f90 src/Cw_coefficient.f90 src/Fu.f90 src/SOR.f90 src/upwind_adv.f90 src/meantracer.f90 src/prep_fgmres_NK.f90 src/identity.f90 src/JacfreeVec.f90 src/fgmresD.f90 src/dcopy.f90 src/ddot.f90 src/daxpy.f90 src/EVP2solver.f90 src/EVP1Bprecond.f90 src/EVP2precond.f90 src/EVP2Aprecond.f90 src/EVP2Bprecond.f90 src/EVP2Dprecond.f90 src/output_results.f90 src/output_file.f90 src/sigma_s.f90 src/Fu_EVP.f90
+SRC	= src/ice.f90 src/parameter_mod.f90 src/constants_mod.f90 src/global_var_mod.f90 src/option_mod.f90 src/ini_get.f90 src/wind_forcing.f90 src/pressure.f90 src/bvect.f90 src/viscouscoefficient.f90 src/Cw_coefficient.f90 src/Fu.f90 src/SOR.f90 src/upwind_adv.f90 src/util.f90 src/prep_fgmres_NK.f90 src/identity.f90 src/JacfreeVec.f90 src/fgmresD.f90 src/dcopy.f90 src/ddot.f90 src/daxpy.f90 src/EVP2solver.f90 src/EVP2Dprecond.f90 src/output_results.f90 src/output_file.f90 src/sigma_s.f90 src/Fu_EVP.f90
 
 
 ice: $(SRC) $(COMMON) 
@@ -28,7 +28,7 @@ ice: $(SRC) $(COMMON)
 #	ar rv libice.a $(OBJ)
 
 tidy:	
-	rm ./*.o src/*~ ./a.out
+	rm ./*.o src/*~ ./zoupa
 
 
 # $(LIBDIR)  $(LIBS)

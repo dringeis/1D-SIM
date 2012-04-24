@@ -48,7 +48,6 @@ subroutine output_results(ts, expnb, zeta, eta)
   open (17, file = filename, status = 'unknown')
 
 
-!  do i = 0, nx+1
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
   write(13,10) ( div(i),     i = 0, nx+1 )
@@ -62,7 +61,7 @@ subroutine output_results(ts, expnb, zeta, eta)
      close(k)
   enddo
 
-10 format (1x, 1000(f24.10, 1x))
+10 format (1x, 1000(f25.20, 1x))
 
   return
 end subroutine output_results

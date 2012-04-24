@@ -5,20 +5,21 @@
 ! no restart possible for the moment jfl WATCHOUT
 ! no open bcs possible for the moment jfl WATCHOUT
 
-subroutine ini_get (upts)
+subroutine ini_get (restart, expres, ts_res)
 
   use size
   use global_var
 
   implicit none
      
+  logical, intent(in) :: restart
+  integer, intent(in) :: expres, ts_res
   integer :: i
   double precision :: rdnb, small
-  double precision, intent(out) :: upts(1:nx+1) ! u previous time step
+
+  character(LEN=30) filename  ! restart file name  
 
   small = 0.0001d0
-
-  upts(:) = 0d0 ! because no restart
 
   u(1)    = 0d0 ! close bc
   u(nx+1) = 0d0 ! close bc
@@ -26,6 +27,27 @@ subroutine ini_get (upts)
   h(nx+1) = 0d0
   A(0)    = 0d0
   A(nx+1) = 0d0
+
+  if (restart) then 
+
+     write (filename,'("output/h_",i3.3,".",i2.2)') ts_res, expres
+     open (10, file = filename, status = 'old')
+     
+     write (filename,'("output/A_",i3.3,".",i2.2)') ts_res, expres
+     open (11, file = filename, status = 'old')
+
+     write (filename,'("output/u_",i3.3,".",i2.2)') ts_res, expres
+     open (12, file = filename, status = 'old')
+
+     read (10,*) ( h(i), i = 0, nx+1 )
+     read (11,*) ( A(i), i = 0, nx+1 )
+     read (12,*) ( u(i), i = 1, nx+1 )
+
+     close(10)
+     close(11)
+     close(12)
+
+  else ! specify initial fields
 
   do i = 2, nx
 !     call random_number(rdnb)
@@ -38,6 +60,8 @@ subroutine ini_get (upts)
      A(i) = 0.95d0
 !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall
   enddo
+
+  endif
 
   return
 end subroutine ini_get
