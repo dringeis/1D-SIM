@@ -54,13 +54,13 @@ program ice
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   implicit       = .true. ! T: solvers 1, 2 or 3, F: EVP solver
-  restart        = .true.
+  restart        = .false.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
 
   Deltat     = 900d0   ! time step [s]
-  nstep      = 2000     ! lenght of the run in nb of time steps
+  nstep      = 200     ! lenght of the run in nb of time steps
   Nmax_OL    = 500
 
   if (implicit) then
@@ -240,7 +240,7 @@ program ice
      call minmaxtracer(h,1)
      call minmaxtracer(A,2)
 !     call minmaxtracer(zeta,3)
-     call stab_condition(Cw, zeta)
+!     call stab_condition(Cw, zeta)
 
   enddo
 

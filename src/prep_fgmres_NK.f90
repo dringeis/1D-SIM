@@ -1,6 +1,6 @@
 
       subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, b, tauair, &
-                               inires, k, ts, precond, upts)
+                               L2norm, k, ts, precond, upts)
         use size
         use numerical
         
@@ -11,7 +11,7 @@
 
       double precision, intent(inout) :: uk1(1:nx+1)
       double precision, intent(in)  :: F_uk1(1:nx+1), b(1:nx+1), upts(1:nx+1)
-      double precision, intent(in)  :: inires
+      double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
       double precision, intent(in)  :: Cw(1:nx+1)
       double precision, intent(in) :: tauair(1:nx+1) 
@@ -49,43 +49,14 @@
 !------------------------------------------------------------------------
 !     Choosing the forcing term (eta_e)
 !------------------------------------------------------------------------
-
-!      res_t     = 1d-02 ! transition between fast and slow phase
-      eta_e_ini = 0.999999d0
-!      phi_e     = 1d0
-!      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0
- 
-!      if (k .eq. 1) then
-
-      eta_e = eta_e_ini
-
-    if (ts .gt. 10) then
-!      if (k .lt. 20) then
-!         eta_e = eta_e_ini
-!      else
-         eta_e = 0.01d0
-!         print * ,'dudeman'
-!      endif
-      endif
-!      elseif (k .gt. 1 .and. res .gt. res_t) then
-
-!         eta_e = eta_e_ini
-
-!      else
-!         eta_e = phi_e * (res/resk_1)**alp_e ! Eisenstat, 1996, equ.(2.6)
-!         eta_e = min(eta_e_ini,eta_e)
-!         eta_e = max(0.3d0,eta_e)
-!      endif         
-
-!      resk_1 = res 
-
-!      print *, 'initial norm is', k, res, eta_e
+      
+      call forcing_term (k,ts,L2norm,eta_e)
 
 !------------------------------------------------------------------------
 !      Begining of FGMRES method    
 !------------------------------------------------------------------------
 
-      eps = eta_e * inires ! setting the tolerance for fgmres
+      eps = eta_e * L2norm ! setting the tolerance for fgmres
 
       iout   = 0    ! set  higher than 0 to have res(ite)
 
@@ -136,6 +107,51 @@
          return
        end subroutine prepFGMRES_NK
       
+   subroutine forcing_term(k,ts,L2norm,eta_e)
+
+      implicit none
+
+      integer, intent(in) :: k, ts
+
+      double precision, intent(in) :: L2norm
+      double precision, save :: L2normk_1, L2norm_t
+      double precision :: eta_e_ini, phi_e, alp_e
+      double precision, intent(out) :: eta_e
+
+      eta_e_ini = 0.99d0
+      phi_e     = 1d0
+      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
+
+      if (k .eq. 1) then
+
+         eta_e = eta_e_ini
+         L2norm_t = L2norm / 5d0 ! t stands for transition
+
+      elseif (k .gt. 100) then
+
+         eta_e = eta_e_ini
+
+      else
+
+         if (L2norm .gt. L2norm_t) then
+
+            eta_e = eta_e_ini
+      
+         else
+
+            eta_e = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
+            eta_e = min(eta_e_ini,eta_e)
+            eta_e = max(0.01d0,eta_e)
+
+         endif
+
+      endif
+
+      L2normk_1 = L2norm
+
+      if (ts .le. 10) eta_e = eta_e_ini
+
+    end subroutine forcing_term
 
 
 
