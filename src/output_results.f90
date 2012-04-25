@@ -79,7 +79,7 @@ subroutine output_residual(ts, k, expnb, F)
   write (filename, '("output/residual_",i4.4,"_",i4.4,".",i2.2)') ts,k,expnb
   open (11, file = filename, status = 'unknown')
 
-  write(11,10) ( F(i), i = 0, nx+1 )
+  write(11,10) ( F(i), i = 1, nx+1 )
 
   close(11)
   
