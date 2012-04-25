@@ -9,7 +9,7 @@ subroutine output_results(ts, expnb, zeta, eta)
 
   integer :: i, k
   integer, intent(in) :: ts, expnb
-  double precision, intent(inout):: zeta(0:nx+1),eta(0:nx+1)
+  double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
 
   div(0) = 0d0
@@ -18,7 +18,6 @@ subroutine output_results(ts, expnb, zeta, eta)
   do i = 1, nx
      div(i) = (u(i+1)-u(i)) / Deltax ! calc divergence
      sigma(i) = (zeta(i)+eta(i))*div(i) - p_half(i)
-     zeta(i) = zeta(i) !/ (zmax_par*p_half(i))
      sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/p_half(i) - 0.5d0
      zeta_norm(i) = zeta(i) / (zmax_par*p_half(i))
   enddo
@@ -65,5 +64,28 @@ subroutine output_results(ts, expnb, zeta, eta)
 
   return
 end subroutine output_results
+
+subroutine output_residual(ts, k, expnb, F)
+  use size
+
+  implicit none
+
+  character filename*40
+
+  integer :: i
+  integer, intent(in) :: ts, k, expnb
+  double precision, intent(in):: F(1:nx+1)
+
+  write (filename, '("output/residual_",i4.4,"_",i4.4,".",i2.2)') ts,k,expnb
+  open (11, file = filename, status = 'unknown')
+
+  write(11,10) ( F(i), i = 0, nx+1 )
+
+  close(11)
+  
+10 format (1x, 1000(f25.18, 1x))
+
+  return
+end subroutine output_residual
 
 
