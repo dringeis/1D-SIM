@@ -21,10 +21,14 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
      deno = max( deno, 1d-30 )
      
-     zeta(i) = zmax_par * p_half(i) * (tanh(1/(zmax_par*deno))) &
+     zeta(i) = zmax_par * Pp_half(i) * (tanh(1/(zmax_par*deno))) &
           + zetamin
 
      eta(i)  = zeta(i) * e_2
+
+     if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
+	P_half(i) = zeta(i)*deno 
+     endif
 
   enddo
 

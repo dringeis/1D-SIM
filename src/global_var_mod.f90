@@ -9,7 +9,8 @@ use size
   IMPLICIT NONE
   DOUBLE PRECISION :: h(0:nx+1)
   DOUBLE PRECISION :: A(0:nx+1)
-  DOUBLE PRECISION :: p_half(0:nx+1)
+  DOUBLE PRECISION :: Pp_half(0:nx+1)
+  DOUBLE PRECISION :: P_half(0:nx+1)
   DOUBLE PRECISION :: u(1:nx+1)
 
 END MODULE global_var

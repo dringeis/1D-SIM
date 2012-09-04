@@ -34,7 +34,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
   
   do i = 1, nx ! initial values of sigma
 
-     sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - p_half(i)
+     sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
 
   enddo
 
@@ -74,7 +74,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
      do i = 1, nx ! for tracer points
 
         right = (zeta(i)/ T )*( utp(i+1) - utp(i) ) / Deltax &
-              + sigma(i) / Deltate - p_half(i) / (T*alpha2)! could be impr.
+              + sigma(i) / Deltate - P_half(i) / (T*alpha2)! could be impr.
 
         sigma(i) = right / left
 

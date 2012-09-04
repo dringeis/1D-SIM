@@ -55,7 +55,8 @@ program ice
   linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
-  implicit       = .true. ! T: solvers 1, 2 or 3, F: EVP solver
+  rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
+  implicit_solv  = .true. ! T: solvers 1, 2 or 3, F: EVP solver
   restart        = .false.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
@@ -65,11 +66,11 @@ program ice
   nstep      = 200     ! lenght of the run in nb of time steps
   Nmax_OL    = 500
 
-  if (implicit) then
+  if (implicit_solv) then
      N_sub = 25                        ! nb of subcycles for precond
      Deltate = 4d0                     ! EVP as a precond
      Eo    = 0.05d0                    ! Hunke 1997, eq (44)
-  elseif (.not. implicit) then
+  elseif (.not. implicit_solv) then
      N_sub = 900                       ! nb of subcycles
      Deltate    = Deltat / (N_sub*1d0) ! EVP as a solver
   endif
@@ -105,9 +106,9 @@ program ice
 !------------------------------------------------------------------------
 
   p_flag = .true.
-  if (implicit) then
+  if (implicit_solv) then
      if (solver .eq. 1) p_flag = .false.
-  elseif (.not. implicit) then
+  elseif (.not. implicit_solv) then
      print *, 'check this out one_or_zero!!!', one_or_zero
      one_or_zero = 0d0 ! set to zero to eliminate du/dt term (not du/dte)
      p_flag = .false.
@@ -175,18 +176,18 @@ program ice
 !------- Create forcing vector b (independent of u) ----------------------
 
      call wind_forcing (tauair, ts)
-     call pressure () ! p_half is p/2
-     call bvect (tauair, upts, b) ! b does not include dP/dx for EVP solver
+     call pressure () ! Pp_half is Pp/2 where Pp is the ice strength
 
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
 !------- Begining of outer loop (OL) or Newton iterations ----------------
 
-     if (implicit) then
+     if (implicit_solv) then
 
      do k = 1, Nmax_OL 
         
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+        call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
 
@@ -198,7 +199,7 @@ program ice
         if (solver .eq. 1) then
            call SOR (b, u, zeta, eta, Cw, p_flag, ts)
         elseif (solver .eq. 2) then
-           call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, b, tauair, &
+           call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
                               L2norm, k, ts, precond)
         endif
 
@@ -208,7 +209,8 @@ program ice
 
      else ! EVP1 solver
         
-        u = upts ! could be improved
+        call bvect (tauair, upts, b) ! b does not include dP/dx for EVP solver
+
 ! watchout b includes rho*h*upts/dt
 !        CALL EVP1(b, u, zeta, eta, Cw, .false., ts)
 

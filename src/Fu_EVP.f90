@@ -68,7 +68,7 @@ subroutine Fu_EVP (utp, us1, zeta, eta, Cw, b, Fu_vec)
 !     dP/dx term for the EVP...recall it is not included in b
 !------------------------------------------------------------------------
 
-        Fu_vec(i) = Fu_vec(i) + ( p_half(i) - p_half(i-1) ) / Deltax
+        Fu_vec(i) = Fu_vec(i) + ( P_half(i) - P_half(i-1) ) / Deltax
         
   enddo
 

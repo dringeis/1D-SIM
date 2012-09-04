@@ -1,6 +1,6 @@
 
-      subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, b, tauair, &
-                               L2norm, k, ts, precond, upts)
+      subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, upts, tauair, &
+                               L2norm, k, ts, precond)
         use size
         use numerical
         
@@ -10,7 +10,7 @@
       integer, intent(in) ::  k, ts, precond
 
       double precision, intent(inout) :: uk1(1:nx+1)
-      double precision, intent(in)  :: F_uk1(1:nx+1), b(1:nx+1), upts(1:nx+1)
+      double precision, intent(in)  :: F_uk1(1:nx+1), upts(1:nx+1)
       double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
       double precision, intent(in)  :: Cw(1:nx+1)
@@ -77,7 +77,7 @@
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
          epsilon = 1d-07 ! approximates Jv below
-         call JacfreeVec (wk1, wk2, F_uk1, uk1, b, epsilon) 
+         call JacfreeVec (wk1, wk2, F_uk1, uk1, upts, tauair, epsilon) 
          GOTO 10
       ENDIF
 

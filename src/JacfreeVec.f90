@@ -1,4 +1,4 @@
-subroutine JacfreeVec (v, Jv, F_uk1, uk1, b, epsilon)
+subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 
   use size
   use global_var
@@ -7,12 +7,12 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, b, epsilon)
   
   integer :: i
   double precision, intent(in) :: v(1:nx+1), F_uk1(1:nx+1), uk1(1:nx+1)
-  double precision, intent(in) :: b(1:nx+1)
+  double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
   double precision :: zeta(0:nx+1), eta(0:nx+1)
   double precision :: Cw(1:nx+1), Fpos(1:nx+1)
-  double precision :: upos(1:nx+1)
+  double precision :: upos(1:nx+1), b(1:nx+1)
 
 !  double precision xpos(nvar), xneg(nvar), x(nvar),rhs(nvar)
 
@@ -27,6 +27,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, b, epsilon)
   enddo
         
   call viscouscoefficient (upos, zeta, eta)
+  call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
   call Fu (upos, zeta, eta, Cw, b, Fpos)
 

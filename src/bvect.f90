@@ -21,12 +21,12 @@ subroutine bvect(tauair, upts, b)
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
 
-     if (implicit) then
+     if (implicit_solv) then
 
-        b(i) = tauair(i)  - ( p_half(i) - p_half(i-1) ) / Deltax +  &
+        b(i) = tauair(i)  - ( P_half(i) - P_half(i-1) ) / Deltax +  &
              ( rho * h_at_u * upts(i) ) / Deltat
 
-     elseif (.not. implicit) then
+     elseif (.not. implicit_solv) then
         
         b(i) = tauair(i) + one_or_zero * ( rho * h_at_u * upts(i) ) / Deltat
 

@@ -22,8 +22,10 @@ subroutine sigma_s(utp, sigma)
 
      deno = max( deno, mindeno )
      
-     sigma(i) = beta_1 * ( p_half(i)*(1d0/T)*(dudx/deno - 0.5d0) &
+     sigma(i) = beta_1 * ( P_half(i)*(1d0/T)*(dudx/deno - 0.5d0) &
                 + sigma(i)/Deltate )
+
+      ! check if it should be Pp or P_half...
 
   enddo
 

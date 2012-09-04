@@ -17,9 +17,9 @@ subroutine output_results(ts, expnb, zeta, eta)
 
   do i = 1, nx
      div(i) = (u(i+1)-u(i)) / Deltax ! calc divergence
-     sigma(i) = (zeta(i)+eta(i))*div(i) - p_half(i)
-     sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/p_half(i) - 0.5d0
-     zeta_norm(i) = zeta(i) / (zmax_par*p_half(i))
+     sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
+     sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/P_half(i) - 0.5d0
+     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
   write (filename, '("output/h_",i3.3,".",i2.2)') ts,expnb

@@ -35,11 +35,11 @@ subroutine Fu (utp, zeta, eta, Cw, b, Fu_vec)
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
 
-     if (implicit) then
+     if (implicit_solv) then
      
         Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * utp(i) ) / Deltat
      
-     elseif (.not. implicit) then
+     elseif (.not. implicit_solv) then
 
         Fu_vec(i) = Fu_vec(i) + one_or_zero*( rho * h_at_u * utp(i) )/ Deltat
 
@@ -70,9 +70,9 @@ subroutine Fu (utp, zeta, eta, Cw, b, Fu_vec)
 !     dP/dx term for the EVP...recall it is not included in b
 !------------------------------------------------------------------------
 
-     if (.not. implicit) then
+     if (.not. implicit_solv) then
         
-        Fu_vec(i) = Fu_vec(i) + ( p_half(i) - p_half(i-1) ) / Deltax
+        Fu_vec(i) = Fu_vec(i) + ( P_half(i) - P_half(i-1) ) / Deltax
         
      endif
 

@@ -49,7 +49,7 @@ subroutine output_file(e, gamma_nl, solver, precond, expnb)
   write(10,*) ('SOLVER AND NUMERICS')
   write(10,*) ('')
 
-  if (implicit) then
+  if (implicit_solv) then
      write(10,*) ('SOLVER = ')
      write(10,11) (solver)
      write(10,*) ('precond = ')
@@ -71,7 +71,7 @@ subroutine output_file(e, gamma_nl, solver, precond, expnb)
      write(10,*) ('gamma_nl (tol) =')
      write(10,10) (gamma_nl)
      
-  elseif (.not. implicit) then
+  elseif (.not. implicit_solv) then
      write(10,*) ('SOLVER = EVP')
      write(10,*) ('dte (s) =')
      write(10,10) (Deltate)
