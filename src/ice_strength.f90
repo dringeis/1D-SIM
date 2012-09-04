@@ -1,4 +1,4 @@
-subroutine pressure ( )
+subroutine ice_strength ( )
   use size
   use rheology
   use global_var
@@ -24,7 +24,7 @@ subroutine pressure ( )
   endif
 
   return
-end subroutine pressure
+end subroutine ice_strength
       
 
 

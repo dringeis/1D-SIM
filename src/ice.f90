@@ -176,7 +176,7 @@ program ice
 !------- Create forcing vector b (independent of u) ----------------------
 
      call wind_forcing (tauair, ts)
-     call pressure () ! Pp_half is Pp/2 where Pp is the ice strength
+     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
 
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
