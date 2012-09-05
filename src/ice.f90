@@ -224,7 +224,7 @@ program ice
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
-     call advection ! advection scheme for tracers
+     call advection (u, h, A) ! advection scheme for tracers
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------
