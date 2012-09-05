@@ -58,12 +58,13 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   implicit_solv  = .true. ! T: solvers 1, 2 or 3, F: EVP solver
   restart        = .false.
+  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
 
   Deltat     = 900d0   ! time step [s]
-  nstep      = 200     ! lenght of the run in nb of time steps
+  nstep      = 71     ! lenght of the run in nb of time steps
   Nmax_OL    = 500
 
   if (implicit_solv) then
@@ -223,7 +224,7 @@ program ice
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
-     call upwind_adv ! advection scheme for tracers
+     call advection ! advection scheme for tracers
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------
