@@ -2,6 +2,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 
   use size
   use global_var
+  use option
   
   implicit none
   
@@ -26,6 +27,13 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 
   enddo
         
+  if (IMEX .eq. 2) then ! IMEX method 2 only
+    h=hold
+    A=Aold
+    call advection (upos, h, A) ! advection scheme for tracers
+    call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+  endif
+  
   call viscouscoefficient (upos, zeta, eta)
   call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)

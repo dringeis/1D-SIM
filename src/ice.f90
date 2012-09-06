@@ -62,9 +62,10 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
+  IMEX       = 0        ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 900d0   ! time step [s]
-  nstep      = 71     ! lenght of the run in nb of time steps
+  nstep      = 200     ! lenght of the run in nb of time steps
   Nmax_OL    = 500
 
   if (implicit_solv) then
@@ -177,7 +178,7 @@ program ice
 !------- Create forcing vector b (independent of u) ----------------------
 
      call wind_forcing (tauair, ts)
-     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+     if (IMEX .eq. 0) call ice_strength () ! standard approach no IMEX
 
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
@@ -185,15 +186,26 @@ program ice
 
      if (implicit_solv) then
 
+     if (IMEX .gt. 0) then ! IMEX method 1 or 2
+	hold=h
+	Aold=A
+     endif
+
      do k = 1, Nmax_OL 
         
+        if (IMEX .gt. 0) then ! IMEX method 1 or 2
+	  h=hold ! pas besoin premier coup...
+	  A=Aold
+	  call advection (u, h, A) ! advection scheme for tracers
+	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+	endif
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
 
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-        print *, 'L2 norm after k ite is', ts, k-1, L2norm
+        print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) nl_target = gamma_nl*L2norm
         if (L2norm .lt. nl_target) exit
 
@@ -224,7 +236,8 @@ program ice
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
-     call advection (u, h, A) ! advection scheme for tracers
+     if (IMEX .eq. 0) call advection (u, h, A)  ! standard approach no IMEX
+
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------
