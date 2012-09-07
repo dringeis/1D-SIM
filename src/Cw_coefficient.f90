@@ -24,8 +24,8 @@ subroutine Cw_coefficient (utp, Cw)
      
      do i = 2, nx
         
-        Cw(i) = Cdw*abs(utp(i))  ! nonlinear water drag
-        
+        Cw(i) = max(Cdw*abs(utp(i)), 1d-10)  ! nonlinear water drag
+
      enddo
      
   endif
