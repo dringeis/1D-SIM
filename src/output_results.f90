@@ -101,7 +101,7 @@ subroutine output_nb_Newton_or_OL_ite(k)
   Dt=int(Deltat)
   Dx=int(Deltax/1000d0)
 
-  write (filename, '("output/Newton_ite_",i5.5,"_",i3.3,".",i2.2)') Dt,Dx,IMEX
+  write (filename, '("output/Newton_ite_",i5.5,"_",i3.3,"km.",i2.2)') Dt,Dx,IMEX
   open (10, file = filename, access = 'append')
   
   write(10,10) k-1
