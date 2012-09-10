@@ -88,4 +88,26 @@ subroutine output_residual(ts, k, expnb, F)
   return
 end subroutine output_residual
 
+subroutine output_nb_Newton_or_OL_ite(k)
+  use resolution
+  use option
+  implicit none
 
+  character filename*35
+
+  integer :: Dt
+  integer, intent(in) :: k
+
+  Dt=int(Deltat)
+
+  write (filename, '("output/Newton_ite_",i5.5".",i2.2)') Dt,IMEX
+  open (10, file = filename, access = 'append')
+  
+  write(10,10) k-1
+
+  close(10)
+
+10 format (i4)
+
+  return
+end subroutine output_nb_Newton_or_OL_ite

@@ -219,6 +219,7 @@ program ice
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
 
      enddo
+!     call output_nb_Newton_or_OL_ite (k)
 
      else ! EVP1 solver
         
