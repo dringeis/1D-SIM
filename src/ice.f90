@@ -194,8 +194,10 @@ program ice
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  h=hold ! pas besoin premier coup...
-	  A=Aold
+	  if (k .gt. 1) then
+	    h=hold 
+	    A=Aold
+	  endif
 	  call advection (u, h, A) ! advection scheme for tracers
 	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
