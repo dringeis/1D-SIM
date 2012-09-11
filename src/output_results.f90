@@ -1,4 +1,4 @@
-subroutine output_results(ts, expnb, zeta, eta)
+subroutine output_results(ts, expnb, utp, zeta, eta)
   use size
   use resolution
   use global_var
@@ -10,13 +10,14 @@ subroutine output_results(ts, expnb, zeta, eta)
   integer :: i, k
   integer, intent(in) :: ts, expnb
   double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
+  double precision, intent(in)  :: utp(1:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
 
   div(0) = 0d0
   div(nx+1) = 0d0
 
   do i = 1, nx
-     div(i) = (u(i+1)-u(i)) / Deltax ! calc divergence
+     div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
      sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
      sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/P_half(i) - 0.5d0
      zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
@@ -54,7 +55,7 @@ subroutine output_results(ts, expnb, zeta, eta)
   write(15,10) ( sigma(i),   i = 0, nx+1 )
   write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
   write(17,10) ( sig_norm(i),   i = 0, nx+1 )
-  write(12,10) ( u(i),       i = 1, nx+1 )
+  write(12,10) ( utp(i),       i = 1, nx+1 )
 
   do k = 10, 17
      close(k)

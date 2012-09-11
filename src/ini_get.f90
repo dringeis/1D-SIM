@@ -5,7 +5,7 @@
 ! no restart possible for the moment jfl WATCHOUT
 ! no open bcs possible for the moment jfl WATCHOUT
 
-subroutine ini_get (restart, expres, ts_res)
+subroutine ini_get (utp, restart, expres, ts_res)
 
   use size
   use global_var
@@ -15,14 +15,15 @@ subroutine ini_get (restart, expres, ts_res)
   logical, intent(in) :: restart
   integer, intent(in) :: expres, ts_res
   integer :: i
+  double precision, intent(inout)  :: utp(1:nx+1)
   double precision :: rdnb, small
 
   character(LEN=30) filename  ! restart file name  
 
   small = 0.0001d0
 
-  u(1)    = 0d0 ! close bc
-  u(nx+1) = 0d0 ! close bc
+  utp(1)    = 0d0 ! close bc
+  utp(nx+1) = 0d0 ! close bc
   h(0)    = 0d0
   h(nx+1) = 0d0
   A(0)    = 0d0
@@ -41,7 +42,7 @@ subroutine ini_get (restart, expres, ts_res)
 
      read (10,*) ( h(i), i = 0, nx+1 )
      read (11,*) ( A(i), i = 0, nx+1 )
-     read (12,*) ( u(i), i = 1, nx+1 )
+     read (12,*) ( utp(i), i = 1, nx+1 )
 
      close(10)
      close(11)
@@ -52,7 +53,7 @@ subroutine ini_get (restart, expres, ts_res)
   do i = 2, nx
 !     call random_number(rdnb)
 !     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
-     u(i) = 0d0
+     utp(i) = 0d0
   enddo
 
   do i = 1, nx

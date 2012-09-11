@@ -35,7 +35,7 @@ program ice
   integer :: out_step(5), expnb, expres, ts_res
   integer, save :: Nfail ! nb of failures
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
-  double precision :: upts(1:nx+1)      ! u previous time step
+  double precision :: u(1:nx+1), upts(1:nx+1) ! pts = previous time step
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
@@ -166,7 +166,7 @@ program ice
 !     initial conditions
 !------------------------------------------------------------------------
 
-  call ini_get (restart, expres, ts_res)
+  call ini_get (u, restart, expres, ts_res)
   
   do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
      
@@ -251,7 +251,7 @@ program ice
          ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
          ts .eq. out_step(5)) then
         print *, 'outputting results'
-        call output_results(ts, expnb, zeta, eta)
+        call output_results(ts, expnb, u, zeta, eta)
         call output_file(e, gamma_nl, solver, precond, expnb)
      endif
 
