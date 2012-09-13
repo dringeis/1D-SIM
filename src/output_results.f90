@@ -94,15 +94,21 @@ subroutine output_nb_Newton_or_OL_ite(k)
   use option
   implicit none
 
-  character filename*35
+  character filename*40
 
-  integer :: Dt, Dx
+  integer :: Dt, Dx, adv
   integer, intent(in) :: k
 
-  Dt=int(Deltat)
-  Dx=int(Deltax/1000d0)
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
 
-  write (filename, '("output/Newton_ite_",i5.5,"_",i3.3,"km.",i2.2)') Dt,Dx,IMEX
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+
+  write (filename, '("output/NLite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".dat")') Dt,Dx,IMEX,adv
   open (10, file = filename, access = 'append')
   
   write(10,10) k-1
