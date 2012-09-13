@@ -10,6 +10,7 @@ subroutine advection (utp, hin, Ain, hout, Aout)
   double precision, intent(in) :: utp(1:nx+1)
   double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
+  double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: fluxh(1:nx), flux1h, flux2h
   double precision :: fluxA(1:nx), flux1A, flux2A
  
@@ -24,7 +25,7 @@ subroutine advection (utp, hin, Ain, hout, Aout)
 !     compute RHS of dh/dt=-d(hu)/dx (same idea for A)
 !------------------------------------------------------------------------
 
-  call fluxh_A (fluxh, fluxA, utp, hin, Ain)
+  call fluxh_A (utp, hin, Ain, fluxh, fluxA)
 
 !------------------------------------------------------------------------
 !     update the tracer values
@@ -43,6 +44,10 @@ subroutine advection (utp, hin, Ain, hout, Aout)
   enddo
   
   elseif (adv_scheme .eq. 'upwindRK2') then 
+  
+  call fluxh_A (utp, hin, Ain, fluxh, fluxA)
+  
+  
   stop
   endif
   
@@ -50,7 +55,7 @@ subroutine advection (utp, hin, Ain, hout, Aout)
 end subroutine advection
 
 
-subroutine fluxh_A (fluxh, fluxA, utp, htp, Atp)
+subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
   use size
   use resolution
   
