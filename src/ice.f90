@@ -62,7 +62,7 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
-  IMEX       = 0        ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  IMEX       = 2        ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 900d0   ! time step [s]
   nstep      = 200     ! lenght of the run in nb of time steps
@@ -186,19 +186,13 @@ program ice
 
      if (implicit_solv) then
 
-     if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	hold=h
-	Aold=A
-     endif
+     hold=h
+     Aold=A
 
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  if (k .gt. 1) then
-	    h=hold 
-	    A=Aold
-	  endif
-	  call advection (u, h, A) ! advection scheme for tracers
+	  call advection (u, hold, Aold, h, A) ! advection scheme for tracers
 	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
@@ -239,7 +233,7 @@ program ice
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
-     if (IMEX .eq. 0) call advection (u, h, A)  ! standard approach no IMEX
+     if (IMEX .eq. 0) call advection (u, hold, Aold, h, A)  ! standard approach no IMEX
 
 !     call meantracer(h,meanvalue)
 

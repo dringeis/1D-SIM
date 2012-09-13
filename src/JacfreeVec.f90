@@ -27,10 +27,8 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 
   enddo
         
-  if (IMEX .eq. 2) then ! IMEX method 2 only
-    h=hold
-    A=Aold
-    call advection (upos, h, A) ! advection scheme for tracers
+  if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
+    call advection (upos, hold, Aold, h, A) ! advection scheme for tracers
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   

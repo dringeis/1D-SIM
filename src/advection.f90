@@ -1,4 +1,4 @@
-subroutine advection (utp, htp, Atp)
+subroutine advection (utp, hin, Ain, hout, Aout)
   use size
   use resolution
   use option
@@ -8,14 +8,15 @@ subroutine advection (utp, htp, Atp)
   integer :: i
 
   double precision, intent(in) :: utp(1:nx+1)
-  double precision, intent(inout) :: htp(0:nx+1), Atp(0:nx+1)
+  double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1)
+  double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: fluxh(1:nx), flux1h, flux2h
   double precision :: fluxA(1:nx), flux1A, flux2A
  
-  htp(0) = 0d0    ! closed b.c.s
-  htp(nx+1) = 0d0
-  Atp(0) = 0d0
-  Atp(nx+1) = 0d0
+  hout(0) = 0d0    ! closed b.c.s
+  hout(nx+1) = 0d0
+  Aout(0) = 0d0
+  Aout(nx+1) = 0d0
  
   if (adv_scheme .eq. 'upwind') then
   
@@ -23,7 +24,7 @@ subroutine advection (utp, htp, Atp)
 !     compute RHS of dh/dt=-d(hu)/dx (same idea for A)
 !------------------------------------------------------------------------
 
-  call fluxh_A (fluxh, fluxA, utp, htp, Atp)
+  call fluxh_A (fluxh, fluxA, utp, hin, Ain)
 
 !------------------------------------------------------------------------
 !     update the tracer values
@@ -32,12 +33,12 @@ subroutine advection (utp, htp, Atp)
             
   do i = 1, nx
 
-     htp(i) = htp(i) + Deltat*fluxh(i)    
-     htp(i) = max(htp(i), 0d0)
+     hout(i) = hin(i) + Deltat*fluxh(i)    
+     hout(i) = max(hout(i), 0d0)
 
-     Atp(i) = Atp(i) + Deltat*fluxA(i)    
-     Atp(i) = max(Atp(i), 0d0)
-     Atp(i) = min(Atp(i), 1d0)     
+     Aout(i) = Ain(i) + Deltat*fluxA(i)    
+     Aout(i) = max(Aout(i), 0d0)
+     Aout(i) = min(Aout(i), 1d0)     
      
   enddo
   
