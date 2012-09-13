@@ -1,4 +1,4 @@
-subroutine advection (utp, hin, Ain, hout, Aout)
+subroutine advection (upts, utp, hin, Ain, hout, Aout)
   use size
   use resolution
   use option
@@ -7,10 +7,11 @@ subroutine advection (utp, hin, Ain, hout, Aout)
   
   integer :: i
 
-  double precision, intent(in) :: utp(1:nx+1)
+  double precision, intent(in) :: upts(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
+  double precision :: ustar(1:nx+1)
   double precision :: fluxh(1:nx), flux1h, flux2h
   double precision :: fluxA(1:nx), flux1A, flux2A
  
@@ -45,10 +46,33 @@ subroutine advection (utp, hin, Ain, hout, Aout)
   
   elseif (adv_scheme .eq. 'upwindRK2') then 
   
-  call fluxh_A (utp, hin, Ain, fluxh, fluxA)
+  call fluxh_A (upts, hin, Ain, fluxh, fluxA) 
   
+  do i = 1, nx ! predictor step
+
+     hstar(i) = hin(i) + (Deltat/2d0)*fluxh(i)
+     hstar(i) = max(hstar(i), 0d0)
+
+     Astar(i) = Ain(i) + (Deltat/2d0)*fluxA(i)    
+     Astar(i) = max(Astar(i), 0d0)
+     Astar(i) = min(Astar(i), 1d0)     
+     
+  enddo
   
-  stop
+  ustar = ( utp + upts ) / 2d0
+  call fluxh_A (ustar, hstar, Astar, fluxh, fluxA) 
+  
+  do i = 1, nx ! corrector step
+
+     hout(i) = hin(i) + Deltat*fluxh(i)
+     hout(i) = max(hout(i), 0d0)
+
+     Aout(i) = Ain(i) + Deltat*fluxA(i)    
+     Aout(i) = max(Aout(i), 0d0)
+     Aout(i) = min(Aout(i), 1d0)     
+     
+  enddo
+  
   endif
   
   return
