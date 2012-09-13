@@ -123,9 +123,9 @@
       if (k .eq. 1) then
 
          eta_e = eta_e_ini
-         L2norm_t = L2norm / 5d0 ! t stands for transition
+         L2norm_t = L2norm / 4d0 ! t stands for transition
 
-      elseif (k .gt. 100) then
+      elseif (k .gt. 200) then
 
          eta_e = eta_e_ini
 
