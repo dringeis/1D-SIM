@@ -203,7 +203,7 @@ program ice
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
         print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) nl_target = gamma_nl*L2norm
-        if (L2norm .lt. nl_target) exit
+        if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
 
         if (solver .eq. 1) then
            call SOR (b, u, zeta, eta, Cw, p_flag, ts)
