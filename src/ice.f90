@@ -132,6 +132,7 @@ program ice
   endif
 
   Deltax2 = Deltax ** 2
+  DtoverDx = Deltat / Deltax
 
   if ( 1d0*Deltat .gt. Deltax ) then
      print *, 'CFL condition is not respected'

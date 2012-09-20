@@ -35,10 +35,10 @@ subroutine advection (upts, utp, hin, Ain, hout, Aout)
             
   do i = 1, nx
 
-     hout(i) = hin(i) - Deltat*fluxh(i)    
+     hout(i) = hin(i) - DtoverDx*fluxh(i)    
      hout(i) = max(hout(i), 0d0)
 
-     Aout(i) = Ain(i) - Deltat*fluxA(i)    
+     Aout(i) = Ain(i) - DtoverDx*fluxA(i)    
      Aout(i) = max(Aout(i), 0d0)
      Aout(i) = min(Aout(i), 1d0)     
      
@@ -50,10 +50,10 @@ subroutine advection (upts, utp, hin, Ain, hout, Aout)
   
   do i = 1, nx ! predictor step
 
-     hstar(i) = hin(i) - (Deltat/2d0)*fluxh(i)
+     hstar(i) = hin(i) - (DtoverDx/2d0)*fluxh(i)
      hstar(i) = max(hstar(i), 0d0)
 
-     Astar(i) = Ain(i) - (Deltat/2d0)*fluxA(i)    
+     Astar(i) = Ain(i) - (DtoverDx/2d0)*fluxA(i)    
      Astar(i) = max(Astar(i), 0d0)
      Astar(i) = min(Astar(i), 1d0)     
      
@@ -64,10 +64,10 @@ subroutine advection (upts, utp, hin, Ain, hout, Aout)
   
   do i = 1, nx ! corrector step
 
-     hout(i) = hin(i) - Deltat*fluxh(i)
+     hout(i) = hin(i) - DtoverDx*fluxh(i)
      hout(i) = max(hout(i), 0d0)
 
-     Aout(i) = Ain(i) - Deltat*fluxA(i)    
+     Aout(i) = Ain(i) - DtoverDx*fluxA(i)    
      Aout(i) = max(Aout(i), 0d0)
      Aout(i) = min(Aout(i), 1d0)     
      
@@ -116,8 +116,8 @@ subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
         flux2A = utp(i+1)*Atp(i+1)
      endif
 
-     fluxh(i) = ( flux2h - flux1h ) / Deltax
-     fluxA(i) = ( flux2A - flux1A ) / Deltax
+     fluxh(i) = flux2h - flux1h 
+     fluxA(i) = flux2A - flux1A 
 
   enddo
   
