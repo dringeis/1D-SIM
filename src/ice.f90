@@ -175,7 +175,9 @@ program ice
      call cpu_time(time1)
 
      upts = u
-
+     hpts=h
+     Apts=A
+     
 !------- Create forcing vector b (independent of u) ----------------------
 
      call wind_forcing (tauair, ts)
@@ -186,9 +188,6 @@ program ice
 !------- Begining of outer loop (OL) or Newton iterations ----------------
 
      if (implicit_solv) then
-
-     hpts=h
-     Apts=A
 
      do k = 1, Nmax_OL 
         
