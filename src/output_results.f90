@@ -89,7 +89,7 @@ subroutine output_residual(ts, k, expnb, F)
   return
 end subroutine output_residual
 
-subroutine output_nb_Newton_or_OL_ite(k)
+subroutine output_nb_Newton_or_OL_ite(ts, k)
   use resolution
   use option
   implicit none
@@ -97,7 +97,7 @@ subroutine output_nb_Newton_or_OL_ite(k)
   character filename*40
 
   integer :: Dt, Dx, adv
-  integer, intent(in) :: k
+  integer, intent(in) :: ts, k
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -111,11 +111,11 @@ subroutine output_nb_Newton_or_OL_ite(k)
   write (filename, '("output/NLite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".dat")') Dt,Dx,IMEX,adv
   open (10, file = filename, access = 'append')
   
-  write(10,10) k-1
+  write(10,10) ts,k-1
 
   close(10)
 
-10 format (i4)
+10 format (i5,1x,i4)
 
   return
 end subroutine output_nb_Newton_or_OL_ite

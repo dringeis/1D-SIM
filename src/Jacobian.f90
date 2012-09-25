@@ -47,7 +47,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 end subroutine JacfreeVec
       
       
-subroutine formJacobian (utp, Futp, upts, tauair)
+subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
 
   use size
   use global_var
@@ -56,6 +56,7 @@ subroutine formJacobian (utp, Futp, upts, tauair)
   implicit none
   
   integer :: i
+  integer, intent(in) :: ts, k
   double precision, intent(in) :: Futp(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
   double precision :: zeta(0:nx+1), eta(0:nx+1), epsilon
@@ -122,7 +123,7 @@ subroutine formJacobian (utp, Futp, upts, tauair)
 
   uele(i+1)=0d0
 
-  print *, 'Jacobian', i, Jleft(i), J(i), Jright(i), Fpos(i),Futp(i)
+  print *, 'Jacobian', ts, k, i, Jleft(i), J(i), Jright(i)
 
   enddo
 
