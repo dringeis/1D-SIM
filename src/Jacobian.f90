@@ -66,11 +66,6 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   double precision :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
 
   epsilon=1d-07
-
-  if (IMEX .gt. 0) then
-    print *, 'does not work if IMEX is greater than 0'
-    stop  
-  endif
   
   do i = 2, nx
   
@@ -82,6 +77,10 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   uele(i-1)=epsilon
   upos = utp + uele
   
+  if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
+    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+  endif
   call viscouscoefficient (upos, zeta, eta)
   call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
@@ -98,6 +97,10 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   uele(i)=epsilon
   upos = utp + uele
   
+  if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
+    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+  endif
   call viscouscoefficient (upos, zeta, eta)
   call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
@@ -112,6 +115,10 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   uele(i+1)=epsilon      
   upos = utp + uele
   
+  if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
+    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+  endif
   call viscouscoefficient (upos, zeta, eta)
   call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
