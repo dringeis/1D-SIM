@@ -17,14 +17,14 @@ subroutine wind_forcing (tauair, ts)
   speed = 10d0 ! [m/s]
   period = 3d0*24d0*3600d0 ! period of cos in seconds (set to 3 days)
   pi = 3.14159265d0
-  apar = 1800d0
+  apar = 6d0*3600d0
 
   tauair(1)    = 0d0 ! close bc
   tauair(nx+1) = 0d0 ! close bc
 
     if (constant_wind) then
 
-       do i = 2, nx ! with apar = 1800, tauair is (1-e^-2) after 1 hour.
+       do i = 2, nx ! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
 !          tauair(i) = Cda * (speed)**2d0
           tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*Deltat/apar))
        enddo
