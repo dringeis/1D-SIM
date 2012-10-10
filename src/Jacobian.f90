@@ -65,7 +65,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   
   double precision :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
 
-  epsilon=1d-07
+  epsilon=1d-10
   
   do i = 2, nx
   
