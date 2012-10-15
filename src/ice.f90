@@ -203,8 +203,12 @@ program ice
 !	call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
         print *, 'L2-norm after k ite=', ts, k-1, L2norm
-        if (k .eq. 1) nl_target = gamma_nl*L2norm
-        if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
+        if (k .eq. 1) then
+	  nl_target = gamma_nl*L2norm
+	  call output_ini_L2norm(ts,L2norm,expnb)
+	endif
+
+	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
 
         if (solver .eq. 1) then
            call SOR (b, u, zeta, eta, Cw, p_flag, ts)
@@ -216,7 +220,7 @@ program ice
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
 
      enddo
-     call output_nb_Newton_or_OL_ite (ts, k)
+     call output_nb_Newton_or_OL_ite (ts, k ,expnb)
 
      else ! EVP1 solver
         

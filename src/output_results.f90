@@ -119,15 +119,15 @@ subroutine output_residual(ts, k, expnb, F)
   return
 end subroutine output_residual
 
-subroutine output_nb_Newton_or_OL_ite(ts, k)
+subroutine output_nb_Newton_or_OL_ite(ts, k, expnb)
   use resolution
   use option
   implicit none
 
-  character filename*40
+  character filename*60
 
+  integer, intent(in) :: ts, k, expnb
   integer :: Dt, Dx, adv
-  integer, intent(in) :: ts, k
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -138,7 +138,8 @@ subroutine output_nb_Newton_or_OL_ite(ts, k)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/NLite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".dat")') Dt,Dx,IMEX,adv
+  write (filename, '("output/NLite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".",i2.2)') Dt,Dx,&
+	 IMEX,adv,expnb
   open (10, file = filename, access = 'append')
   
   write(10,10) ts,k-1
@@ -149,3 +150,36 @@ subroutine output_nb_Newton_or_OL_ite(ts, k)
 
   return
 end subroutine output_nb_Newton_or_OL_ite
+
+subroutine output_ini_L2norm(ts, L2norm, expnb)
+  use resolution
+  use option
+  implicit none
+
+  character filename*60
+
+  integer :: Dt, Dx, adv
+  integer, intent(in) :: ts, expnb
+  double precision, intent(in) :: L2norm
+
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+
+  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".",i2.2)') Dt,Dx,&
+	 IMEX,adv,expnb
+  open (10, file = filename, access = 'append')
+  
+  write(10,10) ts,L2norm
+
+  close(10)
+
+10 format (i5,1x,f15.12)
+
+  return
+end subroutine output_ini_L2norm
