@@ -3,15 +3,25 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
   use resolution
   use global_var
   use rheology
+  use option
   implicit none
 
-  character filename*30
+  character filename*60
 
-  integer :: i, k
+  integer :: i, k, Dt, Dx, adv
   integer, intent(in) :: ts, expnb
   double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
   double precision, intent(in)  :: utp(1:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
+
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
 
   div(0) = 0d0
   div(nx+1) = 0d0
@@ -23,38 +33,46 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
      zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
-  write (filename, '("output/h_",i3.3,".",i2.2)') ts,expnb
+  write (filename, '("output/h_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i3.3,".",i2.2)') ts,expnb
+  write (filename, '("output/A_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i3.3,".",i2.2)') ts,expnb
+  write (filename, '("output/u_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i3.3,".",i2.2)') ts,expnb
+  write (filename, '("output/div_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,ts,expnb
   open (13, file = filename, status = 'unknown')
 
-  write (filename, '("output/zeta_",i3.3,".",i2.2)') ts,expnb
-  open (14, file = filename, status = 'unknown')
+!  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!		    IMEX, adv,ts,expnb
+!  open (14, file = filename, status = 'unknown')
 
-  write (filename, '("output/sigma_",i3.3,".",i2.2)') ts,expnb
-  open (15, file = filename, status = 'unknown')
+!  write (filename, '("output/sigma_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!		    IMEX, adv,ts,expnb
+!  open (15, file = filename, status = 'unknown')
 
-  write (filename, '("output/zeta_norm",i3.3,".",i2.2)') ts,expnb
-  open (16, file = filename, status = 'unknown')
+!  write (filename, '("output/zeta_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!		    IMEX, adv,ts,expnb
+!  open (16, file = filename, status = 'unknown')
 
-  write (filename, '("output/sig_norm",i3.3,".",i2.2)') ts,expnb
-  open (17, file = filename, status = 'unknown')
+!  write (filename, '("output/sig_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!		    IMEX, adv,ts,expnb
+!  open (17, file = filename, status = 'unknown')
 
 
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
   write(13,10) ( div(i),     i = 0, nx+1 )
-  write(14,10) ( zeta(i),    i = 0, nx+1 )
-  write(15,10) ( sigma(i),   i = 0, nx+1 )
-  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
-  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
+!  write(14,10) ( zeta(i),    i = 0, nx+1 )
+!  write(15,10) ( sigma(i),   i = 0, nx+1 )
+!  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
+!  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
   write(12,10) ( utp(i),       i = 1, nx+1 )
 
   do k = 10, 17
@@ -68,18 +86,30 @@ end subroutine output_results
 
 subroutine output_residual(ts, k, expnb, F)
   use size
+  use resolution
+  use option
 
   implicit none
 
-  character filename*40
+  character filename*60
 
-  integer :: i
+  integer :: i, Dt, Dx, adv
   integer, intent(in) :: ts, k, expnb
   double precision, intent(in):: F(1:nx+1)
+ 
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
 
-  write (filename, '("output/residual_",i4.4,"_",i4.4,".",i2.2)') ts,k,expnb
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+  
+  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt,Dx,IMEX, &
+		    adv,ts,k,expnb
   open (11, file = filename, status = 'unknown')
-
+  
   write(11,10) ( F(i), i = 1, nx+1 )
 
   close(11)

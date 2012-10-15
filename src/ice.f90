@@ -64,8 +64,8 @@ program ice
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
-  Deltat     = 900d0   ! time step [s]
-  nstep      = 200     ! lenght of the run in nb of time steps
+  Deltat     = 3600d0   ! time step [s]
+  nstep      = 500     ! lenght of the run in nb of time steps
   Nmax_OL    = 500
 
   if (implicit_solv) then
@@ -89,7 +89,7 @@ program ice
   expnb      = 3
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
-  out_step(1)= 100   
+  out_step(1)= 100000   
 
 !------------------------------------------------------------------------ 
 !     Set first time level depending on restart specifications                
@@ -200,7 +200,7 @@ program ice
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k) ! forms Jacobian element by element
-
+!	call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
         print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) nl_target = gamma_nl*L2norm
