@@ -42,7 +42,7 @@ program ice
   double precision :: Cw(1:nx+1)
   double precision :: F_uk1(1:nx+1)
   double precision :: meanvalue, time1, time2, timecrap
-  double precision :: L2norm, gamma_nl, nl_target, Eo
+  double precision :: L2norm, gamma_nl, nl_target, Eo, nbhr
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
@@ -66,7 +66,7 @@ program ice
 
   Deltat     = 3600d0   ! time step [s]
   nstep      = 500     ! lenght of the run in nb of time steps
-  Nmax_OL    = 500
+  Nmax_OL    = 1000
 
   if (implicit_solv) then
      N_sub = 25                        ! nb of subcycles for precond
@@ -86,7 +86,7 @@ program ice
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-03
 
-  expnb      = 3
+  expnb      = 1
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)= 100000   
@@ -168,8 +168,12 @@ program ice
 !------------------------------------------------------------------------
 
   call ini_get (u, restart, expres, ts_res)
+  nbhr = 0d0
   
   do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
+     
+     nbhr = nbhr + Deltat / 3600d0
+     print *, 'time level, cumulative time (h) =', ts, nbhr
      
      call cpu_time(timecrap)
      call cpu_time(time1)
