@@ -137,7 +137,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
   return
 end subroutine formJacobian
 
-subroutine formA (utp, zeta, eta, Cw)
+subroutine formA (utp, zeta, eta, Cw, ts, k)
   use size
   use resolution
   use properties
@@ -145,7 +145,8 @@ subroutine formA (utp, zeta, eta, Cw)
   use option
 
   implicit none
-      
+  
+  integer, intent(in) :: ts, k
   integer :: i
 
   double precision, intent(in)  :: utp(1:nx+1)
@@ -179,15 +180,10 @@ subroutine formA (utp, zeta, eta, Cw)
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 
-     Aleft(i) = (zeta(i-1)+eta(i-1)) / Deltax2
-     Adiag(i) = Adiag(i) + (zeta(i)+eta(i)-zeta(i-1)-eta(i-1)) / Deltax2
-     Aright(i)= -(zeta(i)+eta(i)) / Deltax2
+     Aleft(i) = - (zeta(i-1)+eta(i-1)) / Deltax2
+     Adiag(i) = Adiag(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
+     Aright(i)= - (zeta(i)+eta(i)) / Deltax2
 
-!     Fu_vec(i) = Fu_vec(i) - &
-
-!          (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 + &
-!          (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
-     
   enddo
 
   return

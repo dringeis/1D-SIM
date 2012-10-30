@@ -204,7 +204,8 @@ program ice
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k) ! forms Jacobian element by element
-!	call output_residual(ts,k,expnb,F_uk1)
+!	call formA(u,zeta,eta,Cw, ts, k)
+!       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
         print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) then
