@@ -91,7 +91,75 @@ subroutine SOR (rhs, utp, zeta, eta, Cw, p_flag, ts)
 end subroutine SOR
 
 
+!****************************************************************************
+!     solves Jdu=-F with the SOR method
+!****************************************************************************
 
+subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
+  use size
+  use resolution
+  use properties
+  use global_var
+  use numerical
+
+  implicit none
+      
+  integer :: i, l
+  integer, intent(in) :: k,ts
+  double precision, intent(inout) :: utp(1:nx+1) 
+  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1), upts(1:nx+1)
+  double precision, intent(in)  :: tauair(1:nx+1), Cw(1:nx+1)
+  double precision, intent(in)  :: Futp(1:nx+1)
+  double precision              :: du(1:nx+1)
+
+  double precision :: B1, residual ,maxerror
+  double precision :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
+
+  call formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
+
+  du = 0d0
+
+  do l = 1, maxiteSOR
+     
+     maxerror = 0d0
+
+     do i = 2, nx
+        
+!------------------------------------------------------------------------
+!     -F : rhs
+!------------------------------------------------------------------------
+        
+        B1 = -Futp(i)
+
+!------------------------------------------------------------------------
+!     off diag Jac terms
+!------------------------------------------------------------------------
+
+        B1 = B1 - Jleft(i)*du(i-1) - Jright(i)*du(i+1)
+        
+!------------------------------------------------------------------------
+!     get latest du
+!------------------------------------------------------------------------
+
+        residual = B1/J(i) - du(i)
+        du(i) = du(i) + omega * residual
+
+	 if ( abs( residual ) .gt. maxerror ) then
+             maxerror = abs( residual )
+         endif
+
+     enddo
+     
+     print *, 'max error', l, maxerror
+     
+     if ( maxerror .lt. tol_SOR ) exit
+
+  enddo
+
+  utp = utp + du
+
+  return
+end subroutine SOR_J
 
 
 
