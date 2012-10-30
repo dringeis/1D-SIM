@@ -136,6 +136,62 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k)
 
   return
 end subroutine formJacobian
+
+subroutine formA (utp, zeta, eta, Cw)
+  use size
+  use resolution
+  use properties
+  use global_var
+  use option
+
+  implicit none
+      
+  integer :: i
+
+  double precision, intent(in)  :: utp(1:nx+1)
+  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1)
+  double precision :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
+
+  double precision :: h_at_u
+
+  Aleft = 0d0
+  Adiag = 0d0
+  Aright = 0d0
+
+  do i = 2, nx
+
+!------------------------------------------------------------------------
+!    rhoice*h*du/dt : tendency term, advection of momentum is neglected
+!------------------------------------------------------------------------
+
+     h_at_u = ( h(i) + h(i-1) ) / 2d0
+
+     Adiag(i) = ( rho * h_at_u ) / Deltat
+     
+!------------------------------------------------------------------------
+!     Cw*u : water drag term
+!------------------------------------------------------------------------
+     
+     Adiag(i) = Adiag(i) + Cw(i)
+     
+!------------------------------------------------------------------------
+!     -d ( (zeta+eta) du/dx ) / dx : rheology term
+!------------------------------------------------------------------------
+
+     Aleft(i) = (zeta(i-1)+eta(i-1)) / Deltax2
+     Adiag(i) = Adiag(i) + (zeta(i)+eta(i)-zeta(i-1)-eta(i-1)) / Deltax2
+     Aright(i)= -(zeta(i)+eta(i)) / Deltax2
+
+!     Fu_vec(i) = Fu_vec(i) - &
+
+!          (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 + &
+!          (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
+     
+  enddo
+
+  return
+end subroutine formA
       
 
 
