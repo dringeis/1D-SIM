@@ -220,7 +220,7 @@ program ice
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
                               L2norm, k, ts, precond)
-!           call SOR_J(u, F_uk1, zeta, eta, Cw, tauair, upts, k, ts)
+!           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
