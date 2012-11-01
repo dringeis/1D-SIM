@@ -217,6 +217,7 @@ program ice
 
         if (solver .eq. 1) then
            call SOR (b, u, zeta, eta, Cw, p_flag, ts)
+!           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
                               L2norm, k, ts, precond)

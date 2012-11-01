@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (rhs, utp, zeta, eta, Cw, p_flag, ts)
+subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
   use size
   use resolution
   use properties
@@ -17,7 +17,7 @@ subroutine SOR (rhs, utp, zeta, eta, Cw, p_flag, ts)
   double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
   double precision, intent(in)  :: Cw(1:nx+1)
-  double precision, intent(in)  :: rhs(1:nx+1)
+  double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
   double precision :: h_at_u, B1, residual ,maxerror
@@ -60,7 +60,7 @@ subroutine SOR (rhs, utp, zeta, eta, Cw, p_flag, ts)
 !     b : forcing term
 !------------------------------------------------------------------------
         
-        B1 = rhs(i)
+        B1 = b(i)
 
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
@@ -94,7 +94,7 @@ end subroutine SOR
 ! forms elements of A and solves Au=b with the SOR method
 !****************************************************************************
 
-subroutine SOR_A (utp, b, zeta, eta, Cw, ts, k)
+subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
   use size
   use resolution
   use properties
@@ -144,8 +144,6 @@ subroutine SOR_A (utp, b, zeta, eta, Cw, ts, k)
          endif
 
      enddo
-     
-     print *, 'max error', l, maxerror
      
      if ( maxerror .lt. tol_SOR ) exit
 
