@@ -12,8 +12,7 @@ subroutine advection (upts, utp, hin, Ain, hout, Aout)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
-  double precision :: fluxh(1:nx), flux1h, flux2h
-  double precision :: fluxA(1:nx), flux1A, flux2A
+  double precision :: fluxh(1:nx), fluxA(1:nx)
  
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
