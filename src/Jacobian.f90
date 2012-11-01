@@ -137,7 +137,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   return
 end subroutine formJacobian
 
-subroutine formA (utp, zeta, eta, Cw, ts, k)
+subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
   use size
   use resolution
   use properties
@@ -152,7 +152,7 @@ subroutine formA (utp, zeta, eta, Cw, ts, k)
   double precision, intent(in)  :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
   double precision, intent(in)  :: Cw(1:nx+1)
-  double precision :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
+  double precision, intent(out) :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
 
   double precision :: h_at_u
 

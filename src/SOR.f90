@@ -90,9 +90,72 @@ subroutine SOR (rhs, utp, zeta, eta, Cw, p_flag, ts)
   return
 end subroutine SOR
 
+!****************************************************************************
+! forms elements of A and solves Au=b with the SOR method
+!****************************************************************************
+
+subroutine SOR_A (utp, b, zeta, eta, Cw, ts, k)
+  use size
+  use resolution
+  use properties
+  use global_var
+  use numerical
+
+  implicit none
+      
+  integer :: i, l
+  integer, intent(in) :: k,ts
+  double precision, intent(inout) :: utp(1:nx+1) 
+  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1),Cw(1:nx+1)
+  double precision, intent(in)  :: b(1:nx+1)
+
+  double precision :: B1, residual ,maxerror
+  double precision :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
+
+  call formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
+
+  do l = 1, maxiteSOR
+     
+     maxerror = 0d0
+
+     do i = 2, nx
+        
+!------------------------------------------------------------------------
+!     b : rhs
+!------------------------------------------------------------------------
+        
+        B1 = b(i)
+
+!------------------------------------------------------------------------
+!     off diag A terms
+!------------------------------------------------------------------------
+
+        B1 = B1 - Aleft(i)*utp(i-1) - Aright(i)*utp(i+1)
+        
+!------------------------------------------------------------------------
+!     get latest u
+!------------------------------------------------------------------------
+
+        residual = B1/Adiag(i) - utp(i)
+        utp(i) = utp(i) + omega * residual
+
+	 if ( abs( residual ) .gt. maxerror ) then
+             maxerror = abs( residual )
+         endif
+
+     enddo
+     
+     print *, 'max error', l, maxerror
+     
+     if ( maxerror .lt. tol_SOR ) exit
+
+  enddo
+
+  return
+end subroutine SOR_A
 
 !****************************************************************************
-!     solves Jdu=-F with the SOR method
+! forms elements of J and solves Jdu=-F with the SOR method
 !****************************************************************************
 
 subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
@@ -160,6 +223,4 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
 
   return
 end subroutine SOR_J
-
-
 
