@@ -119,14 +119,14 @@ subroutine output_residual(ts, k, expnb, F)
   return
 end subroutine output_residual
 
-subroutine output_nb_Newton_or_OL_ite(ts, k, expnb)
+subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
   use resolution
   use option
   implicit none
 
   character filename*60
 
-  integer, intent(in) :: ts, k, expnb
+  integer, intent(in) :: ts, k, fgmres_per_ts, expnb
   integer :: Dt, Dx, adv
 
   if (adv_scheme .eq. 'upwind') then
@@ -138,18 +138,18 @@ subroutine output_nb_Newton_or_OL_ite(ts, k, expnb)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/NLite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".",i2.2)') Dt,Dx,&
+  write (filename, '("output/Nbite_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,".",i2.2)') Dt,Dx,&
 	 IMEX,adv,expnb
   open (10, file = filename, access = 'append')
   
-  write(10,10) ts,k-1
+  write(10,10) ts,k-1,fgmres_per_ts
 
   close(10)
 
-10 format (i5,1x,i4)
+10 format (i5,1x,i4,1x,i5)
 
   return
-end subroutine output_nb_Newton_or_OL_ite
+end subroutine output_nb_ite
 
 subroutine output_ini_L2norm(ts, L2norm, expnb)
   use resolution

@@ -1,13 +1,14 @@
 
       subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, upts, tauair, &
-                               L2norm, k, ts, precond)
+                               L2norm, k, ts, precond, fgmres_its)
         use size
         use numerical
         
       implicit none
 
-      integer :: icode, iter, iout, tot_its, i
+      integer :: icode, iter, iout, i
       integer, intent(in) ::  k, ts, precond
+      integer, intent(out) :: fgmres_its
 
       double precision, intent(inout) :: uk1(1:nx+1)
       double precision, intent(in)  :: F_uk1(1:nx+1), upts(1:nx+1)
@@ -63,7 +64,7 @@
  10   CONTINUE
       
       call fgmres (nx+1,img,rhs,du,iter,vv,wk,wk1,wk2, &
-                   eps,maxiteGMRES,iout,icode,tot_its)
+                   eps,maxiteGMRES,iout,icode,fgmres_its)
 
       IF ( icode == 1 ) THEN
 !         CALL identity (wk1,wk2)
@@ -85,7 +86,7 @@
 !      End of FGMRES method    
 !------------------------------------------------------------------------
 
-      if (tot_its .eq. maxiteGMRES) then
+      if (fgmres_its .eq. maxiteGMRES) then
          print *,'WARNING: FGMRES has not converged'
          print*, 'Please check the precond relaxation param (wlsor or wsor).'
          stop

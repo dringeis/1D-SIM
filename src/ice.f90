@@ -32,7 +32,7 @@ program ice
 
   logical :: p_flag, restart
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, precond
-  integer :: out_step(5), expnb, expres, ts_res
+  integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail ! nb of failures
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: u(1:nx+1), upts(1:nx+1) ! pts = previous time step
@@ -174,6 +174,7 @@ program ice
      
      nbhr = nbhr + Deltat / 3600d0
      print *, 'time level, cumulative time (h) =', ts, nbhr
+     fgmres_per_ts = 0
      
      call cpu_time(timecrap)
      call cpu_time(time1)
@@ -220,14 +221,14 @@ program ice
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
-                              L2norm, k, ts, precond)
+                              L2norm, k, ts, precond, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
-
+	fgmres_per_ts = fgmres_per_ts + fgmres_its
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
 
      enddo
-     call output_nb_Newton_or_OL_ite (ts, k ,expnb)
+     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
 
      else ! EVP1 solver
         
