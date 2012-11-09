@@ -78,7 +78,11 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   endif
 
   epsilon=1d-10
-  
+
+  Jleft = 0d0
+  J     = 0d0
+  Jright= 0d0
+
   do i = 2, nx
   
   uele=0d0  
