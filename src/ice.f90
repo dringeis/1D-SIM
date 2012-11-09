@@ -43,6 +43,7 @@ program ice
   double precision :: F_uk1(1:nx+1)
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, Eo, nbhr
+!  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
@@ -204,14 +205,14 @@ program ice
         call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
-!	call formJacobian(u, F_uk1, upts, tauair, ts, k) ! forms Jacobian element by element
-!	call formA(u,zeta,eta,Cw, ts, k)
+!	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements
+!	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
 !       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
         print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) then
 	  nl_target = gamma_nl*L2norm
-	  call output_ini_L2norm(ts,L2norm,expnb)
+!	  call output_ini_L2norm(ts,L2norm,expnb)
 	endif
 
 	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
@@ -228,7 +229,7 @@ program ice
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
 
      enddo
-     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
+!     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
 
      else ! EVP1 solver
         

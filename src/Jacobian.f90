@@ -51,12 +51,15 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
 
   use size
   use global_var
+  use resolution
   use option
   
   implicit none
   
-  integer :: i
+  character filename*60
   integer, intent(in) :: ts, k
+  integer :: i, Dt, Dx, adv
+  
   double precision, intent(in) :: Futp(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
   double precision :: zeta(0:nx+1), eta(0:nx+1), epsilon
@@ -64,6 +67,9 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   double precision :: uele(1:nx+1), upos(1:nx+1), b(1:nx+1)
   
   double precision, intent(out) :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
+
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
 
   epsilon=1d-10
   
@@ -130,9 +136,19 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
 
   uele(i+1)=0d0
 
-!  print *, 'Jacobian', ts, k, i, Jleft(i), J(i), Jright(i)
-
   enddo
+
+!  write (filename, '("output/Jmatrix_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".dat")') Dt,Dx, &
+!		    IMEX, adv,ts
+!  open (11, file = filename, status = 'unknown')
+  
+!  do i=1,nx+1
+!    write(11,10) ( Jleft(i), J(i), Jright(i) ) 
+!  enddo
+  
+!  close(11)
+  
+!  10 format (1x,f25.15, 1x, f25.15, 1x, f25.15)
 
   return
 end subroutine formJacobian
@@ -142,12 +158,14 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
   use resolution
   use properties
   use global_var
+  use resolution
   use option
 
   implicit none
   
+  character filename*60
   integer, intent(in) :: ts, k
-  integer :: i
+  integer :: i, Dt, Dx, adv
 
   double precision, intent(in)  :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
@@ -155,7 +173,10 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
   double precision, intent(out) :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
 
   double precision :: h_at_u
-
+ 
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+  
   Aleft = 0d0
   Adiag = 0d0
   Aright = 0d0
@@ -185,6 +206,18 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
      Aright(i)= - (zeta(i)+eta(i)) / Deltax2
 
   enddo
+
+!  write (filename, '("output/Amatrix_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".dat")') Dt,Dx, &
+!		    IMEX, adv,ts
+!  open (11, file = filename, status = 'unknown')
+  
+!  do i=1,nx+1
+!    write(11,10) ( Aleft(i), Adiag(i), Aright(i) ) 
+!  enddo
+  
+!  close(11)
+  
+!  10 format (1x,f25.15, 1x, f25.15, 1x, f25.15)
 
   return
 end subroutine formA
