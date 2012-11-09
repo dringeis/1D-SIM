@@ -43,7 +43,7 @@ program ice
   double precision :: F_uk1(1:nx+1)
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, Eo, nbhr
-!  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
+  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
@@ -205,7 +205,7 @@ program ice
         call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
-!	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements
+!	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
 !       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))

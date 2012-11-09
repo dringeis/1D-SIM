@@ -71,6 +71,12 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
   epsilon=1d-10
   
   do i = 2, nx
@@ -136,14 +142,16 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
 
   uele(i+1)=0d0
 
+!  print *, i, Jleft(i), J(i), Jright(i)
+
   enddo
 
-!  write (filename, '("output/Jmatrix_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".dat")') Dt,Dx, &
-!		    IMEX, adv,ts
+!  write (filename, '("output/J_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx,IMEX, &
+!		    adv,ts,k
 !  open (11, file = filename, status = 'unknown')
   
 !  do i=1,nx+1
-!    write(11,10) ( Jleft(i), J(i), Jright(i) ) 
+!    write(11,10) Jleft(i), J(i), Jright(i)
 !  enddo
   
 !  close(11)
@@ -177,6 +185,12 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
   
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+  
   Aleft = 0d0
   Adiag = 0d0
   Aright = 0d0
@@ -205,14 +219,16 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
      Adiag(i) = Adiag(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
      Aright(i)= - (zeta(i)+eta(i)) / Deltax2
 
+!     print *, i, Aleft(i), Adiag(i), Aright(i)
+
   enddo
 
-!  write (filename, '("output/Amatrix_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".dat")') Dt,Dx, &
-!		    IMEX, adv,ts
+!  write (filename, '("output/Amat_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx,IMEX, &
+!		    adv,ts,k
 !  open (11, file = filename, status = 'unknown')
   
 !  do i=1,nx+1
-!    write(11,10) ( Aleft(i), Adiag(i), Aright(i) ) 
+!    write(11,10) Aleft(i), Adiag(i), Aright(i)
 !  enddo
   
 !  close(11)
