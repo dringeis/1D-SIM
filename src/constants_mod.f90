@@ -39,7 +39,7 @@ MODULE numerical
   IMPLICIT NONE
   INTEGER :: N_sub, maxiteSOR, maxiteGMRES, iteSOR_pre
   DOUBLE PRECISION :: T
-  DOUBLE PRECISION :: omega, tol_SOR, dropini
+  DOUBLE PRECISION :: omega, tol_SOR, dropini, aa
 
 END MODULE numerical
 

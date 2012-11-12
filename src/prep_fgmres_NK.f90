@@ -19,7 +19,7 @@
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
-      double precision :: eps, gamma, epsilon
+      double precision :: eps, gamma, s, epsilon
 
 !------------------------------------------------------------------------
 !     This routine solves J(u)du = -F(u) where u = u^k, du = du^k using the
@@ -100,11 +100,16 @@
 
 !         call linesearch(sol, x, res)
 !         print *, 'res after linesearch = ', res, eta_e
+      
+      if (k .eq. 1) then
+	uk1 = uk1 + du ! u^k+1 = u^k + du^k
+      else
+	call calc_s(k, uk1, du, s)
+	uk1 = uk1 + s*du ! see Knoll et al., 1993
+      endif
 
-         uk1 = uk1 + du ! u^k+1 = u^k + du^k
-
-         return
-       end subroutine prepFGMRES_NK
+      return
+      end subroutine prepFGMRES_NK
       
    subroutine forcing_term(k,ts,L2norm,gamma)
   
@@ -150,6 +155,34 @@
 !      if (ts .le. 10) gamma = gamma_ini
 
     end subroutine forcing_term
+    
+   subroutine calc_s(k, uk1, du, s)
+      use size
+      use numerical
+      implicit none
+    
+      integer, intent(in) :: k
+      integer :: i
+      double precision, intent(in) :: uk1(1:nx+1), du(1:nx+1)
+      double precision, intent(out) :: s ! see Knoll et al., 1993
+      double precision :: temp
+	
+      temp = 1d20
+      
+      do i = 2, nx
+      
+	if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp = abs(aa*uk1(i)/du(i))
+!	if ( (aa*uk1(i)/du(i)) .lt. temp) temp = (aa*uk1(i)/du(i)) ! marche pas!
+  
+      enddo
+      
+      s = min(1d0,temp)
+      s = max(0.25d0, s)
+      
+      if (k .gt. 50) s = 0.25d0
+      print *, 's = == ', s
+
+    end subroutine calc_s
 
 
 

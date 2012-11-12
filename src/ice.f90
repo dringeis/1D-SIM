@@ -67,7 +67,7 @@ program ice
 
   Deltat     = 3600d0   ! time step [s]
   nstep      = 100     ! lenght of the run in nb of time steps
-  Nmax_OL    = 2000
+  Nmax_OL    = 200
 
   if (implicit_solv) then
      N_sub = 25                        ! nb of subcycles for precond
@@ -87,6 +87,7 @@ program ice
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-06
   dropini  = 4d0        ! defines initial drop in L2norm before gamma = 0.01
+  aa       = 0.25d0     ! alpha in eq. 22 in Knoll et al. 1993
 
   expnb      = 1
   expres     = 2
