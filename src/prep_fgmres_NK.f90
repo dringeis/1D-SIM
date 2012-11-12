@@ -19,7 +19,7 @@
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
-      double precision :: eps, eta_e, eta_e_ini, epsilon
+      double precision :: eps, gamma, epsilon
 
 !------------------------------------------------------------------------
 !     This routine solves J(u)du = -F(u) where u = u^k, du = du^k using the
@@ -49,13 +49,13 @@
 !     Choosing the forcing term (eta_e)
 !------------------------------------------------------------------------
       
-      call forcing_term (k,ts,L2norm,eta_e)
+      call forcing_term (k,ts,L2norm,gamma)
 
 !------------------------------------------------------------------------
 !      Begining of FGMRES method    
 !------------------------------------------------------------------------
 
-      eps = eta_e * L2norm ! setting the tolerance for fgmres
+      eps = gamma * L2norm ! setting the tolerance for fgmres
 
       iout   = 0    ! set  higher than 0 to have res(ite)
 
@@ -106,41 +106,42 @@
          return
        end subroutine prepFGMRES_NK
       
-   subroutine forcing_term(k,ts,L2norm,eta_e)
-
+   subroutine forcing_term(k,ts,L2norm,gamma)
+  
+      use numerical
       implicit none
 
       integer, intent(in) :: k, ts
 
       double precision, intent(in) :: L2norm
       double precision, save :: L2normk_1, L2norm_t
-      double precision :: eta_e_ini, phi_e, alp_e
-      double precision, intent(out) :: eta_e
+      double precision :: gamma_ini, phi_e, alp_e
+      double precision, intent(out) :: gamma
 
-      eta_e_ini = 0.99d0
+      gamma_ini = 0.99d0
       phi_e     = 1d0
       alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
 
       if (k .eq. 1) then
 
-         eta_e = eta_e_ini
-         L2norm_t = L2norm / 4d0 ! t stands for transition
+         gamma = gamma_ini
+         L2norm_t = L2norm / dropini ! t stands for transition
 
       elseif (k .gt. 200) then
 
-         eta_e = eta_e_ini
+         gamma = gamma_ini
 
       else
 
          if (L2norm .gt. L2norm_t) then
 
-            eta_e = eta_e_ini
+            gamma = gamma_ini
       
          else
 
-            eta_e = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
-            eta_e = min(eta_e_ini,eta_e)
-            eta_e = max(0.01d0,eta_e)
+            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
+            gamma = min(gamma_ini,gamma)
+            gamma = max(0.01d0,gamma)
 
          endif
 
@@ -148,7 +149,7 @@
 
       L2normk_1 = L2norm
 
-      if (ts .le. 10) eta_e = eta_e_ini
+      if (ts .le. 10) gamma = gamma_ini
 
     end subroutine forcing_term
 

@@ -86,6 +86,7 @@ program ice
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-03
+  dropini  = 4d0        ! defines initial drop in L2norm before gamma = 0.01
 
   expnb      = 1
   expres     = 2
