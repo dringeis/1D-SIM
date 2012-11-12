@@ -65,9 +65,9 @@ program ice
   precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
-  Deltat     = 3600d0   ! time step [s]
-  nstep      = 500     ! lenght of the run in nb of time steps
-  Nmax_OL    = 1000
+  Deltat     = 1800d0   ! time step [s]
+  nstep      = 100     ! lenght of the run in nb of time steps
+  Nmax_OL    = 200
 
   if (implicit_solv) then
      N_sub = 25                        ! nb of subcycles for precond
@@ -85,7 +85,7 @@ program ice
   maxiteSOR  = 10000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
-  gamma_nl = 1d-03
+  gamma_nl = 1d-04
   dropini  = 4d0        ! defines initial drop in L2norm before gamma = 0.01
 
   expnb      = 1
