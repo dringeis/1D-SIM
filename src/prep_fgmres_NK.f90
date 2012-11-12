@@ -19,7 +19,7 @@
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
-      double precision :: eps, gamma, s, epsilon
+      double precision :: eps, gamma, epsilon
 
 !------------------------------------------------------------------------
 !     This routine solves J(u)du = -F(u) where u = u^k, du = du^k using the
@@ -50,7 +50,7 @@
 !------------------------------------------------------------------------
       
       call forcing_term (k,ts,L2norm,gamma)
-!      print *, 'L2norm', ts, k-1, L2norm, gamma
+
 !------------------------------------------------------------------------
 !      Begining of FGMRES method    
 !------------------------------------------------------------------------
@@ -100,16 +100,11 @@
 
 !         call linesearch(sol, x, res)
 !         print *, 'res after linesearch = ', res, eta_e
-      
-      if (k .eq. 1) then
-	uk1 = uk1 + du ! u^k+1 = u^k + du^k
-      else
-	call calc_s(k, uk1, du, s)
-	uk1 = uk1 + s*du ! see Knoll et al., 1993
-      endif
 
-      return
-      end subroutine prepFGMRES_NK
+         uk1 = uk1 + du ! u^k+1 = u^k + du^k
+
+         return
+       end subroutine prepFGMRES_NK
       
    subroutine forcing_term(k,ts,L2norm,gamma)
   
@@ -119,70 +114,44 @@
       integer, intent(in) :: k, ts
 
       double precision, intent(in) :: L2norm
-      double precision, save :: L2norm_t !, L2normk_1
-      double precision :: gamma_ini
-!      double precision :: phi_e, alp_e
+      double precision, save :: L2normk_1, L2norm_t
+      double precision :: gamma_ini, phi_e, alp_e
       double precision, intent(out) :: gamma
 
       gamma_ini = 0.99d0
-!      phi_e     = 1d0
-!      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
+      phi_e     = 1d0
+      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
 
-      if (k .eq. 1) L2norm_t = L2norm / dropini ! t stands for transition
+      if (k .eq. 1) then
 
-      if ( L2norm .gt. L2norm_t) then
-	gamma = gamma_ini
+         gamma = gamma_ini
+         L2norm_t = L2norm / dropini ! t stands for transition
+
+      elseif (k .gt. 200) then
+
+         gamma = gamma_ini
+
       else
-	gamma = 0.01d0
+
+         if (L2norm .gt. L2norm_t) then
+
+            gamma = gamma_ini
+      
+         else
+
+            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
+            gamma = min(gamma_ini,gamma)
+            gamma = max(0.01d0,gamma)
+
+         endif
+
       endif
 
-!      if (k .eq. 1) then
-!         gamma = gamma_ini
-!         L2norm_t = L2norm / dropini ! t stands for transition
-!      elseif (k .gt. 200) then
-!         gamma = gamma_ini
-!      else
+      L2normk_1 = L2norm
 
-!      if (L2norm .gt. L2norm_t) then
-!            gamma = gamma_ini
-!      else
-!            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
-!            gamma = min(gamma_ini,gamma)
-!            gamma = max(0.01d0,gamma)
-!      endif
-!      endif
-!      L2normk_1 = L2norm
-!      if (ts .le. 10) gamma = gamma_ini
+      if (ts .le. 10) gamma = gamma_ini
 
     end subroutine forcing_term
-    
-   subroutine calc_s(k, uk1, du, s)
-      use size
-      use numerical
-      implicit none
-    
-      integer, intent(in) :: k
-      integer :: i
-      double precision, intent(in) :: uk1(1:nx+1), du(1:nx+1)
-      double precision, intent(out) :: s ! see Knoll et al., 1993
-      double precision :: temp
-	
-      temp = 1d20
-      
-      do i = 2, nx
-      
-	if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp = abs(aa*uk1(i)/du(i))
-!	if ( (aa*uk1(i)/du(i)) .lt. temp) temp = (aa*uk1(i)/du(i)) ! marche pas!
-  
-      enddo
-      
-      s = min(1d0,temp)
-      s = max(0.25d0, s)
-      
-      if (k .gt. 50) s = 0.25d0
-      print *, 's = == ', s
-
-    end subroutine calc_s
 
 
 
