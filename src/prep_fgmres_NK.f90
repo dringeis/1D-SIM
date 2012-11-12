@@ -19,7 +19,7 @@
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
-      double precision :: eps, gamma, epsilon
+      double precision :: eps, gamma, epsilon, s
 
 !------------------------------------------------------------------------
 !     This routine solves J(u)du = -F(u) where u = u^k, du = du^k using the
@@ -100,7 +100,7 @@
 
 !         call linesearch(sol, x, res)
 !         print *, 'res after linesearch = ', res, eta_e
-
+	 call calc_s( uk1, du, s )
          uk1 = uk1 + du ! u^k+1 = u^k + du^k
 
          return
@@ -154,5 +154,30 @@
     end subroutine forcing_term
 
 
+   subroutine calc_s(uk1, du, s)
+      use size
+      use numerical
+      implicit none
 
+      integer :: i, imaxdu
+
+      double precision, intent(in) :: uk1(1:nx+1), du(1:nx+1)
+      double precision, intent(out) :: s
+      double precision :: aa, temp, maxdu
+
+      aa = 0.25d0
+      temp=100000d0
+      maxdu = 0d0
+      
+      do i = 2, nx
+	if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp =abs(aa*uk1(i)/du(i))
+	if ( abs(du(i)) .gt. maxdu ) then
+	  maxdu = abs(du(i))
+	  imaxdu = i
+	endif
+      enddo
+  
+      s = min(1d0,temp)
+
+    end subroutine calc_s
 
