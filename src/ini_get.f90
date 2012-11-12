@@ -58,7 +58,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   do i = 1, nx
      h(i) = 0.5d0
-     A(i) = 0.95d0
+     A(i) = 0.5d0
 !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall
   enddo
 

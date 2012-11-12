@@ -50,7 +50,7 @@
 !------------------------------------------------------------------------
       
       call forcing_term (k,ts,L2norm,gamma)
-
+!      print *, 'L2norm', ts, k-1, L2norm, gamma
 !------------------------------------------------------------------------
 !      Begining of FGMRES method    
 !------------------------------------------------------------------------
@@ -114,42 +114,40 @@
       integer, intent(in) :: k, ts
 
       double precision, intent(in) :: L2norm
-      double precision, save :: L2normk_1, L2norm_t
-      double precision :: gamma_ini, phi_e, alp_e
+      double precision, save :: L2norm_t !, L2normk_1
+      double precision :: gamma_ini
+!      double precision :: phi_e, alp_e
       double precision, intent(out) :: gamma
 
       gamma_ini = 0.99d0
-      phi_e     = 1d0
-      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
+!      phi_e     = 1d0
+!      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
 
-      if (k .eq. 1) then
+      if (k .eq. 1) L2norm_t = L2norm / dropini ! t stands for transition
 
-         gamma = gamma_ini
-         L2norm_t = L2norm / dropini ! t stands for transition
-
-      elseif (k .gt. 200) then
-
-         gamma = gamma_ini
-
+      if ( L2norm .gt. L2norm_t) then
+	gamma = gamma_ini
       else
-
-         if (L2norm .gt. L2norm_t) then
-
-            gamma = gamma_ini
-      
-         else
-
-            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
-            gamma = min(gamma_ini,gamma)
-            gamma = max(0.01d0,gamma)
-
-         endif
-
+	gamma = 0.01d0
       endif
 
-      L2normk_1 = L2norm
+!      if (k .eq. 1) then
+!         gamma = gamma_ini
+!         L2norm_t = L2norm / dropini ! t stands for transition
+!      elseif (k .gt. 200) then
+!         gamma = gamma_ini
+!      else
 
-      if (ts .le. 10) gamma = gamma_ini
+!      if (L2norm .gt. L2norm_t) then
+!            gamma = gamma_ini
+!      else
+!            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
+!            gamma = min(gamma_ini,gamma)
+!            gamma = max(0.01d0,gamma)
+!      endif
+!      endif
+!      L2normk_1 = L2norm
+!      if (ts .le. 10) gamma = gamma_ini
 
     end subroutine forcing_term
 
