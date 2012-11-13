@@ -8,7 +8,7 @@ MODULE rheology
 ! zmax_par_1 : 1/zmax_par
   IMPLICIT NONE
   DOUBLE PRECISION :: C, Pstar, alpha, alpha2
-  DOUBLE PRECISION :: zetamin, e_2, zmax_par
+  DOUBLE PRECISION :: zetamin, e_2, zmax_par, small2
 
 END MODULE rheology
 
@@ -22,7 +22,7 @@ END MODULE properties
 MODULE forcing
 
   IMPLICIT NONE
-  DOUBLE PRECISION :: Cda, Cdw
+  DOUBLE PRECISION :: Cda, Cdw, small1
 
 END MODULE forcing
 

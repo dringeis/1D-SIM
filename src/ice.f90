@@ -87,6 +87,8 @@ program ice
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-04
   dropini  = 4d0        ! defines initial drop in L2norm before gamma = 0.01
+  small1   = 1d-10      ! to have a continuously diff water drag term
+  small2   = 1d-22      ! to have a continuously diff rheology term
 
   expnb      = 1
   expres     = 2

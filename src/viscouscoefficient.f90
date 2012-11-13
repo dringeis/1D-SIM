@@ -17,9 +17,9 @@ subroutine viscouscoefficient(utp, zeta, eta)
      
      dudx = ( utp(i+1) - utp(i) ) / Deltax
 
-     deno = alpha*(abs(dudx))
-
-     deno = max( deno, 1d-30 )
+     deno = alpha*sqrt( (dudx)**2d0 + small2 )
+!     deno = alpha*(abs(dudx))
+!     deno = max( deno, 1d-30 )
      
      zeta(i) = zmax_par * Pp_half(i) * (tanh(1/(zmax_par*deno))) &
           + zetamin
