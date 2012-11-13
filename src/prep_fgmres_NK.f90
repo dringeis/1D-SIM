@@ -100,6 +100,7 @@
 
 !         call linesearch(sol, x, res)
 !         print *, 'res after linesearch = ', res, eta_e
+!	 call output_u_and_du ( ts, k, uk1, du )
 	 call calc_s( uk1, du, s )
          uk1 = uk1 + du ! u^k+1 = u^k + du^k
 

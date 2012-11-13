@@ -217,6 +217,7 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
 
   enddo
 
+! call output_u_and_du ( ts, k, uk1, du )
   utp = utp + du
 
   return

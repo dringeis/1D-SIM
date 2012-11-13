@@ -183,3 +183,45 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
 
   return
 end subroutine output_ini_L2norm
+
+subroutine output_u_and_du ( ts, k, utp, du )
+  use size
+  use resolution
+!  use global_var
+  use rheology
+  use option
+  implicit none
+
+  character filename*60
+
+  integer :: i, Dt, Dx, adv
+  integer, intent(in) :: ts, k
+  double precision, intent(in)  :: utp(1:nx+1), du(1:nx+1)
+
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+
+  write (filename, '("output/uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
+		    IMEX, adv,ts,k
+  open (10, file = filename, status = 'unknown')
+  
+  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
+		    IMEX, adv,ts,k
+  open (11, file = filename, status = 'unknown')
+  
+  write(10,10) ( utp(i),       i = 1, nx+1 )
+  write(11,10) ( du(i),       i = 1, nx+1 )
+
+  close(10)
+  close(11)
+
+10 format (1x, 1000(f25.20, 1x))
+
+  return
+end subroutine output_u_and_du
