@@ -102,6 +102,7 @@
 !         print *, 'res after linesearch = ', res, eta_e
 !	 call output_u_and_du ( ts, k, uk1, du )
 	 call calc_s( uk1, du, s )
+!	 uk1 = uk1 + s*du
          uk1 = uk1 + du ! u^k+1 = u^k + du^k
 
          return
@@ -156,6 +157,9 @@
 
 
    subroutine calc_s(uk1, du, s)
+
+!     Adaptive damping approach, see eq 22 in Knoll et al 1993
+
       use size
       use numerical
       implicit none
