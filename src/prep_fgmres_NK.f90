@@ -182,6 +182,7 @@
 	endif
       enddo
   
+      temp=max(temp,0.05d0)
       s = min(1d0,temp)
 
     end subroutine calc_s
