@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------
 !      Find new iterate without (glob=0) or with globalization (glob=1,2)
 !------------------------------------------------------------------------
-
+      glob=0
       if (glob .eq. 0) then
 	uk1 = uk1 + du ! u^k+1 = u^k + du^k
       elseif (glob .eq. 1) then
@@ -222,11 +222,11 @@
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
+
 	if ( L2normnew .lt. L2norm ) exit
-!	print *, l, beta, L2norm, L2normnew
+	print *, 'LINESEARCH, beta, L2normnew, L2norm
       
       enddo
-      stop
   
     end subroutine linesearch
 
