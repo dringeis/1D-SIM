@@ -6,7 +6,7 @@
         
       implicit none
 
-      integer :: icode, iter, iout, i
+      integer :: icode, iter, iout, i, glob
       integer, intent(in) ::  k, ts, precond
       integer, intent(out) :: fgmres_its
 
@@ -95,15 +95,18 @@
 ! icode = 0 means that fgmres has finished and sol contains the app. solution
 
 !------------------------------------------------------------------------
-!      line search method: add a*du to u (where a = 0.25, 0.5 or 1.0)
+!      Find new iterate without (glob=0) or with globalization (glob=1,2)
 !------------------------------------------------------------------------
 
-!         call linesearch(sol, x, res)
-!         print *, 'res after linesearch = ', res, eta_e
+      if (glob .eq. 0) then
+	uk1 = uk1 + du ! u^k+1 = u^k + du^k
+      elseif (glob .eq. 1) then
+	call calc_s( uk1, du, s )
+	uk1 = uk1 + s*du
+      elseif (glob .eq. 2) then
+	call linesearch(L2norm, uk1, du, upts, tauair)
+      endif
 !	 call output_u_and_du ( ts, k, uk1, du )
-	 call calc_s( uk1, du, s )
-!	 uk1 = uk1 + s*du
-         uk1 = uk1 + du ! u^k+1 = u^k + du^k
 
          return
        end subroutine prepFGMRES_NK
@@ -186,4 +189,44 @@
       s = min(1d0,temp)
 
     end subroutine calc_s
+
+   subroutine linesearch(L2norm, u, du, upts, tauair)
+
+!     linesearch method
+
+      use size
+      use numerical
+      implicit none
+
+      integer :: l
+
+      double precision, intent(in) :: L2norm, du(1:nx+1)
+      double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
+      double precision, intent(inout) :: u(1:nx+1)
+      double precision :: uk1(1:nx+1), b(1:nx+1)         ! b vector
+      double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
+      double precision :: Cw(1:nx+1)
+      double precision :: F_uk1(1:nx+1)
+      double precision :: L2normnew, beta
+
+      uk1 = u
+
+      do l=1,4
+      
+        beta = 1d0/(2d0**(1d0*(l-1)))
+	
+	u = uk1 + beta*du
+      
+	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+        call bvect (tauair, upts, b)
+        call Cw_coefficient (u, Cw)            ! u is u^k-1
+        call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
+	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
+	if ( L2normnew .lt. L2norm ) exit
+!	print *, l, beta, L2norm, L2normnew
+      
+      enddo
+      stop
+  
+    end subroutine linesearch
 
