@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------
 !      Begining of FGMRES method    
 !------------------------------------------------------------------------
-
+      print *, 'L2-norm after k ite=', ts, k-1, L2norm, gamma
       eps = gamma * L2norm ! setting the tolerance for fgmres
 
       iout   = 0    ! set  higher than 0 to have res(ite)
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------
 !      Find new iterate without (glob=0) or with globalization (glob=1,2)
 !------------------------------------------------------------------------
-      glob=0
+      glob=2
       if (glob .eq. 0) then
 	uk1 = uk1 + du ! u^k+1 = u^k + du^k
       elseif (glob .eq. 1) then
@@ -154,7 +154,7 @@
 
       L2normk_1 = L2norm
 
-      if (ts .le. 10) gamma = gamma_ini
+!      if (ts .le. 10) gamma = gamma_ini
 
     end subroutine forcing_term
 
@@ -224,7 +224,7 @@
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
 	if ( L2normnew .lt. L2norm ) exit
-	print *, 'LINESEARCH, beta, L2normnew, L2norm
+	print *, 'LINESEARCH', beta, L2normnew, L2norm
       
       enddo
   

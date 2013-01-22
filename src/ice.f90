@@ -66,7 +66,7 @@ program ice
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
+  nstep      = 200     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   if (implicit_solv) then
@@ -85,8 +85,8 @@ program ice
   maxiteSOR  = 10000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
-  gamma_nl = 1d-04
-  dropini  = 4d0        ! defines initial drop in L2norm before gamma = 0.01
+  gamma_nl = 1d-06
+  dropini  = 2d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
 
@@ -212,7 +212,7 @@ program ice
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
 !       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-        print *, 'L2-norm after k ite=', ts, k-1, L2norm
+!        print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) then
 	  nl_target = gamma_nl*L2norm
 !	  call output_ini_L2norm(ts,L2norm,expnb)
