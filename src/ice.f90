@@ -33,7 +33,7 @@ program ice
   logical :: p_flag, restart
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, precond
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
-  integer, save :: Nfail ! nb of failures
+  integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: u(1:nx+1), upts(1:nx+1) ! pts = previous time step
   double precision :: tauair(1:nx+1)    ! tauair
@@ -48,6 +48,7 @@ program ice
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
   Nfail    = 0
+  meanN    = 0
 
 !------------------------------------------------------------------------
 !     Input by user
@@ -66,7 +67,7 @@ program ice
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 200     ! lenght of the run in nb of time steps
+  nstep      = 100     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   if (implicit_solv) then
@@ -232,6 +233,7 @@ program ice
         if (k .eq. Nmax_OL) Nfail = Nfail + 1
 
      enddo
+     meanN = meanN + k-1
 !     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
 
      else ! EVP1 solver
@@ -279,9 +281,9 @@ program ice
   enddo
   
   if (solver .eq. 1) then
-     print *, 'Nb of failures of Picard: ', Nfail
+     print *, 'Nb failures, mean ite of Picard: ', Nfail, (meanN*1d0)/(nstep*1d0)
   elseif (solver .eq. 2) then
-     print *, 'Nb of failures of JFNK: ', Nfail
+     print *, 'Nb failures, mean ite of JFNK: ', Nfail, (meanN*1d0)/(nstep*1d0)
   endif
 
 end program ice

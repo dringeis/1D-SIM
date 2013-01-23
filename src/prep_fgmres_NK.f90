@@ -196,6 +196,8 @@
 
       use size
       use numerical
+      use global_var
+      use option
       implicit none
 
       integer :: l
@@ -217,6 +219,10 @@
 	
 	u = uk1 + beta*du
       
+	if (IMEX .gt. 0) then ! IMEX method 1 or 2
+	  call advection (upts, u, hpts, Apts, h, A) ! advection scheme for tracers
+	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+	endif
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
