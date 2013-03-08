@@ -1,26 +1,23 @@
 !****************************************************************************
-!     calculates Au-b
+!     calculates F = phdu/dt - R 
 !****************************************************************************
 
-subroutine Fu (utp, zeta, eta, Cw, b, Fu_vec)
+subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
   use size
   use resolution
   use properties
   use global_var
   use option
-  use EVP_const
 
   implicit none
       
   integer :: i
 
-  double precision, intent(in)  :: utp(1:nx+1)
-  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1)
-  double precision, intent(in)  :: b(1:nx+1)
+  double precision, intent(in)  :: utp(1:nx+1), upts(1:nx+1)
+  double precision, intent(in)  :: Rpts(1:nx+1), R_uk1(1:nx+1)
 
   double precision, intent(out) :: Fu_vec(1:nx+1)
-  double precision :: h_at_u
+  double precision :: h_at_u, h_at_u_pts
 
   Fu_vec(1)    = 0d0
   Fu_vec(nx+1) = 0d0
@@ -30,62 +27,84 @@ subroutine Fu (utp, zeta, eta, Cw, b, Fu_vec)
      Fu_vec(i) = 0.0d0
 
 !------------------------------------------------------------------------
-!    rhoice*h*du/dt : tendency term, advection of momentum is neglected
+!    2*rhoice*h*du/dt : tendency term, advection of momentum is neglected
+!
+!    2 is hard coded here....watchout
 !------------------------------------------------------------------------
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
+!     h_at_u_pts = ( hpts(i) + hpts(i-1) ) / 2d0
+!     h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
 
-     if (implicit_solv) then
+!     Fu_vec(i) = Fu_vec(i) + 2d0*( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
+     Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
+
+!------------------------------------------------------------------------
+!     Substract the R vector
+!------------------------------------------------------------------------
      
-        Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * utp(i) ) / Deltat
-     
-     elseif (.not. implicit_solv) then
+     Fu_vec(i) = Fu_vec(i) - R_uk1(i)! - h_at_u * Rpts(i) / h_at_u_pts
 
-        Fu_vec(i) = Fu_vec(i) + one_or_zero*( rho * h_at_u * utp(i) )/ Deltat
+  enddo
 
-     endif
+  return
+end subroutine Fu
+
+!****************************************************************************
+!     calculates R in du/dt = R/ph
+!****************************************************************************
+
+subroutine calc_R (utp, zeta, eta, Cw, tauair, R_vec)
+  use size
+  use resolution
+  use properties
+  use global_var
+  use option
+
+  implicit none
+      
+  integer :: i
+
+  double precision, intent(in)  :: utp(1:nx+1)
+  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), tauair(1:nx+1)
+
+  double precision, intent(out) :: R_vec(1:nx+1)
+  
+  R_vec(1)    = 0d0
+  R_vec(nx+1) = 0d0
+
+  do i = 2, nx
+
+     R_vec(i) = 0.0d0
+
+!------------------------------------------------------------------------
+!     tauair : air drag term
+!------------------------------------------------------------------------
+
+     R_vec(i) = R_vec(i) + tauair(i)
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
      
-     Fu_vec(i) = Fu_vec(i) + Cw(i) * utp(i)
+     R_vec(i) = R_vec(i) - Cw(i) * utp(i)
      
 !------------------------------------------------------------------------
-!     -d ( (zeta+eta) du/dx ) / dx : rheology term
+!     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term
 !------------------------------------------------------------------------
 
-     Fu_vec(i) = Fu_vec(i) - &
+     R_vec(i) = R_vec(i) + &
 
-          (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 + &
+          (zeta(i)+eta(i)) * (utp(i+1)-utp(i))     / Deltax2 - &
           (zeta(i-1)+eta(i-1)) * (utp(i)-utp(i-1)) / Deltax2
      
-!------------------------------------------------------------------------
-!     -b : forcing term
-!------------------------------------------------------------------------
+     R_vec(i) = R_vec(i) - ( P_half(i) - P_half(i-1) ) / Deltax
      
-     Fu_vec(i) = Fu_vec(i) - b(i)
-
-!------------------------------------------------------------------------
-!     dP/dx term for the EVP...recall it is not included in b
-!------------------------------------------------------------------------
-
-     if (.not. implicit_solv) then
-        
-        Fu_vec(i) = Fu_vec(i) + ( P_half(i) - P_half(i-1) ) / Deltax
-        
-     endif
-
-
   enddo
 
-!  print *, 'L2norm =', sqrt(DOT_PRODUCT(Fu_vec,Fu_vec))
-
   return
-end subroutine Fu
-
-
-
+end subroutine calc_R
 
 
 

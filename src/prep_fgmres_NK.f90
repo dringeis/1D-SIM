@@ -208,7 +208,7 @@
       double precision :: uk1(1:nx+1), b(1:nx+1)         ! b vector
       double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
       double precision :: Cw(1:nx+1)
-      double precision :: F_uk1(1:nx+1)
+      double precision :: F_uk1(1:nx+1), Rtp(1:nx+1)
       double precision :: L2normnew, beta
 
       uk1 = u
@@ -224,9 +224,10 @@
 	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-        call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
-        call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
+        call calc_R (u, zeta, eta, Cw, tauair, Rtp)
+        call Fu (u, upts, Rtp, Rtp, F_uk1) ! need Rpts
+
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
 	if ( L2normnew .lt. L2norm ) exit

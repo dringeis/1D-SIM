@@ -39,8 +39,8 @@ program ice
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
-  double precision :: Cw(1:nx+1)
-  double precision :: F_uk1(1:nx+1)
+  double precision :: Cw(1:nx+1), Rpts(1:nx+1)
+  double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, Eo, nbhr
   double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
@@ -67,7 +67,7 @@ program ice
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
+  nstep      = 10     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   if (implicit_solv) then
@@ -86,7 +86,7 @@ program ice
   maxiteSOR  = 10000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
-  gamma_nl = 1d-06
+  gamma_nl = 1d-10
   dropini  = 2d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
@@ -206,14 +206,15 @@ program ice
 	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-        call bvect (tauair, upts, b)
         call Cw_coefficient (u, Cw)            ! u is u^k-1
-        call Fu (u, zeta, eta, Cw, b, F_uk1)   ! u is u^k-1
+        call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
+        call Fu (u, upts, R_uk1, R_uk1, F_uk1) ! need Rpts
+
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
 !       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-!        print *, 'L2-norm after k ite=', ts, k-1, L2norm
+        !print *, 'L2-norm after k ite=', ts, k-1, L2norm
         if (k .eq. 1) then
 	  nl_target = gamma_nl*L2norm
 !	  call output_ini_L2norm(ts,L2norm,expnb)
@@ -238,7 +239,7 @@ program ice
 
      else ! EVP1 solver
         
-        call bvect (tauair, upts, b) ! b does not include dP/dx for EVP solver
+!        call bvect (tauair, upts, b) ! b does not include dP/dx for EVP solver
 
 ! watchout b includes rho*h*upts/dt
 !        CALL EVP1(b, u, zeta, eta, Cw, .false., ts)

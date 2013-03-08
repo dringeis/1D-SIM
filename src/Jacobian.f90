@@ -12,8 +12,8 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
   double precision :: zeta(0:nx+1), eta(0:nx+1)
-  double precision :: Cw(1:nx+1), Fpos(1:nx+1)
-  double precision :: upos(1:nx+1), b(1:nx+1)
+  double precision :: Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
+  double precision :: upos(1:nx+1)!, b(1:nx+1)
 
 !  double precision xpos(nvar), xneg(nvar), x(nvar),rhs(nvar)
 
@@ -33,9 +33,9 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
   endif
   
   call viscouscoefficient (upos, zeta, eta)
-  call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
-  call Fu (upos, zeta, eta, Cw, b, Fpos)
+  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
+  call Fu (upos, upts, Rpos, Rpos, Fpos) ! need Rpts
 
   do i=1, nx+1
 
@@ -98,9 +98,10 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)
-  call bvect (tauair, upts, b)
+  stop ! (need to modify or latest changes)
+!  call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
-  call Fu (upos, zeta, eta, Cw, b, Fpos)
+!  call Fu (upos, zeta, eta, Cw, b, Fpos)
   Jleft(i)=(Fpos(i)-Futp(i))/epsilon
   else
   Jleft(i)=0d0
@@ -118,9 +119,9 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)
-  call bvect (tauair, upts, b)
+!  call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
-  call Fu (upos, zeta, eta, Cw, b, Fpos)
+!  call Fu (upos, zeta, eta, Cw, b, Fpos)
   J(i)=(Fpos(i)-Futp(i))/epsilon
   
   uele(i)=0d0
@@ -136,9 +137,9 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)
-  call bvect (tauair, upts, b)
+!  call bvect (tauair, upts, b)
   call Cw_coefficient (upos, Cw)
-  call Fu (upos, zeta, eta, Cw, b, Fpos)
+!  call Fu (upos, zeta, eta, Cw, b, Fpos)
   Jright(i)=(Fpos(i)-Futp(i))/epsilon
   else
   Jright(i)=0d0
