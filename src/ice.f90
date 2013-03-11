@@ -62,10 +62,10 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  CN         = 1       ! 0: stand, 1: Crank-Nicolson scheme
+  CN         = 1       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 10     ! lenght of the run in nb of time steps
+  nstep      = 48     ! lenght of the run in nb of time steps
   Nmax_OL    = 150
 !  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
