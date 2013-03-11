@@ -8,6 +8,7 @@ subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
   use properties
   use global_var
   use numerical
+  use option
 
   implicit none
       
@@ -20,8 +21,9 @@ subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, B1, residual ,maxerror
+  double precision :: h_at_u, B1, residual ,maxerror, CNconst
 
+  CNconst = 2d0
   if (p_flag) then
      utp = 0d0              ! initial guess for precond
      maxiteSOR = iteSOR_pre ! nb of ite for precond
@@ -34,7 +36,11 @@ subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
 !------------------------------------------------------------------------
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
-     D(i) = ( rho * h_at_u ) / Deltat 
+     if ( CN .eq. 0 ) then
+      D(i) = ( rho * h_at_u ) / Deltat 
+     elseif ( CN .eq. 1 ) then
+      D(i) = ( CNconst * rho * h_at_u ) / Deltat 
+     endif
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term

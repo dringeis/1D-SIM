@@ -22,30 +22,53 @@ subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
   Fu_vec(1)    = 0d0
   Fu_vec(nx+1) = 0d0
 
-  do i = 2, nx
+  if ( CN .eq. 0 ) then
 
-     Fu_vec(i) = 0.0d0
+    do i = 2, nx
+
+      Fu_vec(i) = 0.0d0
 
 !------------------------------------------------------------------------
-!    2*rhoice*h*du/dt : tendency term, advection of momentum is neglected
-!
-!    2 is hard coded here....watchout
+!    rhoice*h*du/dt : tendency term, advection of momentum is neglected
 !------------------------------------------------------------------------
 
-     h_at_u = ( h(i) + h(i-1) ) / 2d0
-!     h_at_u_pts = ( hpts(i) + hpts(i-1) ) / 2d0
-!     h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
-
-!     Fu_vec(i) = Fu_vec(i) + 2d0*( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
-     Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
+      h_at_u = ( h(i) + h(i-1) ) / 2d0
+      Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
 
 !------------------------------------------------------------------------
 !     Substract the R vector
 !------------------------------------------------------------------------
      
-     Fu_vec(i) = Fu_vec(i) - R_uk1(i)! - h_at_u * Rpts(i) / h_at_u_pts
+      Fu_vec(i) = Fu_vec(i) - R_uk1(i)
+
+    enddo
+
+  elseif ( CN .eq. 1 ) then
+
+    do i = 2, nx
+
+      Fu_vec(i) = 0.0d0
+
+!------------------------------------------------------------------------
+!    2*rhoice*h*du/dt : tendency term, advection of momentum is neglected
+!
+!    2 is hard coded here....watchout (voir p. 42 EC-4)
+!------------------------------------------------------------------------
+
+     h_at_u = ( h(i) + h(i-1) ) / 2d0
+     h_at_u_pts = ( hpts(i) + hpts(i-1) ) / 2d0
+     h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
+
+     Fu_vec(i) = Fu_vec(i) + 2d0*( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
+     
+!------------------------------------------------------------------------
+!     Substract the R vectors
+!------------------------------------------------------------------------
+     
+     Fu_vec(i) = Fu_vec(i) - R_uk1(i) - h_at_u * Rpts(i) / h_at_u_pts
 
   enddo
+  endif
 
   return
 end subroutine Fu
