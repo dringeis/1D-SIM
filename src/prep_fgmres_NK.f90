@@ -120,7 +120,7 @@
 
       gamma_ini = 0.99d0
       phi_e     = 1d0
-      alp_e     = 1d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
+      alp_e     = 1.5d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
 
       if (k .eq. 1) then
 

@@ -4,7 +4,6 @@ subroutine output_file(e, gamma_nl, solver, expnb)
   use rheology
   use resolution
   use numerical
-  use EVP_const
   use option
 
   implicit none

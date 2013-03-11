@@ -65,7 +65,8 @@ program ice
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 10     ! lenght of the run in nb of time steps
-  Nmax_OL    = 200
+  Nmax_OL    = 150
+!  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
 
@@ -75,7 +76,7 @@ program ice
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
   gamma_nl = 1d-10
-  dropini  = 2d0        ! defines initial drop in L2norm before gamma = 0.01
+  dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
 
@@ -226,6 +227,7 @@ program ice
 !     output results
 !------------------------------------------------------------------------
 
+!     if (abs(nbhr-24d0) .lt. 1d-06) call output_results(ts, expnb, u, zeta, eta)
      if (ts .eq. out_step(1) .or. ts .eq. out_step(2) .or. &
          ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
          ts .eq. out_step(5)) then
