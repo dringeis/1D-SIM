@@ -1,13 +1,13 @@
 
       subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, upts, tauair, &
-                               L2norm, k, ts, precond, fgmres_its)
+                               L2norm, k, ts, fgmres_its)
         use size
         use numerical
         
       implicit none
 
       integer :: icode, iter, iout, i, glob
-      integer, intent(in) ::  k, ts, precond
+      integer, intent(in) ::  k, ts
       integer, intent(out) :: fgmres_its
 
       double precision, intent(inout) :: uk1(1:nx+1)
@@ -68,12 +68,7 @@
 
       IF ( icode == 1 ) THEN
 !         CALL identity (wk1,wk2)
-         if (precond .eq. 1) then
-            CALL SOR (wk1, wk2, zeta, eta, Cw, .true., ts)
-         elseif (precond .eq. 2) then
-!            CALL EVP1Bprecond(wk1, wk2, zeta, eta, Cw, ts)
-            CALL EVP2Dprecond(wk1, wk2, zeta, eta, Cw, ts)
-         endif
+          CALL SOR (wk1, wk2, zeta, eta, Cw, .true., ts)
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN

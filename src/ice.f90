@@ -25,13 +25,12 @@ program ice
   use resolution
   use global_var
   use numerical
-  use EVP_const
   use option
   
   implicit none
 
   logical :: p_flag, restart
-  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, precond
+  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
@@ -42,7 +41,7 @@ program ice
   double precision :: Cw(1:nx+1), Rpts(1:nx+1)
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
-  double precision :: L2norm, gamma_nl, nl_target, Eo, nbhr
+  double precision :: L2norm, gamma_nl, nl_target, nbhr
   double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
 
   out_step = 0
@@ -58,26 +57,15 @@ program ice
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
-  implicit_solv  = .true. ! T: solvers 1, 2 or 3, F: EVP solver
   restart        = .false.
   adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  precond    = 1        ! precond for solver 2, 1: SOR, 2: EVP2
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 10     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
-
-  if (implicit_solv) then
-     N_sub = 25                        ! nb of subcycles for precond
-     Deltate = 4d0                     ! EVP as a precond
-     Eo    = 0.05d0                    ! Hunke 1997, eq (44)
-  elseif (.not. implicit_solv) then
-     N_sub = 900                       ! nb of subcycles
-     Deltate    = Deltat / (N_sub*1d0) ! EVP as a solver
-  endif
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
 
@@ -113,13 +101,7 @@ program ice
 !------------------------------------------------------------------------
 
   p_flag = .true.
-  if (implicit_solv) then
-     if (solver .eq. 1) p_flag = .false.
-  elseif (.not. implicit_solv) then
-     print *, 'check this out one_or_zero!!!', one_or_zero
-     one_or_zero = 0d0 ! set to zero to eliminate du/dt term (not du/dte)
-     p_flag = .false.
-  endif
+  if (solver .eq. 1) p_flag = .false.
 
 !------------------------------------------------------------------------
 !     Define Deltax and check CFL based on input by user
@@ -166,8 +148,6 @@ program ice
   Cda        = rhoair   * Cdair
   Cdw        = rhowater * Cdwater
 
-  Estar      = 2d0*Eo*rho*Deltax2 / (Deltate**2d0) ! Hunke 1997, eq (44)
-
 !------------------------------------------------------------------------
 !     initial conditions
 !------------------------------------------------------------------------
@@ -197,8 +177,6 @@ program ice
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
 !------- Begining of outer loop (OL) or Newton iterations ----------------
 
-     if (implicit_solv) then
-
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
@@ -227,7 +205,7 @@ program ice
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
-                              L2norm, k, ts, precond, fgmres_its)
+                              L2norm, k, ts, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 	fgmres_per_ts = fgmres_per_ts + fgmres_its
@@ -236,19 +214,6 @@ program ice
      enddo
      meanN = meanN + k-1
 !     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
-
-     else ! EVP1 solver
-        
-!        call bvect (tauair, upts, b) ! b does not include dP/dx for EVP solver
-
-! watchout b includes rho*h*upts/dt
-!        CALL EVP1(b, u, zeta, eta, Cw, .false., ts)
-
-        call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-        call Cw_coefficient (u, Cw) 
-        CALL EVP2solver(b, u, zeta, eta, Cw, ts)
-
-     endif
 
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
@@ -266,7 +231,7 @@ program ice
          ts .eq. out_step(5)) then
         print *, 'outputting results'
         call output_results(ts, expnb, u, zeta, eta)
-        call output_file(e, gamma_nl, solver, precond, expnb)
+        call output_file(e, gamma_nl, solver, expnb)
      endif
 
 !------------------------------------------------------------------------

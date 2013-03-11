@@ -30,7 +30,7 @@ MODULE resolution
 
   IMPLICIT NONE
   DOUBLE PRECISION :: Deltax, Deltax2
-  DOUBLE PRECISION :: Deltat, Deltate, DtoverDx
+  DOUBLE PRECISION :: Deltat, DtoverDx
 
 END MODULE resolution
 
@@ -43,9 +43,3 @@ MODULE numerical
 
 END MODULE numerical
 
-MODULE EVP_const
-
-  IMPLICIT NONE
-  DOUBLE PRECISION :: beta_1, mindeno, one_or_zero, Estar
-
-END MODULE EVP_const

@@ -1,4 +1,4 @@
-subroutine output_file(e, gamma_nl, solver, precond, expnb)
+subroutine output_file(e, gamma_nl, solver, expnb)
  
   use size
   use rheology
@@ -11,7 +11,7 @@ subroutine output_file(e, gamma_nl, solver, precond, expnb)
 
   character filename*30
 
-  integer, intent(in) :: solver, precond, expnb
+  integer, intent(in) :: solver, expnb
   double precision, intent(in) :: e, gamma_nl
   
   write (filename, '("output/info.",i2.2)') expnb
@@ -49,36 +49,17 @@ subroutine output_file(e, gamma_nl, solver, precond, expnb)
   write(10,*) ('SOLVER AND NUMERICS')
   write(10,*) ('')
 
-  if (implicit_solv) then
      write(10,*) ('SOLVER = ')
      write(10,11) (solver)
-     write(10,*) ('precond = ')
-     write(10,11) (precond)
-     if (precond .eq. 1) then
-        write(10,*) ('omega (sor) =')
-        write(10,10) (omega)
-        write(10,*) ('nb of sor ite =')
-        write(10,12) (iteSOR_pre)
-     elseif (precond .eq. 2) then
-        write(10,*) ('EVP precond')
-        write(10,*) ('dte (s) =')
-        write(10,10) (Deltate)
-        write(10,*) ('nb of sub cycles =')
-        write(10,12) (N_sub)
-     endif
+     write(10,*) ('omega (sor) =')
+     write(10,10) (omega)
+     write(10,*) ('nb of sor ite =')
+     write(10,12) (iteSOR_pre)
      write(10,*) ('max nb of gmres ite = ')
      write(10,12) (maxiteGMRES)
      write(10,*) ('gamma_nl (tol) =')
      write(10,10) (gamma_nl)
      
-  elseif (.not. implicit_solv) then
-     write(10,*) ('SOLVER = EVP')
-     write(10,*) ('dte (s) =')
-     write(10,10) (Deltate)
-     write(10,*) ('T (s) =')
-     write(10,10) (T)
-  endif
-
   close(10)
 
 10 format (f24.10)
