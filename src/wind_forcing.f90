@@ -28,7 +28,7 @@ subroutine wind_forcing (tauair, ts)
 !          tauair(i) = Cda * (speed)**2d0
           tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*Deltat/apar))
        enddo
-!       print *, 'tauair', ts, 100d0*tauair(50)/(Cda * (speed)**2d0)
+       print *, 'tauair', ts, 100d0*tauair(50)/(Cda * (speed)**2d0)
     else
        modulation = cos(2*pi*ts*Deltat/period)
        
