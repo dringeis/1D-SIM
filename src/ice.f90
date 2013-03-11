@@ -58,10 +58,11 @@ program ice
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
+  adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  CN         = 0       ! Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 10     ! lenght of the run in nb of time steps
@@ -154,6 +155,7 @@ program ice
 !------------------------------------------------------------------------
 
   call ini_get (u, restart, expres, ts_res)
+  tauair = 0d0 ! initialization (watchout for restart)
   nbhr = 0d0
   
   do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
@@ -165,14 +167,21 @@ program ice
      call cpu_time(timecrap)
      call cpu_time(time1)
 
-     upts = u
+     upts=u
      hpts=h
      Apts=A
+   
+     if (IMEX .eq. 0) call ice_strength () ! standard approach no IMEX 
+     if ( CN .eq. 1 ) then
+       call ice_strength ()
+       call viscouscoefficient (upts, zeta, eta) ! u is u^k-1
+       call Cw_coefficient (upts, Cw)            !
+       call calc_R (upts, zeta, eta, Cw, tauair, Rpts)
+     endif
      
 !------- Create forcing vector b (independent of u) ----------------------
 
      call wind_forcing (tauair, ts)
-     if (IMEX .eq. 0) call ice_strength () ! standard approach no IMEX
 
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
@@ -187,7 +196,7 @@ program ice
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-        call Fu (u, upts, R_uk1, R_uk1, F_uk1) ! need Rpts
+        call Fu (u, upts, Rpts, R_uk1, F_uk1) ! need Rpts
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
@@ -206,7 +215,7 @@ program ice
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
-                              L2norm, k, ts, fgmres_its)
+                              Rpts, L2norm, k, ts, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 	fgmres_per_ts = fgmres_per_ts + fgmres_its
