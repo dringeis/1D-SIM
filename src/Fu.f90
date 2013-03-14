@@ -17,9 +17,10 @@ subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
   double precision, intent(in)  :: Rpts(1:nx+1), R_uk1(1:nx+1)
 
   double precision, intent(out) :: Fu_vec(1:nx+1)
-  double precision :: h_at_u, h_at_u_pts, CNconst
+  double precision :: h_at_u, h_at_u_pts, CNconst, small
 
   CNconst = 2d0	
+  small = 1d-15
 
   Fu_vec(1)    = 0d0
   Fu_vec(nx+1) = 0d0
@@ -59,7 +60,8 @@ subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
      h_at_u_pts = ( hpts(i) + hpts(i-1) ) / 2d0
-     h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
+     h_at_u_pts = h_at_u_pts + small !to avoid div by 0
+     !h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
 
      Fu_vec(i) = Fu_vec(i) + CNconst*( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
      

@@ -106,8 +106,8 @@ subroutine output_residual(ts, k, expnb, F)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
   
-  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt,Dx,IMEX, &
-		    adv,CN,ts,k,expnb
+  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt,Dx,&
+		    IMEX,adv,CN,ts,k,expnb
   open (11, file = filename, status = 'unknown')
   
   write(11,10) ( F(i), i = 1, nx+1 )
@@ -211,7 +211,7 @@ subroutine output_u_and_du ( ts, k, utp, du )
 		    IMEX, adv,CN,ts,k
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,,"_CN",i1.1"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
+  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
 		    IMEX, adv,CN,ts,k
   open (11, file = filename, status = 'unknown')
   
