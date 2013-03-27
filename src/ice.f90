@@ -34,7 +34,7 @@ program ice
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
-  double precision :: u(1:nx+1), upts(1:nx+1) ! pts = previous time step
+  double precision :: u(1:nx+1), upts(1:nx+1), umid(1:nx+1),hmid(0:nx+1),Amid(0:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
@@ -62,7 +62,7 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  CN         = 1       ! 0: standard, 1: Crank-Nicolson scheme
+  CN         = 0       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 5     ! lenght of the run in nb of time steps
@@ -85,6 +85,11 @@ program ice
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)= 100000   
+
+  if ( CN .eq. 1 .and. IMEX .eq. 0 ) then ! but IMEX can be 1 or 2 and CN=0
+    print *, 'IMEX needs to be 1 or 2 with CN=1'
+    stop
+  endif
 
 !------------------------------------------------------------------------ 
 !     Set first time level depending on restart specifications                
@@ -171,7 +176,7 @@ program ice
      hpts=h
      Apts=A
    
-     if (IMEX .eq. 0) call ice_strength (h, A) ! standard approach no IMEX 
+     if (IMEX .eq. 0) call ice_strength (hpts, Apts) ! standard approach no IMEX 
      if ( CN .eq. 1 ) then
        call ice_strength (hpts, Apts)
        call viscouscoefficient (upts, zeta, eta) ! u is u^k-1
@@ -191,7 +196,13 @@ program ice
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (upts, u, hpts, Apts, h, A) ! advection scheme for tracers
-	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+	  if ( CN .eq. 0 ) then
+	    call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+	  elseif ( CN .eq. 1 ) then
+	    hmid=(h + hpts)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
+	    Amid=(A + Apts)/2d0
+	    call ice_strength (hmid, Amid)
+	  endif  
 	endif
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call Cw_coefficient (u, Cw)            ! u is u^k-1
