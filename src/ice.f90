@@ -60,8 +60,8 @@ program ice
   adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  CN         = 0       ! 0: standard, 1: Crank-Nicolson scheme
+  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  CN         = 1       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 5     ! lenght of the run in nb of time steps

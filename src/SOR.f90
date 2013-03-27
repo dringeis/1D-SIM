@@ -21,7 +21,9 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, B1, residual ,maxerror
+  double precision :: h_at_u, B1, residual ,maxerror, CNconst
+
+  CNconst = 0.5d0
 
   if (p_flag) then
      utp = 0d0              ! initial guess for precond
@@ -41,13 +43,21 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
      
-     D(i) = D(i) + Cw(i)
+     if ( CN .eq. 0 ) then
+      D(i) = D(i) + Cw(i)
+     elseif ( CN .eq. 1 ) then
+      D(i) = D(i) + CNconst*Cw(i)
+     endif
 
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
-
-     D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
+     
+     if ( CN .eq. 0 ) then
+      D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
+     elseif ( CN .eq. 1 ) then
+      D(i) = D(i) + CNconst*(zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
+     endif
 
   enddo
 
@@ -66,10 +76,14 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
-
-        B1 = B1 + ((zeta(i)+eta(i))    *utp(i+1) &
-                +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
-
+	
+	if ( CN .eq. 0 ) then
+	  B1 = B1 + ((zeta(i)+eta(i))    *utp(i+1) &
+		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
+	elseif ( CN .eq. 1 ) then
+	  B1 = B1 + CNconst*((zeta(i)+eta(i))    *utp(i+1) &
+		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
+	endif
 
         residual = B1/D(i) - utp(i)
         utp(i) = utp(i) + omega * residual
