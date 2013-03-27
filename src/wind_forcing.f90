@@ -11,7 +11,7 @@ subroutine wind_forcing (tauair, ts)
      
   integer :: i
   integer, intent(in) :: ts
-  double precision :: speed, period, modulation, pi, apar
+  double precision :: speed, period, modulation, pi, apar, timeCN
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
   speed = 10d0 ! [m/s]
@@ -29,7 +29,8 @@ subroutine wind_forcing (tauair, ts)
        if ( CN .eq. 0 ) then
 	    tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*Deltat/apar)) ! at n
        elseif ( CN .eq. 1 ) then
-	    tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*(Deltat/2d0)/apar)) ! at n-1/2
+	    timeCN = (ts-1)*Deltat + Deltat/2d0
+	    tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*timeCN/apar)) ! at n-1/2
        endif
        
        enddo
@@ -38,7 +39,8 @@ subroutine wind_forcing (tauair, ts)
        if ( CN .eq. 0 ) then
 	    modulation = cos(2*pi*ts*Deltat/period)
        elseif ( CN .eq. 1 ) then
-	    modulation = cos(2*pi*ts*(Deltat/2d0)/period)
+	    timeCN = (ts-1)*Deltat + Deltat/2d0
+	    modulation = cos(2*pi*timeCN/period)
        endif
        
        do i = 2, nx
