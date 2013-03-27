@@ -2,7 +2,7 @@
 !     calculates F = phdu/dt - R 
 !****************************************************************************
 
-subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
+subroutine Fu (utp, upts, R_uk1, Fu_vec)
   use size
   use resolution
   use properties
@@ -14,7 +14,7 @@ subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
   integer :: i
 
   double precision, intent(in)  :: utp(1:nx+1), upts(1:nx+1)
-  double precision, intent(in)  :: Rpts(1:nx+1), R_uk1(1:nx+1)
+  double precision, intent(in)  :: R_uk1(1:nx+1)
 
   double precision, intent(out) :: Fu_vec(1:nx+1)
   double precision :: h_at_u, h_at_u_pts, CNconst, small
@@ -69,7 +69,7 @@ subroutine Fu (utp, upts, Rpts, R_uk1, Fu_vec)
 !     Substract the R vectors
 !------------------------------------------------------------------------
      
-     Fu_vec(i) = Fu_vec(i) - R_uk1(i) - h_at_u * Rpts(i) / h_at_u_pts
+!     Fu_vec(i) = Fu_vec(i) - R_uk1(i) - h_at_u * Rpts(i) / h_at_u_pts
 
   enddo
   endif

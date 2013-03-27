@@ -37,8 +37,7 @@ program ice
   double precision :: u(1:nx+1), upts(1:nx+1), umid(1:nx+1),hmid(0:nx+1),Amid(0:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
-  double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
-  double precision :: Cw(1:nx+1), Rpts(1:nx+1)
+  double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1)
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
@@ -58,10 +57,10 @@ program ice
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
+  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   CN         = 0       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
@@ -203,13 +202,13 @@ program ice
 	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (u, Cw)            ! u is u^k-1
 	  call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, upts, Rpts, R_uk1, F_uk1) 
+	  call Fu (u, upts, R_uk1, F_uk1) 
 	elseif ( CN .eq. 1 ) then
 	  umid=(u + upts)/2d0
 	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umid, Cw)
 	  call calc_R (umid, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (umid, upts, Rpts, R_uk1, F_uk1) ! need Rpts
+	  call Fu (umid, upts, R_uk1, F_uk1)
 	endif
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
@@ -229,7 +228,7 @@ program ice
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
            call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
-                              Rpts, L2norm, k, ts, fgmres_its)
+                              L2norm, k, ts, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 	fgmres_per_ts = fgmres_per_ts + fgmres_its

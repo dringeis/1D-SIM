@@ -1,6 +1,6 @@
 
       subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, upts, tauair, &
-                               Rpts,L2norm, k, ts, fgmres_its)
+                               L2norm, k, ts, fgmres_its)
         use size
         use numerical
         
@@ -12,7 +12,7 @@
 
       double precision, intent(inout) :: uk1(1:nx+1)
       double precision, intent(in)  :: F_uk1(1:nx+1), upts(1:nx+1)
-      double precision, intent(in)  :: Rpts(1:nx+1), L2norm
+      double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
       double precision, intent(in)  :: Cw(1:nx+1)
       double precision, intent(in) :: tauair(1:nx+1) 
@@ -73,7 +73,7 @@
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
          epsilon = 1d-07 ! approximates Jv below
-         call JacfreeVec (wk1, wk2, F_uk1, uk1, upts, tauair, Rpts, epsilon) 
+         call JacfreeVec (wk1, wk2, F_uk1, uk1, upts, tauair, epsilon) 
          GOTO 10
       ENDIF
 
@@ -99,7 +99,7 @@
 	call calc_s( uk1, du, s )
 	uk1 = uk1 + s*du
       elseif (glob .eq. 2) then
-	call linesearch(L2norm, uk1, du, upts, tauair, Rpts)
+	call linesearch(L2norm, uk1, du, upts, tauair)
       endif
 !	 call output_u_and_du ( ts, k, uk1, du )
 
@@ -185,7 +185,7 @@
 
     end subroutine calc_s
 
-   subroutine linesearch(L2norm, u, du, upts, tauair, Rpts)
+   subroutine linesearch(L2norm, u, du, upts, tauair)
 
 !     linesearch method
 
@@ -198,7 +198,7 @@
       integer :: l
 
       double precision, intent(in) :: L2norm, du(1:nx+1)
-      double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1), Rpts(1:nx+1)
+      double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
       double precision, intent(inout) :: u(1:nx+1)
       double precision :: uk1(1:nx+1), b(1:nx+1)         ! b vector
       double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
@@ -221,7 +221,7 @@
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call Cw_coefficient (u, Cw)            ! u is u^k-1
         call calc_R (u, zeta, eta, Cw, tauair, Rtp)
-        call Fu (u, upts, Rpts, Rtp, F_uk1)
+        call Fu (u, upts, Rtp, F_uk1)
 
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
