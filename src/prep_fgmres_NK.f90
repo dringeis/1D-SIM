@@ -1,5 +1,5 @@
 
-      subroutine prepFGMRES_NK(uk1, F_uk1, zeta, eta, Cw, upts, tauair, &
+      subroutine prepFGMRES_NK(uk1, htp, F_uk1, zeta, eta, Cw, upts, tauair, &
                                L2norm, k, ts, fgmres_its)
         use size
         use numerical
@@ -14,7 +14,7 @@
       double precision, intent(in)  :: F_uk1(1:nx+1), upts(1:nx+1)
       double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-      double precision, intent(in)  :: Cw(1:nx+1)
+      double precision, intent(in)  :: Cw(1:nx+1), htp(0:nx+1)
       double precision, intent(in) :: tauair(1:nx+1) 
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
@@ -68,7 +68,7 @@
 
       IF ( icode == 1 ) THEN
 !         CALL identity (wk1,wk2)
-          CALL SOR (wk1, wk2, zeta, eta, Cw, .true., ts)
+          CALL SOR (wk1, wk2, htp, zeta, eta, Cw, .true., ts)
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN

@@ -224,11 +224,16 @@ program ice
 	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
 
         if (solver .eq. 1) then
-           call SOR (b, u, zeta, eta, Cw, p_flag, ts)
+           call SOR (b, u, h, zeta, eta, Cw, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
-           call prepFGMRES_NK(u, F_uk1, zeta, eta, Cw, upts, tauair, &
+	   if ( CN .eq. 0 ) then
+           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, upts, tauair, &
                               L2norm, k, ts, fgmres_its)
+           elseif ( CN .eq. 1 ) then
+           call prepFGMRES_NK(u, hmid, F_uk1, zeta, eta, Cw, upts, tauair, &
+                              L2norm, k, ts, fgmres_its)
+           endif
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 	fgmres_per_ts = fgmres_per_ts + fgmres_its

@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
+subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
   use size
   use resolution
   use properties
@@ -17,13 +17,12 @@ subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
   logical, intent(in) :: p_flag ! T: precond, F: standard solver
   double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), htp(0:nx+1)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, B1, residual ,maxerror, CNconst
+  double precision :: h_at_u, B1, residual ,maxerror
 
-  CNconst = 2d0
   if (p_flag) then
      utp = 0d0              ! initial guess for precond
      maxiteSOR = iteSOR_pre ! nb of ite for precond
@@ -35,12 +34,8 @@ subroutine SOR (b, utp, zeta, eta, Cw, p_flag, ts)
 !    rhoice*h*du/dt : tendency term, advection of momentum is neglected
 !------------------------------------------------------------------------
 
-     h_at_u = ( h(i) + h(i-1) ) / 2d0
-     if ( CN .eq. 0 ) then
-      D(i) = ( rho * h_at_u ) / Deltat 
-     elseif ( CN .eq. 1 ) then
-      D(i) = ( CNconst * rho * h_at_u ) / Deltat 
-     endif
+     h_at_u = ( htp(i) + htp(i-1) ) / 2d0
+     D(i) = ( rho * h_at_u ) / Deltat 
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
