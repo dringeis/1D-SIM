@@ -65,7 +65,7 @@ program ice
   CN         = 1       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 48     ! lenght of the run in nb of time steps
+  nstep      = 5     ! lenght of the run in nb of time steps
   Nmax_OL    = 150
 !  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
@@ -171,9 +171,9 @@ program ice
      hpts=h
      Apts=A
    
-     if (IMEX .eq. 0) call ice_strength () ! standard approach no IMEX 
+     if (IMEX .eq. 0) call ice_strength (h, A) ! standard approach no IMEX 
      if ( CN .eq. 1 ) then
-       call ice_strength ()
+       call ice_strength (hpts, Apts)
        call viscouscoefficient (upts, zeta, eta) ! u is u^k-1
        call Cw_coefficient (upts, Cw)            !
        call calc_R (upts, zeta, eta, Cw, tauair, Rpts)
@@ -191,7 +191,7 @@ program ice
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (upts, u, hpts, Apts, h, A) ! advection scheme for tracers
-	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
         call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call Cw_coefficient (u, Cw)            ! u is u^k-1

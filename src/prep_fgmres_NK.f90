@@ -216,7 +216,7 @@
       
 	if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (upts, u, hpts, Apts, h, A) ! advection scheme for tracers
-	  call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
+	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
         call Cw_coefficient (u, Cw)            ! u is u^k-1
