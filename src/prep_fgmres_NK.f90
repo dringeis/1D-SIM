@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------
 !      Find new iterate without (glob=0) or with globalization (glob=1,2)
 !------------------------------------------------------------------------
-      glob=0
+      glob=2
       if (glob .eq. 0) then
 	uk1 = uk1 + du ! u^k+1 = u^k + du^k
       elseif (glob .eq. 1) then
@@ -202,12 +202,12 @@
       double precision, intent(inout) :: u(1:nx+1)
       double precision :: uk1(1:nx+1), b(1:nx+1)         ! b vector
       double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
-      double precision :: Cw(1:nx+1)
+      double precision :: Cw(1:nx+1), umid(1:nx+1),hmid(0:nx+1), Amid(0:nx+1)
       double precision :: F_uk1(1:nx+1), Rtp(1:nx+1)
       double precision :: L2normnew, beta
 
       uk1 = u
-
+      
       do l=1,4
       
         beta = 1d0/(2d0**(1d0*(l-1)))
@@ -216,12 +216,27 @@
       
 	if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (upts, u, hpts, Apts, h, A) ! advection scheme for tracers
-	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+	  if ( CN .eq. 0 ) then
+	    call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+	  elseif ( CN .eq. 1 ) then
+	    hmid=(h + hpts)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
+	    Amid=(A + Apts)/2d0
+	    call ice_strength (hmid, Amid)
+	  endif  
 	endif
-	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-        call Cw_coefficient (u, Cw)            ! u is u^k-1
-        call calc_R (u, zeta, eta, Cw, tauair, Rtp)
-        call Fu (u, upts, Rtp, F_uk1)
+	
+	if ( CN .eq. 0 ) then
+	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (u, Cw)            ! u is u^k-1
+	  call calc_R (u, zeta, eta, Cw, tauair, Rtp)
+	  call Fu (u, upts, h, Rtp, F_uk1) 
+	elseif ( CN .eq. 1 ) then
+	  umid=(u + upts)/2d0
+	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (umid, Cw)
+	  call calc_R (umid, zeta, eta, Cw, tauair, Rtp)
+	  call Fu (u, upts, hmid, Rtp, F_uk1)
+	endif
 
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
