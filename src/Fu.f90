@@ -2,7 +2,7 @@
 !     calculates F = phdu/dt - R 
 !****************************************************************************
 
-subroutine Fu (utp, upts, R_uk1, Fu_vec)
+subroutine Fu (utp, upts, htp, R_uk1, Fu_vec)
   use size
   use resolution
   use properties
@@ -13,19 +13,14 @@ subroutine Fu (utp, upts, R_uk1, Fu_vec)
       
   integer :: i
 
-  double precision, intent(in)  :: utp(1:nx+1), upts(1:nx+1)
+  double precision, intent(in)  :: utp(1:nx+1), upts(1:nx+1),htp(0:nx+1)
   double precision, intent(in)  :: R_uk1(1:nx+1)
 
   double precision, intent(out) :: Fu_vec(1:nx+1)
-  double precision :: h_at_u, h_at_u_pts, CNconst, small
-
-  CNconst = 2d0	
-  small = 1d-15
+  double precision :: h_at_u
 
   Fu_vec(1)    = 0d0
   Fu_vec(nx+1) = 0d0
-
-  if ( CN .eq. 0 ) then
 
     do i = 2, nx
 
@@ -35,7 +30,7 @@ subroutine Fu (utp, upts, R_uk1, Fu_vec)
 !    rhoice*h*du/dt : tendency term, advection of momentum is neglected
 !------------------------------------------------------------------------
 
-      h_at_u = ( h(i) + h(i-1) ) / 2d0
+      h_at_u = ( htp(i) + htp(i-1) ) / 2d0
       Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
 
 !------------------------------------------------------------------------
@@ -45,34 +40,6 @@ subroutine Fu (utp, upts, R_uk1, Fu_vec)
       Fu_vec(i) = Fu_vec(i) - R_uk1(i)
 
     enddo
-
-  elseif ( CN .eq. 1 ) then
-
-    do i = 2, nx
-
-      Fu_vec(i) = 0.0d0
-
-!------------------------------------------------------------------------
-!    2*rhoice*h*du/dt : tendency term, advection of momentum is neglected
-!
-!    2 is hard coded here....watchout (voir p. 42 EC-4)
-!------------------------------------------------------------------------
-
-     h_at_u = ( h(i) + h(i-1) ) / 2d0
-     h_at_u_pts = ( hpts(i) + hpts(i-1) ) / 2d0
-     h_at_u_pts = h_at_u_pts + small !to avoid div by 0
-     !h_at_u_pts = max ( h_at_u_pts, 1d-25 ) !to avoid div by 0
-
-     Fu_vec(i) = Fu_vec(i) + CNconst*( rho * h_at_u * (utp(i)-upts(i)) ) / Deltat
-     
-!------------------------------------------------------------------------
-!     Substract the R vectors
-!------------------------------------------------------------------------
-     
-!     Fu_vec(i) = Fu_vec(i) - R_uk1(i) - h_at_u * Rpts(i) / h_at_u_pts
-
-  enddo
-  endif
 
   return
 end subroutine Fu

@@ -57,10 +57,10 @@ program ice
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
+  adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
+  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   CN         = 0       ! 0: standard, 1: Crank-Nicolson scheme
 
   Deltat     = 1800d0   ! time step [s]
@@ -202,13 +202,13 @@ program ice
 	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (u, Cw)            ! u is u^k-1
 	  call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, upts, R_uk1, F_uk1) 
+	  call Fu (u, upts, h, R_uk1, F_uk1) 
 	elseif ( CN .eq. 1 ) then
 	  umid=(u + upts)/2d0
 	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umid, Cw)
 	  call calc_R (umid, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (umid, upts, R_uk1, F_uk1)
+	  call Fu (u, upts, hmid, R_uk1, F_uk1)
 	endif
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  

@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------
 !      Find new iterate without (glob=0) or with globalization (glob=1,2)
 !------------------------------------------------------------------------
-      glob=2
+      glob=0
       if (glob .eq. 0) then
 	uk1 = uk1 + du ! u^k+1 = u^k + du^k
       elseif (glob .eq. 1) then

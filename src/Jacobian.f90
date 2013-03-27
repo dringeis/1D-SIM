@@ -11,8 +11,8 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
   double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
-  double precision :: zeta(0:nx+1), eta(0:nx+1)
-  double precision :: Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
+  double precision :: zeta(0:nx+1), eta(0:nx+1), hmidp(0:nx+1), Amidp(0:nx+1) ! p = pos
+  double precision :: umidp(1:nx+1), Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
   double precision :: upos(1:nx+1)!, b(1:nx+1)
 
 !  double precision xpos(nvar), xneg(nvar), x(nvar),rhs(nvar)
@@ -27,15 +27,30 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 
   enddo
         
-  if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
-    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
-    call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+  
+  if (IMEX .eq. 2) then ! IMEX method 1 or 2
+     call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+     if ( CN .eq. 0 ) then
+	call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+     elseif ( CN .eq. 1 ) then
+	hmidp=(h + hpts)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
+	Amidp=(A + Apts)/2d0
+	call ice_strength (hmidp, Amidp)
+     endif  
   endif
   
-  call viscouscoefficient (upos, zeta, eta)
-  call Cw_coefficient (upos, Cw)
-  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
-  call Fu (upos, upts, Rpos, Fpos)
+  if ( CN .eq. 0 ) then
+	  call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (upos, Cw)            ! u is u^k-1
+	  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
+	  call Fu (upos, upts, h, Rpos, Fpos) 
+  elseif ( CN .eq. 1 ) then
+	  umidp=(upos + upts)/2d0
+	  call viscouscoefficient (umidp, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (umidp, Cw)
+	  call calc_R (umidp, zeta, eta, Cw, tauair, Rpos)
+	  call Fu (upos, upts, hmidp, Rpos, Fpos)
+  endif
 
   do i=1, nx+1
 
