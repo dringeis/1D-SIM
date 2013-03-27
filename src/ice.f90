@@ -177,14 +177,8 @@ program ice
      Apts=A
    
      if (IMEX .eq. 0) call ice_strength (hpts, Apts) ! standard approach no IMEX 
-     if ( CN .eq. 1 ) then
-       call ice_strength (hpts, Apts)
-       call viscouscoefficient (upts, zeta, eta) ! u is u^k-1
-       call Cw_coefficient (upts, Cw)            !
-       call calc_R (upts, zeta, eta, Cw, tauair, Rpts)
-     endif
      
-!------- Create forcing vector b (independent of u) ----------------------
+!------- get wind forcing (independent of u) -----------------------------
 
      call wind_forcing (tauair, ts)
 
@@ -204,10 +198,19 @@ program ice
 	    call ice_strength (hmid, Amid)
 	  endif  
 	endif
-        call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-        call Cw_coefficient (u, Cw)            ! u is u^k-1
-        call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-        call Fu (u, upts, Rpts, R_uk1, F_uk1) ! need Rpts
+	
+	if ( CN .eq. 0 ) then
+	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (u, Cw)            ! u is u^k-1
+	  call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
+	  call Fu (u, upts, Rpts, R_uk1, F_uk1) 
+	elseif ( CN .eq. 1 ) then
+	  umid=(u + upts)/2d0
+	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
+	  call Cw_coefficient (umid, Cw)
+	  call calc_R (umid, zeta, eta, Cw, tauair, R_uk1)
+	  call Fu (umid, upts, Rpts, R_uk1, F_uk1) ! need Rpts
+	endif
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
