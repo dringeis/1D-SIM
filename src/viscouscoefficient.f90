@@ -28,6 +28,8 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
      if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
 	P_half(i) = zeta(i)*deno 
+     else
+	P_half(i) = Pp_half(i)
      endif
 
   enddo
