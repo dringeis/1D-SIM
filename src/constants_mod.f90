@@ -2,13 +2,10 @@ MODULE rheology
 !
 ! C : ice strength parameter
 ! Pstar : ice compression strength parameter
-! zetamin : minimum bulk viscosity 
 ! ell_2 : 1/ellipticity**2
-! zmax_par : capping value of zeta 
-! zmax_par_1 : 1/zmax_par
   IMPLICIT NONE
   DOUBLE PRECISION :: C, Pstar, alpha, alpha2
-  DOUBLE PRECISION :: zetamin, e_2, zmax_par, small2
+  DOUBLE PRECISION :: e_2, small2
 
 END MODULE rheology
 

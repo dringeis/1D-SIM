@@ -30,7 +30,7 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
      div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
      sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
      sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/P_half(i) - 0.5d0
-     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
+!     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
   write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &

@@ -57,6 +57,7 @@ program ice
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
+  regularization = 'tanh'
   adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
@@ -142,8 +143,6 @@ program ice
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
   alpha2     = 1d0 + e_2
-  zetamin    = 0d0          ! minimum bulk viscosity 
-  zmax_par   = 5d08         ! 2x2.5d08 (Hib, 1979). p is p/2 in code  
 
   Cdair      = 1.2d-03      ! air-ice drag coeffient 
   Cdwater    = 5.5d-03      ! water-ice drag coeffient

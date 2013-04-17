@@ -11,18 +11,27 @@ subroutine viscouscoefficient(utp, zeta, eta)
   
   double precision, intent(in) :: utp(1:nx+1)
   double precision, intent(out):: zeta(0:nx+1), eta(0:nx+1)
-  double precision :: dudx, deno
+  double precision :: dudx, deno, denomin
+  
+  denomin=2d-09
 
   do i = 1, nx ! for tracer points
      
      dudx = ( utp(i+1) - utp(i) ) / Deltax
 
+    if ( regularization .eq. 'tanh' ) then
+
      deno = alpha*sqrt( (dudx)**2d0 + small2 )
 !     deno = alpha*(abs(dudx))
 !     deno = max( deno, 1d-30 )
-     
-     zeta(i) = zmax_par * Pp_half(i) * (tanh(1/(zmax_par*deno))) &
-          + zetamin
+     zeta(i) = (Pp_half(i)/denomin)*tanh(denomin*(1d0/deno))
+
+    elseif ( regularization .eq. 'Kreyscher' ) then
+
+      deno = alpha*sqrt( (dudx)**2d0)
+      zeta(i) = Pp_half(i) / ( deno + denomin )
+
+    endif
 
      eta(i)  = zeta(i) * e_2
 
