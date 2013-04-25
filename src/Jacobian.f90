@@ -1,4 +1,4 @@
-subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, tauair, epsilon)
+subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, un2, tauair, epsilon)
 
   use size
   use global_var
@@ -8,7 +8,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, tauair, epsilon)
   
   integer :: i
   double precision, intent(in) :: v(1:nx+1), F_uk1(1:nx+1), uk1(1:nx+1)
-  double precision, intent(in) :: un1(1:nx+1), tauair(1:nx+1)
+  double precision, intent(in) :: un1(1:nx+1), un2(1:nx+1), tauair(1:nx+1)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
   double precision :: zeta(0:nx+1), eta(0:nx+1), hmidp(0:nx+1), Amidp(0:nx+1) ! p = pos
@@ -43,13 +43,13 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, tauair, epsilon)
 	  call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (upos, Cw)            ! u is u^k-1
 	  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, un1, h, Rpos, Fpos) 
+	  call Fu (upos, un1, un2, h, Rpos, Fpos) 
   elseif ( CN .eq. 1 ) then
 	  umidp=(upos + un1)/2d0
 	  call viscouscoefficient (umidp, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umidp, Cw)
 	  call calc_R (umidp, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, un1, hmidp, Rpos, Fpos)
+	  call Fu (upos, un1, un2, hmidp, Rpos, Fpos)
   endif
 
   do i=1, nx+1

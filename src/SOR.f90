@@ -37,7 +37,11 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
 !------------------------------------------------------------------------
 
      h_at_u = ( htp(i) + htp(i-1) ) / 2d0
-     D(i) = ( rho * h_at_u ) / Deltat 
+     if ( AB .eq. 0 ) then
+      D(i) = ( rho * h_at_u ) / Deltat 
+     elseif ( AB .eq. 1 ) then 
+      D(i) = ( 3d0 * rho * h_at_u ) / ( 2d0*Deltat )
+     endif
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
@@ -171,7 +175,7 @@ end subroutine SOR_A
 ! forms elements of J and solves Jdu=-F with the SOR method
 !****************************************************************************
 
-subroutine SOR_J (utp, Futp, zeta, eta, Cw, un1, tauair, k, ts)
+subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
   use size
   use resolution
   use properties
@@ -183,7 +187,7 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, un1, tauair, k, ts)
   integer :: i, l
   integer, intent(in) :: k,ts
   double precision, intent(inout) :: utp(1:nx+1) 
-  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1), un1(1:nx+1)
+  double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1), upts(1:nx+1)
   double precision, intent(in)  :: tauair(1:nx+1), Cw(1:nx+1)
   double precision, intent(in)  :: Futp(1:nx+1)
   double precision              :: du(1:nx+1)
@@ -191,7 +195,7 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, un1, tauair, k, ts)
   double precision :: B1, residual ,maxerror
   double precision :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
 
-  call formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
+  call formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
 
   du = 0d0
 

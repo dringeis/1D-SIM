@@ -1,5 +1,5 @@
 
-      subroutine prepFGMRES_NK(uk1, htp, F_uk1, zeta, eta, Cw, un1, tauair, &
+      subroutine prepFGMRES_NK(uk1, htp, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
                                L2norm, k, ts, fgmres_its)
         use size
         use numerical
@@ -11,7 +11,7 @@
       integer, intent(out) :: fgmres_its
 
       double precision, intent(inout) :: uk1(1:nx+1)
-      double precision, intent(in)  :: F_uk1(1:nx+1), un1(1:nx+1)
+      double precision, intent(in)  :: F_uk1(1:nx+1), un1(1:nx+1), un2(1:nx+1)
       double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
       double precision, intent(in)  :: Cw(1:nx+1), htp(0:nx+1)
@@ -73,7 +73,7 @@
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
          epsilon = 1d-07 ! approximates Jv below
-         call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, tauair, epsilon) 
+         call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, un2, tauair, epsilon) 
          GOTO 10
       ENDIF
 
@@ -99,7 +99,7 @@
 	call calc_s( uk1, du, s )
 	uk1 = uk1 + s*du
       elseif (glob .eq. 2) then
-	call linesearch(L2norm, uk1, du, un1, tauair)
+	call linesearch(L2norm, uk1, du, un1, un2, tauair)
       endif
 !	 call output_u_and_du ( ts, k, uk1, du )
 
@@ -185,7 +185,7 @@
 
     end subroutine calc_s
 
-   subroutine linesearch(L2norm, u, du, un1, tauair)
+   subroutine linesearch(L2norm, u, du, un1, un2, tauair)
 
 !     linesearch method
 
@@ -198,7 +198,7 @@
       integer :: l
 
       double precision, intent(in) :: L2norm, du(1:nx+1)
-      double precision, intent(in) :: un1(1:nx+1), tauair(1:nx+1)
+      double precision, intent(in) :: un1(1:nx+1), un2(1:nx+1), tauair(1:nx+1)
       double precision, intent(inout) :: u(1:nx+1)
       double precision :: uk1(1:nx+1), b(1:nx+1)         ! b vector
       double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1)
@@ -229,13 +229,13 @@
 	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (u, Cw)            ! u is u^k-1
 	  call calc_R (u, zeta, eta, Cw, tauair, Rtp)
-	  call Fu (u, un1, h, Rtp, F_uk1) 
+	  call Fu (u, un1, un2, h, Rtp, F_uk1) 
 	elseif ( CN .eq. 1 ) then
 	  umid=(u + un1)/2d0
 	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umid, Cw)
 	  call calc_R (umid, zeta, eta, Cw, tauair, Rtp)
-	  call Fu (u, un1, hmid, Rtp, F_uk1)
+	  call Fu (u, un1, un2, hmid, Rtp, F_uk1)
 	endif
 
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))

@@ -34,7 +34,8 @@ program ice
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
-  double precision :: u(1:nx+1), un1(1:nx+1), umid(1:nx+1),hmid(0:nx+1),Amid(0:nx+1)
+  double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
+  double precision :: umid(1:nx+1),hmid(0:nx+1),Amid(0:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1)
@@ -62,7 +63,8 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  CN         = 0       ! 0: standard, 1: Crank-Nicolson scheme
+  CN         = 1       ! 0: standard, 1: Crank-Nicolson scheme
+  AB         = 0       ! 0: standard, 1: Adams-Bashforth scheme
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 5     ! lenght of the run in nb of time steps
@@ -170,6 +172,8 @@ program ice
      call cpu_time(timecrap)
      call cpu_time(time1)
 
+     if ( AB .eq. 1 ) un2 = un1 ! Adams-Bashforth needs u at 3 time levels
+
      un1=u
      hn1=h
      An1=A
@@ -201,13 +205,13 @@ program ice
 	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (u, Cw)            ! u is u^k-1
 	  call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, un1, h, R_uk1, F_uk1) 
+	  call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 	elseif ( CN .eq. 1 ) then
 	  umid=(u + un1)/2d0
 	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umid, Cw)
 	  call calc_R (umid, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, un1, hmid, R_uk1, F_uk1)
+	  call Fu (u, un1, un2, hmid, R_uk1, F_uk1)
 	endif
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
@@ -227,10 +231,10 @@ program ice
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
 	   if ( CN .eq. 0 ) then
-           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, un1, tauair, &
+           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
                               L2norm, k, ts, fgmres_its)
            elseif ( CN .eq. 1 ) then
-           call prepFGMRES_NK(u, hmid, F_uk1, zeta, eta, Cw, un1, tauair, &
+           call prepFGMRES_NK(u, hmid, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
                               L2norm, k, ts, fgmres_its)
            endif
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
