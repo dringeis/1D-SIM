@@ -33,20 +33,20 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
 !     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,ts,expnb
+  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_AB",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,CN,AB,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,ts,expnb
+  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_AB",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,CN,AB,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,ts,expnb
+  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_AB",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,CN,AB,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,ts,expnb
+  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_AB",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
+		    IMEX, adv,CN,AB,ts,expnb
   open (13, file = filename, status = 'unknown')
 
 !  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &

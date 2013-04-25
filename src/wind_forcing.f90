@@ -26,7 +26,7 @@ subroutine wind_forcing (tauair, ts)
 
        do i = 2, nx ! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
 !          tauair(i) = Cda * (speed)**2d0
-       if ( CN .eq. 0 ) then
+       if ( CN .eq. 0 ) then 
 	    tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*Deltat/apar)) ! at n
        elseif ( CN .eq. 1 ) then
 	    timeCN = (ts-1)*Deltat + Deltat/2d0
