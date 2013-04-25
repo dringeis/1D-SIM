@@ -1,4 +1,4 @@
-subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
+subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, tauair, epsilon)
 
   use size
   use global_var
@@ -8,7 +8,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
   
   integer :: i
   double precision, intent(in) :: v(1:nx+1), F_uk1(1:nx+1), uk1(1:nx+1)
-  double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
+  double precision, intent(in) :: un1(1:nx+1), tauair(1:nx+1)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
   double precision :: zeta(0:nx+1), eta(0:nx+1), hmidp(0:nx+1), Amidp(0:nx+1) ! p = pos
@@ -29,12 +29,12 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
         
   
   if (IMEX .eq. 2) then ! IMEX method 1 or 2
-     call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+     call advection (un1, upos, hn1, An1, h, A) ! advection scheme for tracers
      if ( CN .eq. 0 ) then
 	call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
      elseif ( CN .eq. 1 ) then
-	hmidp=(h + hpts)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
-	Amidp=(A + Apts)/2d0
+	hmidp=(h + hn1)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
+	Amidp=(A + An1)/2d0
 	call ice_strength (hmidp, Amidp)
      endif  
   endif
@@ -43,13 +43,13 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 	  call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (upos, Cw)            ! u is u^k-1
 	  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, upts, h, Rpos, Fpos) 
+	  call Fu (upos, un1, h, Rpos, Fpos) 
   elseif ( CN .eq. 1 ) then
-	  umidp=(upos + upts)/2d0
+	  umidp=(upos + un1)/2d0
 	  call viscouscoefficient (umidp, zeta, eta) ! u is u^k-1
 	  call Cw_coefficient (umidp, Cw)
 	  call calc_R (umidp, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, upts, hmidp, Rpos, Fpos)
+	  call Fu (upos, un1, hmidp, Rpos, Fpos)
   endif
 
   do i=1, nx+1
@@ -62,7 +62,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, upts, tauair, epsilon)
 end subroutine JacfreeVec
       
       
-subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
+subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
 
   use size
   use global_var
@@ -76,7 +76,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   integer :: i, Dt, Dx, adv
   
   double precision, intent(in) :: Futp(1:nx+1), utp(1:nx+1)
-  double precision, intent(in) :: upts(1:nx+1), tauair(1:nx+1)
+  double precision, intent(in) :: un1(1:nx+1), tauair(1:nx+1)
   double precision :: zeta(0:nx+1), eta(0:nx+1), epsilon
   double precision :: Cw(1:nx+1), Fpos(1:nx+1)
   double precision :: uele(1:nx+1), upos(1:nx+1), b(1:nx+1)
@@ -109,7 +109,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   upos = utp + uele
   
   if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
-    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call advection (un1, upos, hn1, An1, h, A) ! advection scheme for tracers
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)
@@ -130,7 +130,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   upos = utp + uele
   
   if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
-    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call advection (un1, upos, hn1, An1, h, A) ! advection scheme for tracers
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)
@@ -148,7 +148,7 @@ subroutine formJacobian (utp, Futp, upts, tauair, ts, k, Jleft, J, Jright)
   upos = utp + uele
   
   if (IMEX .eq. 2) then ! IMEX method 2 only (WATCHOUT hpos for precond...)
-    call advection (upts, upos, hpts, Apts, h, A) ! advection scheme for tracers
+    call advection (un1, upos, hn1, An1, h, A) ! advection scheme for tracers
     call ice_strength () ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   call viscouscoefficient (upos, zeta, eta)

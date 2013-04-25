@@ -9,8 +9,8 @@ use size
   IMPLICIT NONE
   DOUBLE PRECISION :: h(0:nx+1)
   DOUBLE PRECISION :: A(0:nx+1)
-  DOUBLE PRECISION :: hpts(0:nx+1)
-  DOUBLE PRECISION :: Apts(0:nx+1)
+  DOUBLE PRECISION :: hn1(0:nx+1)
+  DOUBLE PRECISION :: An1(0:nx+1)
   DOUBLE PRECISION :: Pp_half(0:nx+1)
   DOUBLE PRECISION :: P_half(0:nx+1)
 
