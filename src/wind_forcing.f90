@@ -11,7 +11,7 @@ subroutine wind_forcing (tauair, ts)
      
   integer :: i
   integer, intent(in) :: ts
-  double precision :: speed, period, modulation, pi, apar, timeCN
+  double precision :: speed, period, modulation, pi, apar
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
   speed = 10d0 ! [m/s]
