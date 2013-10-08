@@ -31,9 +31,9 @@ subroutine Fu (utp, un1, un2, htp, R_uk1, Fu_vec)
 !------------------------------------------------------------------------
 
       h_at_u = ( htp(i) + htp(i-1) ) / 2d0
-      if ( AB .eq. 0 ) then
+      if ( BDF2 .eq. 0 ) then
 	Fu_vec(i) = Fu_vec(i) + ( rho * h_at_u * (utp(i)-un1(i)) ) / Deltat
-      elseif ( AB .eq. 1 ) then
+      elseif ( BDF2 .eq. 1 ) then
 	Fu_vec(i) = Fu_vec(i) + & 
 	         (rho * h_at_u / (2d0*Deltat)) * ( 3d0*(utp(i)-un1(i)) - (un1(i)-un2(i)) )
       endif

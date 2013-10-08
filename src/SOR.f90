@@ -37,9 +37,9 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
 !------------------------------------------------------------------------
 
      h_at_u = ( htp(i) + htp(i-1) ) / 2d0
-     if ( AB .eq. 0 ) then
+     if ( BDF2 .eq. 0 ) then
       D(i) = ( rho * h_at_u ) / Deltat 
-     elseif ( AB .eq. 1 ) then 
+     elseif ( BDF2 .eq. 1 ) then 
       D(i) = ( 3d0 * rho * h_at_u ) / ( 2d0*Deltat )
      endif
 
