@@ -30,27 +30,13 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, un2, tauair, epsilon)
   
   if (IMEX .eq. 2) then ! IMEX method 1 or 2
      call advection (un1, upos, hn1, An1, h, A) ! advection scheme for tracers
-     if ( CN .eq. 0 ) then
-	call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
-     elseif ( CN .eq. 1 ) then
-	hmidp=(h + hn1)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
-	Amidp=(A + An1)/2d0
-	call ice_strength (hmidp, Amidp)
-     endif  
+     call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
   endif
   
-  if ( CN .eq. 0 ) then
-	  call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
-	  call Cw_coefficient (upos, Cw)            ! u is u^k-1
-	  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, un1, un2, h, Rpos, Fpos) 
-  elseif ( CN .eq. 1 ) then
-	  umidp=(upos + un1)/2d0
-	  call viscouscoefficient (umidp, zeta, eta) ! u is u^k-1
-	  call Cw_coefficient (umidp, Cw)
-	  call calc_R (umidp, zeta, eta, Cw, tauair, Rpos)
-	  call Fu (upos, un1, un2, hmidp, Rpos, Fpos)
-  endif
+  call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
+  call Cw_coefficient (upos, Cw)            ! u is u^k-1
+  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
+  call Fu (upos, un1, un2, h, Rpos, Fpos) 
 
   do i=1, nx+1
 

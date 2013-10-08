@@ -187,27 +187,13 @@ program ice
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (un1, u, hn1, An1, h, A) ! advection scheme for tracers
-	  if ( CN .eq. 0 ) then
-	    call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
-	  elseif ( CN .eq. 1 ) then
-	    hmid=(h + hn1)/2d0 ! on pourait avoir h=(h+hpts)/2 ???
-	    Amid=(A + An1)/2d0
-	    call ice_strength (hmid, Amid)
-	  endif  
+	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
 	endif
 	
-	if ( CN .eq. 0 ) then
-	  call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-	  call Cw_coefficient (u, Cw)            ! u is u^k-1
-	  call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, un1, un2, h, R_uk1, F_uk1) 
-	elseif ( CN .eq. 1 ) then
-	  umid=(u + un1)/2d0
-	  call viscouscoefficient (umid, zeta, eta) ! u is u^k-1
-	  call Cw_coefficient (umid, Cw)
-	  call calc_R (umid, zeta, eta, Cw, tauair, R_uk1)
-	  call Fu (u, un1, un2, hmid, R_uk1, F_uk1)
-	endif
+	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+	call Cw_coefficient (u, Cw)            ! u is u^k-1
+	call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
+	call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
 !	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
@@ -225,13 +211,8 @@ program ice
            call SOR (b, u, h, zeta, eta, Cw, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
-	   if ( CN .eq. 0 ) then
            call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
                               L2norm, k, ts, fgmres_its)
-           elseif ( CN .eq. 1 ) then
-           call prepFGMRES_NK(u, hmid, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
-                              L2norm, k, ts, fgmres_its)
-           endif
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
 	fgmres_per_ts = fgmres_per_ts + fgmres_its
