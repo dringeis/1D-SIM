@@ -33,20 +33,20 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
 !     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,BDF2,ts,expnb
+  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,IMEX, adv,BDF2,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,BDF2,ts,expnb
+  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,IMEX, adv,BDF2,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,BDF2,ts,expnb
+  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,IMEX, adv,BDF2,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt,Dx, &
-		    IMEX, adv,CN,BDF2,ts,expnb
+  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
 !  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
@@ -106,8 +106,8 @@ subroutine output_residual(ts, k, expnb, F)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
   
-  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt,Dx,&
-		    IMEX,adv,CN,ts,k,expnb
+  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt, &
+		    Dx,IMEX,adv,BDF2,ts,k,expnb
   open (11, file = filename, status = 'unknown')
   
   write(11,10) ( F(i), i = 1, nx+1 )
@@ -138,8 +138,8 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,".",i2.2)') Dt,Dx,&
-	 IMEX,adv,CN,expnb
+  write (filename, '("output/Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt, &
+	 Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
   
   write(10,10) ts,k-1,fgmres_per_ts
@@ -171,8 +171,8 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,".",i2.2)') Dt,Dx,&
-	 IMEX,adv,CN,expnb
+  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
+	 Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
   
   write(10,10) ts,L2norm
@@ -207,12 +207,12 @@ subroutine output_u_and_du ( ts, k, utp, du )
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
-		    IMEX, adv,CN,ts,k
+  write (filename, '("output/uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,&
+		    Dx,IMEX, adv,BDF2,ts,k
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_CN",i1.1"_ts",i4.4,"_k",i3.3,".dat")') Dt,Dx, &
-		    IMEX, adv,CN,ts,k
+  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1"_ts",i4.4,"_k",i3.3,".dat")') Dt,&
+		    Dx,IMEX, adv,BDF2,ts,k
   open (11, file = filename, status = 'unknown')
   
   write(10,10) ( utp(i),       i = 1, nx+1 )
