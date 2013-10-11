@@ -11,8 +11,8 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, un2, tauair, epsilon)
   double precision, intent(in) :: un1(1:nx+1), un2(1:nx+1), tauair(1:nx+1)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
-  double precision :: zeta(0:nx+1), eta(0:nx+1), hmidp(0:nx+1), Amidp(0:nx+1) ! p = pos
-  double precision :: umidp(1:nx+1), Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
+  double precision :: zeta(0:nx+1), eta(0:nx+1)
+  double precision :: Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
   double precision :: upos(1:nx+1)!, b(1:nx+1)
 
 !  double precision xpos(nvar), xneg(nvar), x(nvar),rhs(nvar)

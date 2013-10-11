@@ -35,14 +35,13 @@ program ice
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
-  double precision :: umid(1:nx+1),hmid(0:nx+1),Amid(0:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1)
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
-  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
+!  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
