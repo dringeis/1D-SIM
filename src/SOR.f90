@@ -56,7 +56,6 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
   enddo
 
   do l = 1, maxiteSOR
-     
      maxerror = 0d0
 
      do i = 2, nx
@@ -88,7 +87,7 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
      if (.not. p_flag) then
         if ( maxerror .lt. tol_SOR ) exit
      endif
-
+    
   enddo
 
   return

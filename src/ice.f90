@@ -63,7 +63,7 @@ program ice
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
-  BDF2       = 0       ! 0: standard, 1: Adams-Bashforth scheme
+  BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
 
   Deltat     = 1800d0   ! time step [s]
   nstep      = 100     ! lenght of the run in nb of time steps
@@ -166,7 +166,7 @@ program ice
      call cpu_time(timecrap)
      call cpu_time(time1)
 
-     if ( BDF2 .eq. 1 ) un2 = un1 ! Adams-Bashforth needs u at 3 time levels
+     if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
 
      un1=u
      hn1=h
@@ -207,6 +207,8 @@ program ice
 	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
 
         if (solver .eq. 1) then
+           print *, 'L2-norm after k ite=', ts, k-1, L2norm
+           call bvect(tauair, un1, b)
            call SOR (b, u, h, zeta, eta, Cw, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
