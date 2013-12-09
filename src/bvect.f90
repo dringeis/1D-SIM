@@ -23,9 +23,6 @@ subroutine bvect(tauair, un1, b)
 
   enddo
    
-  b(21)=b(21)-0.2d0
-  print *, 'cic', tauair(21), b(20), b(21)
-
   return
 end subroutine bvect
     

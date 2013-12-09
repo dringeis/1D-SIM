@@ -65,18 +65,18 @@ program ice
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
 
   Deltat     = 1800d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
+  nstep      = 10     ! lenght of the run in nb of time steps
   Nmax_OL    = 150
 !  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
 
   omega      = 1.5d0    ! relax parameter for SOR
-  tol_SOR    = 1d-06    ! tol for SOR solver
+  tol_SOR    = 1d-10    ! tol for SOR solver
   maxiteSOR  = 10000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 900      ! max nb of ite for GMRES
-  gamma_nl = 1d-10
+  gamma_nl = 1d-08
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
