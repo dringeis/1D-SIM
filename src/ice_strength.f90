@@ -2,7 +2,6 @@ subroutine ice_strength ( hin, Ain )
   use size
   use rheology
   use global_var
-  use option
 
   implicit none
 
@@ -23,10 +22,6 @@ subroutine ice_strength ( hin, Ain )
 !------- set p = 0 at open boundaries for proper care of open bc --------------
 !                    see p.1241-1242 for details              
 !--- set dh/dx, dA/dx = 0 at the outside cell when there is an open bc --------
-
-  if (.not. rep_closure) then
-    P_half=Pp_half 
-  endif
 
   return
 end subroutine ice_strength

@@ -186,7 +186,7 @@ program ice
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
 	  call advection (un1, u, hn1, An1, h, A) ! advection scheme for tracers
-	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength
+	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
 	endif
 	
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
