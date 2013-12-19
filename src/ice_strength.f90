@@ -12,9 +12,12 @@ subroutine ice_strength ( hin, Ain )
 
   Pp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
   Pp_half(nx+1) = 0d0
+  Tp_half(0)    = 0d0 ! ! sea ice pressure / 2d0
+  Tp_half(nx+1) = 0d0
 
   do i = 1, nx
      Pp_half(i) = 0.5d0 * Pstar * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
+     Tp_half(i) = Tfrac*Pp_half(i)
   enddo
 
 !------- set p = 0 at open boundaries for proper care of open bc --------------

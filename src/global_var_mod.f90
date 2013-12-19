@@ -12,6 +12,7 @@ use size
   DOUBLE PRECISION :: hn1(0:nx+1)
   DOUBLE PRECISION :: An1(0:nx+1)
   DOUBLE PRECISION :: Pp_half(0:nx+1)
+  DOUBLE PRECISION :: Tp_half(0:nx+1)
   DOUBLE PRECISION :: P_half(0:nx+1)
 
 END MODULE global_var

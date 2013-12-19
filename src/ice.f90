@@ -138,6 +138,7 @@ program ice
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
   alpha2     = 1d0 + e_2
+  Tfrac	     = 0d0          ! T = Tfrac * P (1.0 in Konig and Holland, 2010)
 
   Cdair      = 1.2d-03      ! air-ice drag coeffient 
   Cdwater    = 5.5d-03      ! water-ice drag coeffient

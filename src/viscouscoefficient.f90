@@ -21,31 +21,32 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
     if ( regularization .eq. 'tanh' ) then
 
-     deno = alpha*sqrt( (dudx)**2d0 + small2 )
+     deno = alpha*sqrt( (dudx)**2d0 + small2 ) ! small2 is there to avoid div by zero
 !     deno = alpha*(abs(dudx))
 !     deno = max( deno, 1d-30 )
-     zeta(i) = (Pp_half(i)/denomin)*tanh(denomin*(1d0/deno))
+     zeta(i) = ((Pp_half(i)+Tp_half(i))/denomin)*tanh(denomin*(1d0/deno))
 
     elseif ( regularization .eq. 'Kreyscher' ) then
 
       deno = alpha*sqrt( (dudx)**2d0)
-      zeta(i) = Pp_half(i) / ( deno + denomin )
+      zeta(i) = (Pp_half(i)+Tp_half(i)) / ( deno + denomin )
 
     endif
 
      eta(i)  = zeta(i) * e_2
-
+! wowowo verify rep_closure
      if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
-	P_half(i) = zeta(i)*deno 
+!	P_half(i) = zeta(i)*deno 
+	P_half(i) = (Pp_half(i)-Tp_half(i)) * ( deno / denomin ) * tanh(denomin*(1d0/deno))
      else
-	P_half(i) = Pp_half(i)
+	P_half(i) = Pp_half(i)-Tp_half(i) ! P_half includes tensile strength
      endif
 
   enddo
 
   if (linear_viscous) then
      zeta = 1d08
-     eta  = e_2 * 1d08
+     eta  = e_2 * zeta
   endif
 
   return
