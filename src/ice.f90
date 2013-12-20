@@ -70,7 +70,9 @@ program ice
 !  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
-
+  N_sub = 900
+  Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
+  
   omega      = 1.5d0    ! relax parameter for SOR
   tol_SOR    = 1d-10    ! tol for SOR solver
   maxiteSOR  = 10000     ! max nb of ite for SOR
