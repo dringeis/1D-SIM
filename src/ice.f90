@@ -60,10 +60,10 @@ program ice
   regularization = 'tanh'
   adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
-  solver     = 2        ! 1: Picard+SOR, 2: JFNK
+  solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
-
+  
   Deltat     = 1800d0   ! time step [s]
   nstep      = 10     ! lenght of the run in nb of time steps
   Nmax_OL    = 150
@@ -86,6 +86,17 @@ program ice
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)= 100000   
 
+!------------------------------------------------------------------------ 
+! verify choice of solver and options
+!------------------------------------------------------------------------ 
+
+  if (solver .eq. 3) then
+    if (IMEX .ne. 0 .and. BDF2 .ne. 0) then
+      print *, 'set IMEX=0 and BDF2=0'
+      stop
+    endif
+  endif
+  
 !------------------------------------------------------------------------ 
 !     Set first time level depending on restart specifications                
 !------------------------------------------------------------------------
@@ -181,6 +192,8 @@ program ice
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
 !------- Begining of outer loop (OL) or Newton iterations ----------------
+  
+     if (solver .eq. 1 .or. solver .eq. 2 ) then ! implicit
 
      do k = 1, Nmax_OL 
         
@@ -222,6 +235,14 @@ program ice
      enddo
      meanN = meanN + k-1
 !     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
+
+     elseif (solver .eq. 3) then ! explicit (EVP)
+     
+      call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+      call Cw_coefficient (u, Cw)            ! u is u^k-1
+      call EVP2solver(tauair, u, zeta, eta, Cw, ts)
+     
+     endif
 
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1

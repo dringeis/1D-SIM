@@ -28,7 +28,7 @@ MODULE resolution
 
   IMPLICIT NONE
   DOUBLE PRECISION :: Deltax, Deltax2
-  DOUBLE PRECISION :: Deltat, DtoverDx
+  DOUBLE PRECISION :: Deltat, DtoverDx, Deltate
 
 END MODULE resolution
 
