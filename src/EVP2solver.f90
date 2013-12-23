@@ -18,12 +18,10 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
   integer, intent(in) :: ts
   double precision, intent(in)  :: rhs(1:nx+1)
   double precision, intent(inout) :: utp(1:nx+1)
-  double precision :: Cw(1:nx+1), F_uk1(1:nx+1), us1(1:nx+1)
+  double precision :: Cw(1:nx+1), F_uk1(1:nx+1)
   double precision :: sigma(0:nx+1), zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1)
   double precision :: B1, gamma, right, left
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
-
-  us1 = utp ! at this point us1=us=u^0
 
   left  = 1d0/(Deltate) + ( 1d0 )/(T*alpha2) ! no change during subcycling
 
@@ -82,8 +80,6 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
 !------------------------------------------------------------------------
 ! time step velocity
 !------------------------------------------------------------------------
-
-     us1 = utp
 
      do i = 2, nx
      
