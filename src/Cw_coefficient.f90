@@ -9,8 +9,8 @@ subroutine Cw_coefficient (utp, Cw, Cb)
   integer :: i
 
   double precision, intent(in)  :: utp(1:nx+1)
-  double precision, intent(out) :: Cw(1:nx+1), Cb(1:nx+1)
-  double precision :: utypical, A_at_u, h_at_u, umin
+  double precision, intent(out) :: Cw(1:nx+1), Cb(1:nx+1) ! defined at u location
+  double precision :: utypical, A_at_u, h_at_u, bathy_at_u, umin
   double precision :: Cbfactor, KK, CC ! similar to C in ice_strength calc...in fact we set CC=C=20d0
   
   utypical = 0.1d0
@@ -32,7 +32,9 @@ subroutine Cw_coefficient (utp, Cw, Cb)
      do i = 2, nx
         
         Cw(i) = Cdw*sqrt(utp(i)**2d0 + small1)
-        if (bathy(i) .gt. 20d0) then ! too deep for bottom drag
+        
+        bathy_at_u = ( bathy(i-1) + bathy(i) ) / 2d0
+        if (bathy_at_u .gt. 20d0) then ! too deep for bottom drag
 	  Cb(i) = 0d0
 	else
 	  A_at_u = ( A(i-1) + A(i) ) / 2d0
