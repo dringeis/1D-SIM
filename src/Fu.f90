@@ -53,7 +53,7 @@ end subroutine Fu
 !     calculates R in du/dt = R/ph
 !****************************************************************************
 
-subroutine calc_R (utp, zeta, eta, Cw, tauair, R_vec)
+subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   use size
   use resolution
   use properties
@@ -66,7 +66,7 @@ subroutine calc_R (utp, zeta, eta, Cw, tauair, R_vec)
 
   double precision, intent(in)  :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1), tauair(1:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
 
   double precision, intent(out) :: R_vec(1:nx+1)
   
@@ -88,6 +88,12 @@ subroutine calc_R (utp, zeta, eta, Cw, tauair, R_vec)
 !------------------------------------------------------------------------
      
      R_vec(i) = R_vec(i) - Cw(i) * utp(i)
+     
+!------------------------------------------------------------------------
+!     Cb*u : bottom drag
+!------------------------------------------------------------------------
+     
+     R_vec(i) = R_vec(i) - Cb(i) * utp(i)
      
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term

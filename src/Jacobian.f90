@@ -12,7 +12,7 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, un2, tauair, epsilon)
   double precision, intent(out):: Jv(1:nx+1)
   double precision, intent(in) :: epsilon
   double precision :: zeta(0:nx+1), eta(0:nx+1)
-  double precision :: Cw(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
+  double precision :: Cw(1:nx+1), Cb(1:nx+1), Fpos(1:nx+1), Rpos(1:nx+1)
   double precision :: upos(1:nx+1)!, b(1:nx+1)
 
 !  double precision xpos(nvar), xneg(nvar), x(nvar),rhs(nvar)
@@ -34,8 +34,8 @@ subroutine JacfreeVec (v, Jv, F_uk1, uk1, un1, un2, tauair, epsilon)
   endif
   
   call viscouscoefficient (upos, zeta, eta) ! u is u^k-1
-  call Cw_coefficient (upos, Cw)            ! u is u^k-1
-  call calc_R (upos, zeta, eta, Cw, tauair, Rpos)
+  call Cw_coefficient (upos, Cw, Cb)            ! u is u^k-1
+  call calc_R (upos, zeta, eta, Cw, Cb, tauair, Rpos)
   call Fu (upos, un1, un2, h, Rpos, Fpos) 
 
   do i=1, nx+1
@@ -64,7 +64,7 @@ subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
   double precision, intent(in) :: Futp(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: un1(1:nx+1), tauair(1:nx+1)
   double precision :: zeta(0:nx+1), eta(0:nx+1), epsilon
-  double precision :: Cw(1:nx+1), Fpos(1:nx+1)
+  double precision :: Cw(1:nx+1), Cb(1:nx+1), Fpos(1:nx+1)
   double precision :: uele(1:nx+1), upos(1:nx+1), b(1:nx+1)
   
   double precision, intent(out) :: Jleft(1:nx+1), J(1:nx+1), Jright(1:nx+1)
@@ -101,7 +101,7 @@ subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
   call viscouscoefficient (upos, zeta, eta)
   stop ! (need to modify or latest changes)
 !  call bvect (tauair, upts, b)
-  call Cw_coefficient (upos, Cw)
+  call Cw_coefficient (upos, Cw, Cb)
 !  call Fu (upos, zeta, eta, Cw, b, Fpos)
   Jleft(i)=(Fpos(i)-Futp(i))/epsilon
   else
@@ -121,7 +121,7 @@ subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
   endif
   call viscouscoefficient (upos, zeta, eta)
 !  call bvect (tauair, upts, b)
-  call Cw_coefficient (upos, Cw)
+  call Cw_coefficient (upos, Cw, Cb)
 !  call Fu (upos, zeta, eta, Cw, b, Fpos)
   J(i)=(Fpos(i)-Futp(i))/epsilon
   
@@ -139,7 +139,7 @@ subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
   endif
   call viscouscoefficient (upos, zeta, eta)
 !  call bvect (tauair, upts, b)
-  call Cw_coefficient (upos, Cw)
+  call Cw_coefficient (upos, Cw, Cb)
 !  call Fu (upos, zeta, eta, Cw, b, Fpos)
   Jright(i)=(Fpos(i)-Futp(i))/epsilon
   else
@@ -167,7 +167,7 @@ subroutine formJacobian (utp, Futp, un1, tauair, ts, k, Jleft, J, Jright)
   return
 end subroutine formJacobian
 
-subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
+subroutine formA (utp, zeta, eta, Cw, Cb, ts, k, Aleft, Adiag, Aright)
   use size
   use resolution
   use properties
@@ -183,7 +183,7 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
 
   double precision, intent(in)  :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
   double precision, intent(out) :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
 
   double precision :: h_at_u
@@ -215,7 +215,7 @@ subroutine formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
      
-     Adiag(i) = Adiag(i) + Cw(i)
+     Adiag(i) = Adiag(i) + Cw(i) + Cb(i)
      
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term

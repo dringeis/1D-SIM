@@ -4,7 +4,7 @@
 ! see p. 3-21 and 3-22
 !****************************************************************************
 
-subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
+subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
   use size
   use resolution
   use properties
@@ -18,7 +18,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
   integer, intent(in) :: ts
   double precision, intent(in)  :: rhs(1:nx+1)
   double precision, intent(inout) :: utp(1:nx+1)
-  double precision :: Cw(1:nx+1), F_uk1(1:nx+1)
+  double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1)
   double precision :: sigma(0:nx+1), zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1)
   double precision :: B1, gamma, right, left
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
@@ -49,7 +49,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
 
      if (s .gt. 1) then
         call viscouscoefficient (utp, zeta, eta)
-        call Cw_coefficient (utp, Cw)
+        call Cw_coefficient (utp, Cw, Cb)
      endif
 
 !------------------------------------------------------------------------
@@ -111,7 +111,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, ts)
 !     advance u from u^p-1 to u^p
 !------------------------------------------------------------------------
 
-        gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + Cw(i)
+        gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + Cw(i) + Cb(i)
         
         utp(i) = B1 / gamma
 

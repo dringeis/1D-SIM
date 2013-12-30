@@ -37,7 +37,7 @@ program ice
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
-  double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1)
+  double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1), Cb(1:nx+1)
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
@@ -205,8 +205,8 @@ program ice
 	endif
 	
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-	call Cw_coefficient (u, Cw)            ! u is u^k-1
-	call calc_R (u, zeta, eta, Cw, tauair, R_uk1)
+	call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
+	call calc_R (u, zeta, eta, Cw, Cb, tauair, R_uk1)
 	call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 
 !	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
@@ -224,10 +224,10 @@ program ice
         if (solver .eq. 1) then
            print *, 'L2-norm after k ite=', ts, k-1, L2norm
            call bvect(tauair, un1, b)
-           call SOR (b, u, h, zeta, eta, Cw, p_flag, ts)
+           call SOR (b, u, h, zeta, eta, Cw, Cb, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
-           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, un1, un2, tauair, &
+           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, Cb, un1, un2, tauair, &
                               L2norm, k, ts, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
@@ -241,8 +241,8 @@ program ice
      elseif (solver .eq. 3) then ! explicit (EVP)
      
       call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-      call Cw_coefficient (u, Cw)            ! u is u^k-1
-      call EVP2solver(tauair, u, zeta, eta, Cw, ts)
+      call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
+      call EVP2solver(tauair, u, zeta, eta, Cw, Cb, ts)
      
      endif
 

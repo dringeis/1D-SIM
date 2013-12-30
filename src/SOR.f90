@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
+subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
   use size
   use resolution
   use properties
@@ -17,7 +17,7 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
   logical, intent(in) :: p_flag ! T: precond, F: standard solver
   double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1), htp(0:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), htp(0:nx+1)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
@@ -47,6 +47,12 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, p_flag, ts)
      
       D(i) = D(i) + Cw(i)
 
+!------------------------------------------------------------------------
+!     Cb*u : bottom drag term
+!------------------------------------------------------------------------
+
+      D(i) = D(i) + Cb(i)      
+      
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
