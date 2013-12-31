@@ -3,9 +3,9 @@ MODULE rheology
 ! C : ice strength parameter
 ! Pstar : ice compression strength parameter
 ! ell_2 : 1/ellipticity**2
-! Tfrac: for tensile strength, T = Tfrac x P
+! kt: for tensile strength, T = kt x P
   IMPLICIT NONE
-  DOUBLE PRECISION :: C, Pstar, alpha, alpha2, Tfrac
+  DOUBLE PRECISION :: C, Pstar, alpha, alpha2, kt
   DOUBLE PRECISION :: e_2, small2
 
 END MODULE rheology

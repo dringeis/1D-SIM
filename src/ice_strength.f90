@@ -16,7 +16,7 @@ subroutine ice_strength ( hin, Ain )
 
   do i = 1, nx
      Pp_half(i) = 0.5d0 * Pstar * hin(i) * dexp(-C * ( 1d0 - Ain(i) ) )
-     Tp_half(i) = Tfrac*Pp_half(i)
+     Tp_half(i) = kt*Pp_half(i)
   enddo
 
 !------- set p = 0 at open boundaries for proper care of open bc --------------
