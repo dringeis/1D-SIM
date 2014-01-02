@@ -86,7 +86,7 @@ program ice
   expnb      = 1
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
-  out_step(1)= 100000   
+  out_step(1)= 10   
 
 !------------------------------------------------------------------------ 
 ! verify choice of solver and options
@@ -262,7 +262,7 @@ program ice
          ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
          ts .eq. out_step(5)) then
         print *, 'outputting results'
-        call output_results(ts, expnb, u, zeta, eta)
+        call output_results(ts, expnb, solver, u, zeta, eta)
         call output_file(e, gamma_nl, solver, expnb)
      endif
 

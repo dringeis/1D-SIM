@@ -1,4 +1,4 @@
-subroutine output_results(ts, expnb, utp, zeta, eta)
+subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use size
   use resolution
   use global_var
@@ -9,7 +9,7 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
   character filename*60
 
   integer :: i, k, Dt, Dx, adv
-  integer, intent(in) :: ts, expnb
+  integer, intent(in) :: ts, expnb, solver
   double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
   double precision, intent(in)  :: utp(1:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
@@ -33,20 +33,20 @@ subroutine output_results(ts, expnb, utp, zeta, eta)
 !     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
-  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-		    Dx,IMEX, adv,BDF2,ts,expnb
+  write (filename, '("output/h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,solver,IMEX, adv,BDF2,ts,expnb
   open (10, file = filename, status = 'unknown')
   
-  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-		    Dx,IMEX, adv,BDF2,ts,expnb
+  write (filename, '("output/A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-		    Dx,IMEX, adv,BDF2,ts,expnb
+  write (filename, '("output/u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-		    Dx,IMEX, adv,BDF2,ts,expnb
+  write (filename, '("output/div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
 !  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
