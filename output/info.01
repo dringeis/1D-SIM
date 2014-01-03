@@ -23,7 +23,7 @@
  SOLVER AND NUMERICS
  
  SOLVER = 
-2
+3
  omega (sor) =
             1.5000000000
  nb of sor ite =

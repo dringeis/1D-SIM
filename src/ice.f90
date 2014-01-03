@@ -60,7 +60,7 @@ program ice
   regularization = 'tanh'
   adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
 
-  solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP
+  solver     = 3        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
@@ -92,7 +92,7 @@ program ice
 ! verify choice of solver and options
 !------------------------------------------------------------------------ 
 
-  if (solver .eq. 3) then
+  if (solver .eq. 3 .or. solver .eq. 4) then
     if (IMEX .ne. 0 .and. BDF2 .ne. 0) then
       print *, 'set IMEX=0 and BDF2=0'
       stop
@@ -238,11 +238,11 @@ program ice
      meanN = meanN + k-1
 !     call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
 
-     elseif (solver .eq. 3) then ! explicit (EVP)
+     elseif (solver .eq. 3 .or. solver .eq. 4) then ! explicit (EVP)
      
       call viscouscoefficient (u, zeta, eta) ! u is u^k-1
       call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
-      call EVP2solver(tauair, u, zeta, eta, Cw, Cb, ts)
+      call EVP2solver(tauair, u, zeta, eta, Cw, Cb, ts, solver)
      
      endif
 

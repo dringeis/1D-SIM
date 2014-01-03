@@ -4,7 +4,7 @@
 ! see p. 3-21 and 3-22
 !****************************************************************************
 
-subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
+subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
   use size
   use resolution
   use properties
@@ -15,10 +15,10 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
   implicit none
       
   integer :: i, s
-  integer, intent(in) :: ts
+  integer, intent(in) :: ts, solver
   double precision, intent(in)  :: rhs(1:nx+1)
   double precision, intent(inout) :: utp(1:nx+1)
-  double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1)
+  double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1), un1tp(1:nx+1)
   double precision :: sigma(0:nx+1), zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1)
   double precision :: B1, gamma, right, left
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
@@ -28,6 +28,8 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
 !------------------------------------------------------------------------
 ! initial value of sigma and utp
 !------------------------------------------------------------------------
+  
+  un1tp = utp ! for EVP* solver
   
   do i = 1, nx ! initial values of sigma
 
@@ -98,9 +100,9 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
 !------------------------------------------------------------------------
 !     B1: rho*h*du^p-1 / Deltat ! to match implicit solution
 !------------------------------------------------------------------------
-
-!        B1 = B1 - one_or_zero * ( rho * h_at_u(i) * utp(i) ) / Deltat
-     
+	if ( solver .eq. 4 ) then
+	  B1 = B1 + ( rho * h_at_u(i) * un1tp(i) ) / Deltat
+	endif
 !------------------------------------------------------------------------
 !     B1: dsigma/dx
 !------------------------------------------------------------------------
@@ -110,8 +112,11 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts)
 !------------------------------------------------------------------------
 !     advance u from u^p-1 to u^p
 !------------------------------------------------------------------------
-
-        gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + Cw(i) + Cb(i)
+	if ( solver .eq. 3 ) then
+	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + Cw(i) + Cb(i)
+        elseif (solver .eq. 4 ) then
+	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + ( rho * h_at_u(i) )*(1d0/Deltat) + Cw(i) + Cb(i)
+	endif	
         
         utp(i) = B1 / gamma
 
