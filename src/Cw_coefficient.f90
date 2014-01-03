@@ -37,8 +37,8 @@ subroutine Cw_coefficient (utp, Cw, Cb)
         if (bathy_at_u .gt. 20d0) then ! too deep for bottom drag
 	  Cb(i) = 0d0
 	else
-	  A_at_u = ( A(i-1) + A(i) ) / 2d0
-	  h_at_u = ( h(i-1) + h(i) ) / 2d0
+	  A_at_u = max( A(i-1), A(i) )
+	  h_at_u = max( h(i-1), h(i) )
 	  Cbfactor=KK/(abs(utp(i))+umin)
 	  Cb(i) = Cbfactor * h_at_u * dexp(-CC * ( 1d0 - A_at_u ) )
 	  !Cb(i) = Cbfactor

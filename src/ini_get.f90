@@ -64,6 +64,15 @@ subroutine ini_get (utp, restart, expres, ts_res)
      bathy(i)=100d0
   enddo
 
+!  do i = 1, 20
+!     bathy(i)=10d0
+!  enddo
+ 
+!  do i = 1, 19
+!     h(i) = 1d0
+!     A(i) = 1d0
+!  enddo
+ 
   endif
 
   return
