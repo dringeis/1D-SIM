@@ -33,14 +33,21 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
     endif
 
-     eta(i)  = zeta(i) * e_2
-! wowowo verify rep_closure
-     if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
-!	P_half(i) = zeta(i)*deno 
+    eta(i)  = zeta(i) * e_2
+
+    if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
+     
+      if ( regularization .eq. 'tanh' ) then
 	P_half(i) = (Pp_half(i)-Tp_half(i)) * ( deno / denomin ) * tanh(denomin*(1d0/deno))
-     else
-	P_half(i) = Pp_half(i)-Tp_half(i) ! P_half includes tensile strength
-     endif
+      elseif ( regularization .eq. 'Kreyscher' ) then
+        P_half(i) = (Pp_half(i)-Tp_half(i)) * deno / ( deno + denomin )
+      endif
+      
+    else
+     
+      P_half(i) = Pp_half(i)-Tp_half(i) ! P_half includes tensile strength
+	
+    endif
 
   enddo
 
