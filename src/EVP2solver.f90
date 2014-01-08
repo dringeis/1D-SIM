@@ -1,7 +1,5 @@
 !****************************************************************************
-! calculates utp = M^-1(rhs) where rhs is wk1. du=utp= 0 is the initial
-! guess when used as a precond. utp is the solution sent back. 
-! see p. 3-21 and 3-22
+! EVP solver in 1D. Author JF Lemieux 8 jan 2014.
 !****************************************************************************
 
 subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
@@ -19,8 +17,9 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
   double precision, intent(in)  :: rhs(1:nx+1)
   double precision, intent(inout) :: utp(1:nx+1)
   double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1), R_uk1(1:nx+1), un1tp(1:nx+1)
-  double precision :: sigma(0:nx+1), zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1)
+  double precision :: zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1)
   double precision :: B1, gamma, right, left, L2norm 
+  double precision, save :: sigma(0:nx+1)
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
 
   left  = 1d0/(Deltate) + ( 1d0 )/(T*alpha2) ! no change during subcycling
@@ -31,16 +30,18 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
   
   un1tp = utp ! for EVP* solver
   
-  do i = 1, nx ! initial values of sigma
+  if ( ts .eq. 1 ) then ! initial sigma set to VP for the first time level only
+    do i = 1, nx 
 
-     sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
+      sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
 
-  enddo
-
+    enddo
+  endif
+    
   do i = 1, nx ! could be improved for precond...
-
+  
      h_at_u(i) = ( h(i) + h(i-1) ) / 2d0 ! no change during subcycling
-      
+ 
   enddo
 
 !------------------------------------------------------------------------
@@ -68,8 +69,8 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
 !------------------------------------------------------------------------
 ! time step sigma
 !------------------------------------------------------------------------
- 
-     do i = 1, nx ! for tracer points
+
+    do i = 1, nx ! for tracer points
 
         right = (zeta(i)/ T )*( utp(i+1) - utp(i) ) / Deltax &
               + sigma(i) / Deltate - P_half(i) / (T*alpha2)! could be impr.
