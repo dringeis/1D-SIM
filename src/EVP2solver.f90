@@ -33,6 +33,8 @@ subroutine EVP2solver (rhs, utp, ts, solver)
   if ( solver .eq. 4 .or. ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
     do i = 1, nx 
 
+      call viscouscoefficient (utp, zeta, eta)
+      call Cw_coefficient (utp, Cw, Cb)
       sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
 
     enddo
