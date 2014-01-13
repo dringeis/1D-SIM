@@ -2,7 +2,7 @@
 ! EVP solver in 1D. Author JF Lemieux 8 jan 2014.
 !****************************************************************************
 
-subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
+subroutine EVP2solver (rhs, utp, ts, solver)
   use size
   use resolution
   use properties
@@ -30,7 +30,7 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
   
   un1tp = utp ! for EVP* solver
   
-  if ( ts .eq. 1 ) then ! initial sigma set to VP for the first time level only
+  if ( solver .eq. 4 .or. ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
     do i = 1, nx 
 
       sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
@@ -50,10 +50,8 @@ subroutine EVP2solver (rhs, utp, zeta, eta, Cw, Cb, ts, solver)
 
   do s = 1, N_sub ! subcycling loop
 
-     if (s .gt. 1) then
-        call viscouscoefficient (utp, zeta, eta)
-        call Cw_coefficient (utp, Cw, Cb)
-     endif
+    call viscouscoefficient (utp, zeta, eta)
+    call Cw_coefficient (utp, Cw, Cb)
 
 !------------------------------------------------------------------------
 ! calculation of L2norm at each subcycling step for EVP* solver
