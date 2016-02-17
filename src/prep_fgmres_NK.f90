@@ -72,7 +72,7 @@
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
-         epsilon = 1d-07 ! approximates Jv below
+         epsilon = 4d-07 ! approximates Jv below
          call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, un2, tauair, epsilon) 
          GOTO 10
       ENDIF
