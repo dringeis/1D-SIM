@@ -72,7 +72,8 @@
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
-         epsilon = 4d-07 ! approximates Jv below
+         epsilon = 4d-07 ! approximates Jv below (results show that a large eps (1d-05 - 1d-06) is good 
+                         ! in pack ice but a smaller eps (1d-07 - 1d-10) is better for loose ice. 
          call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, un2, tauair, epsilon) 
          GOTO 10
       ENDIF
