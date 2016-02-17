@@ -58,14 +58,14 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh'
-  adv_scheme     = 'upwindRK2' ! upwind, upwindRK2 not implemented yet
+  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
 
-  solver     = 4        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
-  Deltat     = 1800d0   ! time step [s]
-  nstep      = 10     ! lenght of the run in nb of time steps
+  Deltat     = 300d0   ! time step [s]
+  nstep      = 1000     ! lenght of the run in nb of time steps
   Nmax_OL    = 150
 !  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
 
@@ -77,8 +77,8 @@ program ice
   tol_SOR    = 1d-10    ! tol for SOR solver
   maxiteSOR  = 10000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
-  maxiteGMRES= 900      ! max nb of ite for GMRES
-  gamma_nl = 1d-08
+  maxiteGMRES= 50      ! max nb of ite for GMRES
+  gamma_nl = 1d-06
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
