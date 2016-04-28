@@ -15,9 +15,9 @@ subroutine Cw_coefficient (utp, Cw, Cb)
   
   utypical = 0.1d0
   CC = 20d0
-  k1 = 10d0
-  k2 = 10d0
-  umin=1d-03
+  k1 = 8d0
+  k2 = 15d0
+  umin=5d-05
   
   Cw(1)    = 0d0
   Cw(nx+1) = 0d0

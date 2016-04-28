@@ -30,7 +30,7 @@ subroutine EVP2solver (rhs, utp, ts, solver)
   
   un1tp = utp ! for EVP* solver
   
-  if ( solver .eq. 4 .or. ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
+  if ( ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
     do i = 1, nx 
 
       call viscouscoefficient (utp, zeta, eta)
