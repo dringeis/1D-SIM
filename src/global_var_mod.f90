@@ -15,5 +15,6 @@ use size
   DOUBLE PRECISION :: Tp_half(0:nx+1)
   DOUBLE PRECISION :: P_half(0:nx+1)
   DOUBLE PRECISION :: bathy(0:nx+1)
+  DOUBLE PRECISION :: scaling(1:nx+1)
   
 END MODULE global_var

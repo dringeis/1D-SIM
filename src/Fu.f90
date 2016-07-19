@@ -42,7 +42,7 @@ subroutine Fu (utp, un1, un2, htp, R_uk1, Fu_vec)
 !     Substract the R vector
 !------------------------------------------------------------------------
      
-      Fu_vec(i) = Fu_vec(i) - R_uk1(i)
+      Fu_vec(i) = scaling(i) * ( Fu_vec(i) - R_uk1(i) )
 
     enddo
 
@@ -57,6 +57,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   use size
   use resolution
   use properties
+  use numerical
   use global_var
   use option
 
@@ -69,6 +70,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
 
   double precision, intent(out) :: R_vec(1:nx+1)
+  double precision :: a_at_u
   
   R_vec(1)    = 0d0
   R_vec(nx+1) = 0d0
@@ -76,18 +78,20 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   do i = 2, nx
 
      R_vec(i) = 0.0d0
-
+     a_at_u = ( A(i) + A(i-1) ) / 2d0
+     a_at_u=max(a_at_u, smallA)
+     
 !------------------------------------------------------------------------
 !     tauair : air drag term
 !------------------------------------------------------------------------
 
-     R_vec(i) = R_vec(i) + tauair(i)
+     R_vec(i) = R_vec(i) + a_at_u*tauair(i)
 
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
      
-     R_vec(i) = R_vec(i) - Cw(i) * utp(i)
+     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * utp(i)
      
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag

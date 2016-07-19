@@ -2,12 +2,13 @@ subroutine bvect(tauair, un1, b)
   use size
   use resolution
   use properties
+  use numerical
   use global_var
 
   implicit none
       
   integer :: i
-  double precision h_at_u
+  double precision h_at_u, a_at_u
   double precision, intent(in) :: tauair(1:nx+1), un1(1:nx+1)
   double precision, intent(out):: b(1:nx+1)
 
@@ -17,8 +18,10 @@ subroutine bvect(tauair, un1, b)
   do i = 2, nx
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
+     a_at_u = ( A(i) + A(i-1) ) / 2d0
+     a_at_u=max(a_at_u, smallA)
 
-     b(i) = tauair(i)  - ( P_half(i) - P_half(i-1) ) / Deltax +  &
+     b(i) = a_at_u*tauair(i) - ( P_half(i) - P_half(i-1) ) / Deltax + &
              ( rho * h_at_u * un1(i) ) / Deltat
 
   enddo

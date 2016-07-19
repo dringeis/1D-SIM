@@ -2,7 +2,7 @@
 !     solves Au=b with the SOR method or Pdu=rhs (as a precond)
 !****************************************************************************
 
-subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
+subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
   use size
   use resolution
   use properties
@@ -17,11 +17,12 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
   logical, intent(in) :: p_flag ! T: precond, F: standard solver
   double precision, intent(inout) :: utp(1:nx+1) !in: ini guess, out: answer
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
-  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), htp(0:nx+1)
+  double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1)
+  double precision, intent(in)  :: htp(0:nx+1), Atp(0:nx+1)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, B1, residual ,maxerror
+  double precision :: h_at_u, a_at_u, B1, residual ,maxerror
 
   if (p_flag) then
      utp = 0d0              ! initial guess for precond
@@ -35,6 +36,7 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
 !------------------------------------------------------------------------
 
      h_at_u = ( htp(i) + htp(i-1) ) / 2d0
+     
      if ( BDF2 .eq. 0 ) then
       D(i) = ( rho * h_at_u ) / Deltat 
      elseif ( BDF2 .eq. 1 ) then 
@@ -44,8 +46,10 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
 !------------------------------------------------------------------------
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
-     
-      D(i) = D(i) + Cw(i)
+
+      a_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
+      a_at_u=max(a_at_u, smallA)
+      D(i) = D(i) + a_at_u*Cw(i)
 
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag term
@@ -58,7 +62,8 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
 !------------------------------------------------------------------------
      
       D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
-
+      D(i)=scaling(i)*D(i) ! for JFNK
+      
   enddo
 
   do l = 1, maxiteSOR
@@ -76,7 +81,7 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 	
-	B1 = B1 + ((zeta(i)+eta(i))    *utp(i+1) &
+	B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
 		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
 
         residual = B1/D(i) - utp(i)
@@ -91,7 +96,10 @@ subroutine SOR (b, utp, htp, zeta, eta, Cw, Cb, p_flag, ts)
      enddo
      
      if (.not. p_flag) then
-        if ( maxerror .lt. tol_SOR ) exit
+        if ( maxerror .lt. tol_SOR ) then
+        print *, 'nb of SOR ite=', l
+        exit
+        endif
      endif
     
   enddo

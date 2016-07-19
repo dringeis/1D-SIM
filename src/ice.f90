@@ -41,7 +41,6 @@ program ice
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
-!  double precision :: crap1(1:nx+1), crap2(1:nx+1), crap3(1:nx+1)
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
@@ -58,16 +57,15 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh'
-  adv_scheme     = 'upwind' ! upwind, upwindRK2 not implemented yet
+  adv_scheme     = 'upwind' ! upwind, upwindRK2
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
   Deltat     = 300d0   ! time step [s]
-  nstep      = 1000     ! lenght of the run in nb of time steps
-  Nmax_OL    = 150
-!  if (abs(nstep*Deltat/3600d0 - 24d0) .gt. 1d-06) stop
+  nstep      = 100     ! lenght of the run in nb of time steps
+  Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
   N_sub = 900
@@ -82,11 +80,12 @@ program ice
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
+  smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
   expnb      = 1
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
-  out_step(1)= 100   
+  out_step(1)= 100000   
 
 !------------------------------------------------------------------------ 
 ! verify choice of solver and options
@@ -97,6 +96,10 @@ program ice
       print *, 'set IMEX=0 and BDF2=0'
       stop
     endif
+  endif
+  if (BDF2 .eq. 1 .and. adv_scheme .ne. 'upwindRK2') then
+      print *, 'set adv_scheme = upwindRK2'
+      stop
   endif
   
 !------------------------------------------------------------------------ 
@@ -169,12 +172,13 @@ program ice
   call ini_get (u, restart, expres, ts_res)
   tauair = 0d0 ! initialization (watchout for restart)
   nbhr = 0d0
+  fgmres_per_ts = 0
   
-  do ts = tsini, tsfin ! first u calc is at t = 1*Deltat and h at 1.5*Deltat
+  do ts = tsini, tsfin
      
      nbhr = nbhr + Deltat / 3600d0
      print *, 'time level, cumulative time (h) =', ts, nbhr
-     fgmres_per_ts = 0
+     
      
      call cpu_time(timecrap)
      call cpu_time(time1)
@@ -190,13 +194,15 @@ program ice
 !------- get wind forcing (independent of u) -----------------------------
 
      call wind_forcing (tauair, ts)
-
+     
 !------- Solves NL mom eqn at specific time step with solver1, 2 or 3
 !        F(u) = A(u)u - b(u) = 0, u is the solution vector
 !------- Begining of outer loop (OL) or Newton iterations ----------------
   
      if (solver .eq. 1 .or. solver .eq. 2 ) then ! implicit
 
+	if (solver .eq. 2 ) call calc_scaling (An1) ! scaling=1 for other solvers
+     
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
@@ -209,25 +215,22 @@ program ice
 	call calc_R (u, zeta, eta, Cw, Cb, tauair, R_uk1)
 	call Fu (u, un1, un2, h, R_uk1, F_uk1) 
 
-!	call formJacobian(u, F_uk1, upts, tauair, ts, k, crap1, crap2, crap3) ! forms J elements  
-!	call formA(u,zeta,eta,Cw, ts, k,crap1, crap2, crap3)
-!       call output_residual(ts,k,expnb,F_uk1)
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
-        !print *, 'L2-norm after k ite=', ts, k-1, L2norm
+        
         if (k .eq. 1) then
 	  nl_target = gamma_nl*L2norm
 !	  call output_ini_L2norm(ts,L2norm,expnb)
 	endif
 
-	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-10) exit
+	if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
 
         if (solver .eq. 1) then
            print *, 'L2-norm after k ite=', ts, k-1, L2norm
            call bvect(tauair, un1, b)
-           call SOR (b, u, h, zeta, eta, Cw, Cb, p_flag, ts)
+           call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then
-           call prepFGMRES_NK(u, h, F_uk1, zeta, eta, Cw, Cb, un1, un2, tauair, &
+           call prepFGMRES_NK(u, h, A, F_uk1, zeta, eta, Cw, Cb, un1, un2, tauair, &
                               L2norm, k, ts, fgmres_its)
 !           call SOR_J(u, F_uk1, zeta, eta, Cw, upts, tauair, k, ts)
         endif
@@ -257,7 +260,6 @@ program ice
 !     output results
 !------------------------------------------------------------------------
 
-!     if (abs(nbhr-24d0) .lt. 1d-06) call output_results(ts, expnb, u, zeta, eta)
      if (ts .eq. out_step(1) .or. ts .eq. out_step(2) .or. &
          ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
          ts .eq. out_step(5)) then
@@ -273,8 +275,6 @@ program ice
      call check_neg_vel(u)
      call minmaxtracer(h,1)
      call minmaxtracer(A,2)
-!     call minmaxtracer(zeta,3)
-!     call stab_condition(Cw, zeta)
 
   enddo
   
@@ -282,6 +282,7 @@ program ice
      print *, 'Nb failures, mean ite of Picard: ', Nfail, (meanN*1d0)/(nstep*1d0)
   elseif (solver .eq. 2) then
      print *, 'Nb failures, mean ite of JFNK: ', Nfail, (meanN*1d0)/(nstep*1d0)
+     print *, 'mean nb of fgmres it per time level: ', fgmres_per_ts/(nstep*1d0)
   endif
 
 end program ice
