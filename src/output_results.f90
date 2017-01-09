@@ -29,7 +29,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   do i = 1, nx
      div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
      sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
-     sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/P_half(i) - 0.5d0
+     sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength 
 !     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
   
