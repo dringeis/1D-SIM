@@ -25,6 +25,12 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 
   div(0) = 0d0
   div(nx+1) = 0d0
+  zeta(0) = 0d0
+  zeta(nx+1) = 0d0
+  sigma(0) = 0d0
+  sigma(nx+1) = 0d0
+  sig_norm(0) = 0d0
+  sig_norm(nx+1) = 0d0
 
   do i = 1, nx
      div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence

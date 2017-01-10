@@ -11,7 +11,7 @@ subroutine viscouscoefficient(utp, zeta, eta)
   
   double precision, intent(in) :: utp(1:nx+1)
   double precision, intent(out):: zeta(0:nx+1), eta(0:nx+1)
-  double precision :: dudx, deno, denomin
+  double precision :: dudx, deno, denonum, denomin
   
   denomin=2d-09
 
@@ -30,7 +30,16 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
       deno = alpha*sqrt( (dudx)**2d0)
       zeta(i) = (Pp_half(i)+Tp_half(i)) / ( deno + denomin )
-
+      
+    elseif ( regularization .eq. 'capping' ) then
+    
+      deno = max((alpha*sqrt( (dudx)**2d0)), denomin)
+      zeta(i) = (Pp_half(i)+Tp_half(i)) / deno
+      
+    else
+      print *, 'Wrong regularization'
+      stop
+      
     endif
 
     eta(i)  = zeta(i) * e_2
@@ -41,6 +50,9 @@ subroutine viscouscoefficient(utp, zeta, eta)
 	P_half(i) = (Pp_half(i)-Tp_half(i)) * ( deno / denomin ) * tanh(denomin*(1d0/deno))
       elseif ( regularization .eq. 'Kreyscher' ) then
         P_half(i) = (Pp_half(i)-Tp_half(i)) * deno / ( deno + denomin )
+      elseif ( regularization .eq. 'capping' ) then
+	denonum=alpha*sqrt( (dudx)**2d0)
+	P_half(i) = (Pp_half(i)-Tp_half(i)) * denonum / deno
       endif
       
     else

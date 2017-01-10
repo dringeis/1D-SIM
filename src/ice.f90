@@ -56,7 +56,7 @@ program ice
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
-  regularization = 'tanh'
+  regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
