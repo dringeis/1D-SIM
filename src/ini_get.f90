@@ -24,6 +24,8 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   utp(1)    = 0d0 ! close bc
   utp(nx+1) = 0d0 ! close bc
+  uw(1)    = 0d0 ! close bc
+  uw(nx+1) = 0d0 ! close bc
   h(0)    = 0d0
   h(nx+1) = 0d0
   A(0)    = 0d0
@@ -56,6 +58,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 !     call random_number(rdnb)
 !     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
      utp(i) = 0d0
+     uw(i) = 0d0
   enddo
 
   do i = 1, nx

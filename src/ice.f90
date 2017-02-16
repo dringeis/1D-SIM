@@ -226,7 +226,7 @@ program ice
 
         if (solver .eq. 1) then
            print *, 'L2-norm after k ite=', ts, k-1, L2norm
-           call bvect(tauair, un1, b)
+           call bvect(tauair, un1, Cw, b)
            call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
 !           call SOR_A (b, u, zeta, eta, Cw, k, ts)
         elseif (solver .eq. 2) then

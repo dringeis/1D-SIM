@@ -31,10 +31,11 @@ subroutine EVP2solver (tauair, utp, ts, solver)
   un1tp = utp ! for EVP* solver
   
   if ( ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
+    
+    call viscouscoefficient (utp, zeta, eta)
+    call Cw_coefficient (utp, Cw, Cb)
     do i = 1, nx 
 
-      call viscouscoefficient (utp, zeta, eta)
-      call Cw_coefficient (utp, Cw, Cb)
       sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
 
     enddo
@@ -92,6 +93,12 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
         
         B1 = a_at_u(i) * tauair(i)
+        
+!------------------------------------------------------------------------
+!     B1: part of water drag
+!------------------------------------------------------------------------
+        
+        B1 = B1 + a_at_u(i) * Cw(i) * uw(i)
 
 !------------------------------------------------------------------------
 !     B1: rho*h*du^p-1 / Deltate
