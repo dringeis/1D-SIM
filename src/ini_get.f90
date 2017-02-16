@@ -72,7 +72,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall
 !     h(i) = max(1d-06, h(i))
 !     bathy(i)=100d0
-  enddo
+!  enddo
 
 !  do i = 1, 20
 !     bathy(i)=10d0
