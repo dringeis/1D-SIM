@@ -305,8 +305,6 @@ program ice
       call minmaxtracer(etaw,4)
       call minmaxtracer(uw,5)
      endif
-     print *, 'ADD tilt term!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-      
 
   enddo
   
