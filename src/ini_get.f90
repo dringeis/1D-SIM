@@ -9,6 +9,8 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   use size
   use global_var
+  use shallow_water
+  use option
 
   implicit none
      
@@ -22,19 +24,25 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   small = 0.0001d0
 
+  if (oceanSIM) then 
+     allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
+     allocate(uwn1(1:nx+1), uwn2(1:nx+1))
+     etaw=0d0
+  endif
+  
   utp(1)    = 0d0 ! close bc
   utp(nx+1) = 0d0 ! close bc
-  uw(1)    = 0d0 ! close bc
-  uw(nx+1) = 0d0 ! close bc
   h(0)    = 0d0
   h(nx+1) = 0d0
   A(0)    = 0d0
   A(nx+1) = 0d0
-  
+  uw(1)    = 0d0 ! close bc
+  uw(nx+1) = 0d0 ! close bc  
   scaling=1d0 ! initialize scaling field (only used for JFNK)
 
   if (restart) then 
-
+     print *, 'Restart code should be verified'
+     stop
      write (filename,'("output/h_",i3.3,".",i2.2)') ts_res, expres
      open (10, file = filename, status = 'old')
      
@@ -58,7 +66,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 !     call random_number(rdnb)
 !     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
      utp(i) = 0d0
-     uw(i) = 0d0
+     uw(i)  = 0d0
   enddo
 
   do i = 1, nx
@@ -68,6 +76,13 @@ subroutine ini_get (utp, restart, expres, ts_res)
      h(i) = max(1d-06, h(i))
      bathy(i)=100d0
   enddo
+  
+  if (oceanSIM) then 
+     uwn1=uw
+     uwn2=uw
+     etawn1=etaw
+     etawn2=etaw
+  endif
   
 !  do i = 11, nx-10
 !     h(i) = 1d0

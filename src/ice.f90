@@ -24,6 +24,7 @@ program ice
   use properties
   use resolution
   use global_var
+  use shallow_water
   use numerical
   use option
   
@@ -33,7 +34,7 @@ program ice
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
-  double precision :: e, rhoair, rhowater, Cdair, Cdwater
+  double precision :: e, rhoair, rhowater, Cdair, Cdwater, Hw
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
@@ -58,6 +59,7 @@ program ice
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
+  oceanSIM       = .false.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
@@ -161,6 +163,7 @@ program ice
   rhoair     = 1.3d0        ! air density
   rho        = 900d0        ! ice density
   rhowater   = 1026d0       ! water density
+  Hw         = 5d0          ! mean water depth (for shallow water model)
 
   Cda        = rhoair   * Cdair
   Cdw        = rhowater * Cdwater
@@ -170,6 +173,8 @@ program ice
 !------------------------------------------------------------------------
 
   call ini_get (u, restart, expres, ts_res)
+  un1=u
+  if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
   tauair = 0d0 ! initialization (watchout for restart)
   nbhr = 0d0
   fgmres_per_ts = 0
@@ -184,7 +189,7 @@ program ice
      call cpu_time(time1)
 
      if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
-
+                                  ! Attention not initialized the 1st time level.
      un1=u
      hn1=h
      An1=A
@@ -257,6 +262,20 @@ program ice
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------
+!     Shallow water model
+!------------------------------------------------------------------------
+
+! do we want to use A or An-1?     
+    if (oceanSIM) then 
+       uwn2   = uwn1
+       uwn1   = uw
+       etawn2 = etawn1
+       etawn1 = etaw
+       call Cw_coefficient (u, Cw, Cb) 
+!       call shallow_water(A, tauair, ) ! shallow water ocean model
+    endif
+
+!------------------------------------------------------------------------
 !     output results
 !------------------------------------------------------------------------
 
@@ -285,6 +304,10 @@ program ice
      print *, 'mean nb of fgmres it per time level: ', fgmres_per_ts/(nstep*1d0)
   endif
 
+  if (oceanSIM) then
+   deallocate(etaw, etawn1, etawn2, uwn1, uwn2) 
+  endif
+  
 end program ice
       
 
