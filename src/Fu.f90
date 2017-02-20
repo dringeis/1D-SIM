@@ -70,10 +70,8 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
 
   double precision, intent(out) :: R_vec(1:nx+1)
-  double precision :: a_at_u, h_at_u, ge
-  
-  ge=9.8d0
-  
+  double precision :: a_at_u, h_at_u
+   
   R_vec(1)    = 0d0
   R_vec(nx+1) = 0d0
 

@@ -13,7 +13,7 @@ END MODULE rheology
 MODULE properties
 
   IMPLICIT NONE
-  DOUBLE PRECISION :: rho, rhowater
+  DOUBLE PRECISION :: rho, rhowater, ge
 
 END MODULE properties
 

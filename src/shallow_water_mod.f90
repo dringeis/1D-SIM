@@ -55,10 +55,9 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   
   double precision, intent(in) :: tauair(1:nx+1), Cw(1:nx+1), Cdair
   double precision, intent(in) :: Atp(0:nx+1), utp(1:nx+1)
-  double precision :: invtwodt, ge, RHS, LHS, Ht_at_u, A_At_u, Diocoeff ! Ht=Hw+etaw
+  double precision :: invtwodt, RHS, LHS, Ht_at_u, A_At_u, Diocoeff ! Ht=Hw+etaw
   integer :: i
   
-  ge = 9.8d0
   invtwodt = 1d0 / ( 2d0*Deltat )
   ! leapfrog approach with centered (n1) term on the RHS
   

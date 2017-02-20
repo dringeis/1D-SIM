@@ -59,7 +59,7 @@ program ice
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
-  oceanSIM       = .false. ! for shallow water model
+  oceanSIM       = .true. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
@@ -165,6 +165,7 @@ program ice
   rhoair     = 1.3d0        ! air density
   rho        = 900d0        ! ice density
   rhowater   = 1026d0       ! water density
+  ge         = 9.8d0        ! Earth's gravitional acceleration
   Hw         = 5d0          ! mean water depth (for shallow water model)
   bw         = 0.0001d0     ! friction term for the uw momentum eq.
 

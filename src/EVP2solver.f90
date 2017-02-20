@@ -18,12 +18,12 @@ subroutine EVP2solver (tauair, utp, ts, solver)
   double precision, intent(inout) :: utp(1:nx+1)
   double precision :: Cw(1:nx+1), Cb(1:nx+1), F_uk1(1:nx+1), R_uk1(1:nx+1), un1tp(1:nx+1)
   double precision :: zeta(0:nx+1), eta(0:nx+1), h_at_u(0:nx+1), a_at_u(0:nx+1)
-  double precision :: B1, gamma, right, left, L2norm 
+  double precision :: B1, gamma, right, left, L2norm
   double precision, save :: sigma(0:nx+1)
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
 
   left  = 1d0/(Deltate) + ( 1d0 )/(T*alpha2) ! no change during subcycling
-
+  
 !------------------------------------------------------------------------
 ! initial value of sigma and utp
 !------------------------------------------------------------------------
@@ -99,6 +99,12 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
         
         B1 = B1 + a_at_u(i) * Cw(i) * uw(i)
+        
+!------------------------------------------------------------------------
+!     -rhoh detaw/dx : ocean tilt term
+!------------------------------------------------------------------------
+     
+        B1 = B1 - rho * h_at_u(i) * ge * ( etaw(i) - etaw(i-1) ) / Deltax
 
 !------------------------------------------------------------------------
 !     B1: rho*h*du^p-1 / Deltate
