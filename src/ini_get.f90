@@ -27,7 +27,6 @@ subroutine ini_get (utp, restart, expres, ts_res)
   if (oceanSIM) then 
      allocate(etawn1(0:nx+1), etawn2(0:nx+1))
      allocate(uwn1(1:nx+1), uwn2(1:nx+1))
-     etaw=0d0
   endif
   
   utp(1)    = 0d0 ! close bc
@@ -38,6 +37,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   A(nx+1) = 0d0
   uw(1)    = 0d0 ! close bc
   uw(nx+1) = 0d0 ! close bc  
+  etaw=0d0
   scaling=1d0 ! initialize scaling field (only used for JFNK)
 
   if (restart) then 

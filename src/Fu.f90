@@ -70,7 +70,9 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), tauair(1:nx+1)
 
   double precision, intent(out) :: R_vec(1:nx+1)
-  double precision :: a_at_u
+  double precision :: a_at_u, h_at_u, ge
+  
+  ge=9.8d0
   
   R_vec(1)    = 0d0
   R_vec(nx+1) = 0d0
@@ -80,6 +82,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
      R_vec(i) = 0.0d0
      a_at_u = ( A(i) + A(i-1) ) / 2d0
      a_at_u=max(a_at_u, smallA)
+     h_at_u = ( h(i) + h(i-1) ) / 2d0
      
 !------------------------------------------------------------------------
 !     tauair : air drag term
@@ -98,6 +101,12 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
 !------------------------------------------------------------------------
      
      R_vec(i) = R_vec(i) - Cb(i) * utp(i)
+     
+!------------------------------------------------------------------------
+!     -rhoh detaw/dx : ocean tilt term
+!------------------------------------------------------------------------
+     
+     R_vec(i) = R_vec(i) - rho * h_at_u * ge * ( etaw(i) - etaw(i-1) ) / Deltax
      
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term

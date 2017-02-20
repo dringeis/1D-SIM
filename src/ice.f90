@@ -59,7 +59,7 @@ program ice
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
-  oceanSIM       = .true. ! for shallow water model
+  oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
