@@ -61,7 +61,7 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   invtwodt = 1d0 / ( 2d0*Deltat )
   ! leapfrog approach with centered (n1) term on the RHS
   
-  do i = 1, nx
+  do i = 2, nx
   
    RHS=0d0
    LHS=0d0
