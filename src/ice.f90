@@ -34,7 +34,7 @@ program ice
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
-  double precision :: e, rhoair, rhowater, Cdair, Cdwater, Hw
+  double precision :: e, rhoair, rhowater, Cdair, Cdwater
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
@@ -272,6 +272,7 @@ program ice
        etawn2 = etawn1
        etawn1 = etaw
        call Cw_coefficient (u, Cw, Cb) 
+       call advect_etaw (uwn1)
 !       call shallow_water(A, tauair, ) ! shallow water ocean model
     endif
 
