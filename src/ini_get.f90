@@ -20,7 +20,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   double precision, intent(inout)  :: utp(1:nx+1)
   double precision :: rdnb, small
 
-  character(LEN=30) filename  ! restart file name  
+  character(LEN=30) filename  ! restart file name 
 
   small = 0.0001d0
 

@@ -34,7 +34,7 @@ program ice
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
-  double precision :: e, rhoair, rhowater, Cdair, Cdwater
+  double precision :: e, rhoair, Cdair, Cdwater
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
@@ -59,7 +59,8 @@ program ice
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
-  oceanSIM       = .false.
+  oceanSIM       = .false. ! for shallow water model
+  implicitDrag   = .false. ! for uwater mom eq.
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
@@ -159,11 +160,13 @@ program ice
   kt         = 0d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
 
   Cdair      = 1.2d-03      ! air-ice drag coeffient 
+  Cdairw     = 1.2d-03      ! air-water drag coeffient 
   Cdwater    = 5.5d-03      ! water-ice drag coeffient
   rhoair     = 1.3d0        ! air density
   rho        = 900d0        ! ice density
   rhowater   = 1026d0       ! water density
   Hw         = 5d0          ! mean water depth (for shallow water model)
+  bw         = 0.0001d0     ! friction term for the uw momentum eq.
 
   Cda        = rhoair   * Cdair
   Cdw        = rhowater * Cdwater
@@ -271,9 +274,10 @@ program ice
        uwn1   = uw
        etawn2 = etawn1
        etawn1 = etaw
-       call Cw_coefficient (u, Cw, Cb) 
-       call advect_etaw (uwn1)
-!       call shallow_water(A, tauair, ) ! shallow water ocean model
+       
+       call advect_etaw
+       call Cw_coefficient (u, Cw, Cb) ! at this point uwn1=uw (centered for leap frog below)
+       call momentum_uw (tauair, Cdair, Cw, A, u) ! could try with An1, un1 also
     endif
 
 !------------------------------------------------------------------------
