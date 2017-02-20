@@ -275,7 +275,7 @@ program ice
        etawn2 = etawn1
        etawn1 = etaw
        
-       call advect_etaw
+       call advect_etaw (etaw)
        call Cw_coefficient (u, Cw, Cb) ! at this point uwn1=uw (centered for leap frog below)
        call momentum_uw (tauair, Cdair, Cw, A, u) ! could try with An1, un1 also
     endif
@@ -317,7 +317,7 @@ program ice
   endif
 
   if (oceanSIM) then
-   deallocate(etaw, etawn1, etawn2, uwn1, uwn2) 
+   deallocate(etawn1, etawn2, uwn1, uwn2) 
   endif
   
 end program ice

@@ -8,7 +8,7 @@ use size
 
   IMPLICIT NONE
 
-  DOUBLE PRECISION, allocatable :: etaw(:), etawn1(:), etawn2(:)
+  DOUBLE PRECISION, allocatable :: etawn1(:), etawn2(:)
   DOUBLE PRECISION, allocatable :: uwn1(:), uwn2(:)
   DOUBLE PRECISION :: Hw, bw, Cdairw ! Cdair:over ice, Cdairw: over water
   LOGICAL :: implicitDrag
@@ -18,7 +18,7 @@ use size
   
 END MODULE shallow_water
 
-subroutine advect_etaw
+subroutine advect_etaw (etaw)
   
   use size
   use resolution
@@ -26,6 +26,7 @@ subroutine advect_etaw
   
   implicit none
   
+  double precision, intent(inout) :: etaw(0:nx+1)
   double precision :: RHS, Htleft, Htright ! Ht=Hw+etaw
   integer :: i
   
