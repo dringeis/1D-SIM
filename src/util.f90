@@ -39,8 +39,8 @@ subroutine check_neg_vel(utp)
     if (utp(i) .lt. umin) umin=utp(i)
 
     if (utp(i) .lt. -eps) then
-       print *, utp(i),'NEGATIVE VELOCITIES HERE AT i=', i
-       stop
+!       print *, utp(i),'NEGATIVE VELOCITIES HERE AT i=', i
+!       stop
     endif
 
   enddo
@@ -75,7 +75,11 @@ subroutine minmaxtracer(var,id)
   elseif (id .eq. 2) then
      print *, 'min, max A =', vmin, vmax
   elseif (id .eq. 3) then
-     print *, 'min, max zeta =', vmin, vmax
+     print *, 'min, max u ice =', vmin, vmax
+  elseif (id .eq. 4) then
+     print *, 'min, max eta water =', vmin, vmax
+  elseif (id .eq. 5) then
+     print *, 'min, max u water =', vmin, vmax
   else
      print *, 'WRONG ID'
   endif
