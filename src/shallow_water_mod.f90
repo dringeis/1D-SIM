@@ -67,7 +67,7 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
    LHS=0d0
    RHS = RHS + invtwodt * uwn2(i)                        ! part of inertial term
    RHS = RHS - ge * ( etawn1(i) - etawn1(i-1) ) / Deltax ! pressure gradient
-   RHS = RHS - bw * uwn1(i)                              ! basal friction
+!   RHS = RHS - bw * uwn1(i)                              ! basal friction
    
    A_at_u = ( A(i) + A(i-1) ) / 2d0  
    Ht_at_u = Hw + ( etawn1(i) + etawn1(i-1) ) / 2d0 
@@ -76,11 +76,11 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
    
    Diocoeff = ( A_At_u * Cw(i) ) / ( Ht_at_u * rhowater )
    
-   if (implicitDrag) then
-    LHS = invtwodt + Diocoeff
+   if (implicitDrag) then ! basal friction is always implicit (as in NEMO, FD)
+    LHS = invtwodt + bw + Diocoeff
     RHS = RHS + Diocoeff * utp(i)
    else
-    LHS = invtwodt
+    LHS = invtwodt + bw   ! basal friction is always implicit (as in NEMO, FD)
     RHS = RHS - Diocoeff * ( uwn1(i) - utp(i) )
    endif
    
