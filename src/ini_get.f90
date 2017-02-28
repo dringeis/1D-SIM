@@ -10,6 +10,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
   use size
   use global_var
   use shallow_water
+  use MOMeqSW_output
   use option
 
   implicit none
@@ -27,6 +28,8 @@ subroutine ini_get (utp, restart, expres, ts_res)
   if (oceanSIM) then 
      allocate(etawn1(0:nx+1), etawn2(0:nx+1))
      allocate(uwn1(1:nx+1), uwn2(1:nx+1))
+     allocate(duwdt(1:nx+1), gedetawdx(1:nx+1), buw(1:nx+1))
+     allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif
   
   utp(1)    = 0d0 ! close bc
@@ -82,6 +85,11 @@ subroutine ini_get (utp, restart, expres, ts_res)
      uwn2=uw
      etawn1=etaw
      etawn2=etaw
+     duwdt=0d0
+     gedetawdx=0d0
+     tauiw=0d0
+     tauaw=0d0
+     buw=0d0
   endif
   
 !  do i = 11, nx-10

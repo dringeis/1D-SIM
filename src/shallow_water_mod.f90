@@ -12,11 +12,21 @@ use size
   DOUBLE PRECISION, allocatable :: uwn1(:), uwn2(:)
   DOUBLE PRECISION :: Hw, bw, Cdairw ! Cdair:over ice, Cdairw: over water
   LOGICAL :: implicitDrag
+  
+END MODULE shallow_water
+
+MODULE MOMeqSW_output
+use size
+
+  IMPLICIT NONE
+
+  DOUBLE PRECISION, allocatable :: duwdt(:), gedetawdx(:)
+  DOUBLE PRECISION, allocatable :: tauiw(:), tauaw(:), buw(:)
 !------------------------------------------------------------------------
 !     Subroutine for advecting etaw
 !------------------------------------------------------------------------
   
-END MODULE shallow_water
+END MODULE MOMeqSW_output
 
 subroutine advect_etaw (etaw)
   
@@ -50,6 +60,7 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   use properties
   use global_var
   use shallow_water
+  use MOMeqSW_output
   
   implicit none
   
@@ -85,6 +96,18 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
    endif
    
    uw(i) = RHS / LHS
+  
+!----- MOM eq terms...just for outputs ---------
+   duwdt(i)= invtwodt * ( uw(i) - uwn2(i) )
+   gedetawdx(i) = - ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
+   tauaw(i) = ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater ) 
+   if (implicitDrag) then
+    tauiw(i)= -1d0 * Diocoeff * ( uw(i) - utp(i) )
+   else
+    tauiw(i)= -1d0 * Diocoeff * ( uwn1(i) - utp(i) )
+   endif
+   buw(i) = -1d0 * bw * uw(i)
+!-----------------------------------------------
   
   enddo
   

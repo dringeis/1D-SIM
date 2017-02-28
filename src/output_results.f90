@@ -2,6 +2,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use size
   use resolution
   use global_var
+  use MOMeqSW_output
   use rheology
   use option
   implicit none
@@ -22,7 +23,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km
-
+  
   div(0) = 0d0
   div(nx+1) = 0d0
 !  zeta(0) = 0d0
@@ -95,10 +96,35 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 		    Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (19, file = filename, status = 'unknown')
   
-  write(18,10) ( etaw(i),     i = 0, nx+1 )
-  write(19,10) ( uw(i),       i = 1, nx+1 )
+  write (filename, '("output/duwdt_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (20, file = filename, status = 'unknown')
+
+  write (filename, '("output/gdetawdx_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') & 
+		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (21, file = filename, status = 'unknown')
   
-  do k = 10, 19
+  write (filename, '("output/tauaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (22, file = filename, status = 'unknown')
+
+  write (filename, '("output/tauiw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (23, file = filename, status = 'unknown')
+  
+  write (filename, '("output/buw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (24, file = filename, status = 'unknown')
+  
+  write(18,10) ( etaw(i),      i = 0, nx+1 )
+  write(19,10) ( uw(i),        i = 1, nx+1 )
+  write(20,10) ( duwdt(i),     i = 1, nx+1 )
+  write(21,10) ( gedetawdx(i), i = 1, nx+1 )
+  write(22,10) ( tauaw(i),     i = 1, nx+1 )
+  write(23,10) ( tauiw(i),     i = 1, nx+1 )
+  write(24,10) ( buw(i),       i = 1, nx+1 )
+  
+  do k = 18, 24
      close(k)
   enddo
   

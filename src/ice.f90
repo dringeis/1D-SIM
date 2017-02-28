@@ -25,6 +25,7 @@ program ice
   use resolution
   use global_var
   use shallow_water
+  use MOMeqSW_output
   use numerical
   use option
   
@@ -316,7 +317,7 @@ program ice
   endif
 
   if (oceanSIM) then
-   deallocate(etawn1, etawn2, uwn1, uwn2) 
+   deallocate(etawn1, etawn2, uwn1, uwn2, duwdt, gedetawdx, tauiw, tauaw, buw) 
   endif
   
 end program ice
