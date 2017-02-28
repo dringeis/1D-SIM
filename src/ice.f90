@@ -89,7 +89,7 @@ program ice
   expnb      = 1
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
-  out_step(1)= 100000   
+  out_step(1)= 1   
 
 !------------------------------------------------------------------------ 
 ! verify choice of solver and options

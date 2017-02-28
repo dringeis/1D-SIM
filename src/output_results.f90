@@ -7,7 +7,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use option
   implicit none
 
-  character filename*60
+  character filename*80
 
   integer :: i, k, Dt, Dx, adv
   integer, intent(in) :: ts, expnb, solver
@@ -99,7 +99,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   write (filename, '("output/duwdt_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
 		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (20, file = filename, status = 'unknown')
-
+  
   write (filename, '("output/gdetawdx_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') & 
 		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (21, file = filename, status = 'unknown')
@@ -107,7 +107,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   write (filename, '("output/tauaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
 		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (22, file = filename, status = 'unknown')
-
+  
   write (filename, '("output/tauiw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
 		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (23, file = filename, status = 'unknown')
@@ -115,6 +115,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   write (filename, '("output/buw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
 		    Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (24, file = filename, status = 'unknown')
+  
   
   write(18,10) ( etaw(i),      i = 0, nx+1 )
   write(19,10) ( uw(i),        i = 1, nx+1 )
