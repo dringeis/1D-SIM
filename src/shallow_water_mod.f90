@@ -11,6 +11,7 @@ use size
   DOUBLE PRECISION, allocatable :: etawn1(:), etawn2(:)
   DOUBLE PRECISION, allocatable :: uwn1(:), uwn2(:)
   DOUBLE PRECISION :: Hw, bw, Cdairw ! Cdair:over ice, Cdairw: over water
+  DOUBLE PRECISION :: Agamma ! for Asselin filter
   LOGICAL :: implicitDrag
   
 END MODULE shallow_water
@@ -28,7 +29,7 @@ use size
   
 END MODULE MOMeqSW_output
 
-subroutine advect_etaw (etaw)
+subroutine advect_etaw (etawtp)
   
   use size
   use resolution
@@ -36,7 +37,7 @@ subroutine advect_etaw (etaw)
   
   implicit none
   
-  double precision, intent(inout) :: etaw(0:nx+1)
+  double precision, intent(out) :: etawtp(0:nx+1)
   double precision :: RHS, Htleft, Htright ! Ht=Hw+etaw
   integer :: i
   
@@ -47,7 +48,7 @@ subroutine advect_etaw (etaw)
    Htleft  = Hw + ( etawn1(i-1) + etawn1(i) ) /2d0
    Htright = Hw + ( etawn1(i+1) + etawn1(i) ) /2d0
    RHS     = -1d0*( uwn1(i+1)*Htright - uwn1(i)*Htleft ) / Deltax
-   etaw(i) = etawn2(i) + 2d0*Deltat*RHS
+   etawtp(i) = etawn2(i) + 2d0*Deltat*RHS
   
   enddo
   
@@ -112,3 +113,28 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   enddo
   
 end subroutine momentum_uw
+
+subroutine Asselin_filter (etawtp, uwtp)
+  
+  use size
+  use shallow_water
+  
+  implicit none
+  
+  double precision, intent(in) :: etawtp(0:nx+1) ! etaw^n
+  double precision, intent(in) :: uwtp(1:nx+1) ! uw^n
+  integer :: i
+  
+  do i = 1, nx
+  
+   etawn1(i) = etawn1(i) + Agamma * ( etawn2(i) -2d0 * etawn1(i) + etawtp(i) )
+  
+  enddo
+  
+  do i = 2, nx
+  
+   uwn1(i) = uwn1(i) + Agamma * ( uwn2(i) -2d0 * uwn1(i) + uwtp(i) )
+  
+  enddo
+  
+end subroutine Asselin_filter

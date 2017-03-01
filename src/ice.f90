@@ -62,6 +62,8 @@ program ice
   adv_scheme     = 'upwind' ! upwind, upwindRK2
   oceanSIM       = .true. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
+  Asselin        = .false. ! Asselin filter for uw and etaw
+  Agamma         = 1d-03 ! Asselin filter parameter
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
@@ -280,6 +282,9 @@ program ice
        call advect_etaw (etaw)
        call Cw_coefficient (u, Cw, Cb) ! at this point uwn1=uw (centered for leap frog below)
        call momentum_uw (tauair, Cdair, Cw, A, u) ! could try with An1, un1 also
+       if (Asselin) then
+	call Asselin_filter (etaw, uw)
+       endif
     endif
 
 !------------------------------------------------------------------------
