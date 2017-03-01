@@ -2,6 +2,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   use size
   use resolution
   use global_var
+  use shallow_water
   use MOMeqSW_output
   use rheology
   use option

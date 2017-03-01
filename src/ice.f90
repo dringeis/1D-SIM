@@ -332,7 +332,7 @@ program ice
   endif
 
   if (oceanSIM) then
-   deallocate(etawn1, etawn2, uwn1, uwn2, duwdt, gedetawdx, tauiw, tauaw, buw) 
+   deallocate(etaw, etawn1, etawn2, uw, uwn1, uwn2, duwdt, gedetawdx, tauiw, tauaw, buw) 
   endif
   
 end program ice

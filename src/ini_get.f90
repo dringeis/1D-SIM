@@ -26,8 +26,8 @@ subroutine ini_get (utp, restart, expres, ts_res)
   small = 0.0001d0
 
   if (oceanSIM) then 
-     allocate(etawn1(0:nx+1), etawn2(0:nx+1))
-     allocate(uwn1(1:nx+1), uwn2(1:nx+1))
+     allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
+     allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
      allocate(duwdt(1:nx+1), gedetawdx(1:nx+1), buw(1:nx+1))
      allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif

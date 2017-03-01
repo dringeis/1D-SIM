@@ -8,8 +8,8 @@ use size
 
   IMPLICIT NONE
 
-  DOUBLE PRECISION, allocatable :: etawn1(:), etawn2(:)
-  DOUBLE PRECISION, allocatable :: uwn1(:), uwn2(:)
+  DOUBLE PRECISION, allocatable :: etaw(:), etawn1(:), etawn2(:)
+  DOUBLE PRECISION, allocatable :: uw(:), uwn1(:), uwn2(:)
   DOUBLE PRECISION :: Hw, bw, Cdairw ! Cdair:over ice, Cdairw: over water
   DOUBLE PRECISION :: Agamma ! for Asselin filter
   LOGICAL :: implicitDrag
