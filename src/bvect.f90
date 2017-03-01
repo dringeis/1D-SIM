@@ -4,6 +4,7 @@ subroutine bvect(tauair, un1, Cw, b)
   use properties
   use numerical
   use global_var
+  use shallow_water
 
   implicit none
       
@@ -21,9 +22,9 @@ subroutine bvect(tauair, un1, Cw, b)
      a_at_u = ( A(i) + A(i-1) ) / 2d0
      a_at_u=max(a_at_u, smallA)
 
-     b(i) = a_at_u*tauair(i) + a_at_u*Cw(i)*uw(i) - &
+     b(i) = a_at_u*tauair(i) + a_at_u*Cw(i)*uwn2(i) - &
             ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat - &
-            rho * h_at_u * ge * ( etaw(i) - etaw(i-1) ) / Deltax
+            rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
 
   enddo
    

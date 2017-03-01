@@ -7,6 +7,7 @@ subroutine EVP2solver (tauair, utp, ts, solver)
   use resolution
   use properties
   use global_var
+  use shallow_water
   use numerical
   use rheology
 
@@ -98,13 +99,13 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !     B1: part of water drag
 !------------------------------------------------------------------------
         
-        B1 = B1 + a_at_u(i) * Cw(i) * uw(i)
+        B1 = B1 + a_at_u(i) * Cw(i) * uwn2(i) ! to be consistent with NEMO
         
 !------------------------------------------------------------------------
 !     -rhoh detaw/dx : ocean tilt term
 !------------------------------------------------------------------------
      
-        B1 = B1 - rho * h_at_u(i) * ge * ( etaw(i) - etaw(i-1) ) / Deltax
+        B1 = B1 - rho * h_at_u(i) * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
 
 !------------------------------------------------------------------------
 !     B1: rho*h*du^p-1 / Deltate

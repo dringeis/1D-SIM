@@ -197,9 +197,20 @@ program ice
 
      if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
                                   ! Attention not initialized the 1st time level.
+
+!------------------------------------------------------------------------
+!     update previous time level solutions
+!------------------------------------------------------------------------
+
      un1=u
      hn1=h
      An1=A
+     if (oceanSIM) then 
+       uwn2   = uwn1 
+       uwn1   = uw
+       etawn2 = etawn1
+       etawn1 = etaw
+     endif
    
      if (IMEX .eq. 0) call ice_strength (hn1, An1) ! standard approach no IMEX 
      
@@ -271,17 +282,16 @@ program ice
 !------------------------------------------------------------------------
 !     Shallow water model
 !------------------------------------------------------------------------
-
-! do we want to use A or An-1?     
-    if (oceanSIM) then 
-       uwn2   = uwn1
-       uwn1   = uw
-       etawn2 = etawn1
-       etawn1 = etaw
+  
+    if (oceanSIM) then
        
        call advect_etaw (etaw)
-       call Cw_coefficient (u, Cw, Cb) ! at this point uwn1=uw (centered for leap frog below)
-       call momentum_uw (tauair, Cdair, Cw, A, u) ! could try with An1, un1 also
+       call Cw_coefficient (u, Cw, Cb)
+       if (IMEX .eq. 0) then
+        call momentum_uw (tauair, Cdair, Cw, An1, u)
+       elseif (IMEX .gt. 0) then
+        call momentum_uw (tauair, Cdair, Cw, A, u)
+       endif
        if (Asselin) then
 	call Asselin_filter (etaw, uw)
        endif

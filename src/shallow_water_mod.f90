@@ -81,8 +81,9 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
    RHS = RHS - ge * ( etawn1(i) - etawn1(i-1) ) / Deltax ! pressure gradient
 !   RHS = RHS - bw * uwn1(i)                              ! basal friction
    
-   A_at_u = ( A(i) + A(i-1) ) / 2d0  
-   Ht_at_u = Hw + ( etawn1(i) + etawn1(i-1) ) / 2d0 
+   A_at_u = ( Atp(i) + Atp(i-1) ) / 2d0  
+!   Ht_at_u = Hw + ( etawn1(i) + etawn1(i-1) ) / 2d0
+   Ht_at_u = Hw + ( etaw(i) + etaw(i-1) ) / 2d0 
    RHS = RHS + ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater ) 
    ! rescaled if Cdairw .ne. Cdair
    

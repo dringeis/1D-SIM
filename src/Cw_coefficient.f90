@@ -3,6 +3,7 @@ subroutine Cw_coefficient (utp, Cw, Cb)
   use forcing
   use option  
   use global_var
+  use shallow_water
   
   implicit none
 
@@ -32,7 +33,8 @@ subroutine Cw_coefficient (utp, Cw, Cb)
      
      do i = 2, nx
         
-        Cw(i) = Cdw*sqrt( (utp(i) - uw(i))**2d0 + small1)
+!        Cw(i) = Cdw*sqrt( (utp(i) - uw(i))**2d0 + small1)
+        Cw(i) = Cdw*sqrt( (utp(i) - uwn2(i))**2d0 + small1) ! to be consistent with NEMO
         
 !        bathy_at_u = ( bathy(i-1) + bathy(i) ) / 2d0
 	bathy_at_u = min(bathy(i-1), bathy(i))

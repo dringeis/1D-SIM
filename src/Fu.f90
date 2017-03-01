@@ -59,6 +59,7 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
   use properties
   use numerical
   use global_var
+  use shallow_water
   use option
 
   implicit none
@@ -92,8 +93,9 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
      
-     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
-     
+!     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uw(i) )
+     R_vec(i) = R_vec(i) - a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
+                                                               ! with NEMO
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag
 !------------------------------------------------------------------------
@@ -101,10 +103,10 @@ subroutine calc_R (utp, zeta, eta, Cw, Cb, tauair, R_vec)
      R_vec(i) = R_vec(i) - Cb(i) * utp(i)
      
 !------------------------------------------------------------------------
-!     -rhoh detaw/dx : ocean tilt term
+!     -rhoh detaw/dx : ocean tilt term 
 !------------------------------------------------------------------------
      
-     R_vec(i) = R_vec(i) - rho * h_at_u * ge * ( etaw(i) - etaw(i-1) ) / Deltax
+     R_vec(i) = R_vec(i) - rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
      
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx - 1/2dP/dx : rheology term
