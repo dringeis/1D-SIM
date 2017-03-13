@@ -62,15 +62,15 @@ program ice
   adv_scheme     = 'upwind' ! upwind, upwindRK2
   oceanSIM       = .true. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
-  Asselin        = .false. ! Asselin filter for uw and etaw
-  Agamma         = 1d-03 ! Asselin filter parameter
+  Asselin        = .true. ! Asselin filter for uw and etaw
+  Agamma         = 1d-02 ! Asselin filter parameter
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
   Deltat     = 300d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
+  nstep      = 288     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
@@ -170,7 +170,7 @@ program ice
   rhowater   = 1026d0       ! water density
   ge         = 9.8d0        ! Earth's gravitional acceleration
   Hw         = 5d0          ! mean water depth (for shallow water model)
-  bw         = 0.0001d0     ! friction term for the uw momentum eq (always implicit).
+  bw         = 0.0005d0/Hw  ! friction term for the uw momentum eq (always implicit).
 
   Cda        = rhoair   * Cdair
   Cdw        = rhowater * Cdwater
