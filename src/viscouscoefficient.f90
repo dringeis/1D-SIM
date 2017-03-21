@@ -66,6 +66,7 @@ subroutine viscouscoefficient(utp, zeta, eta)
   if (linear_viscous) then
      zeta = 1d08
      eta  = e_2 * zeta
+     P_half = 0d0
   endif
 
   return
