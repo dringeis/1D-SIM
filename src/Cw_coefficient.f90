@@ -22,8 +22,6 @@ subroutine Cw_coefficient (utp, Cw, Cb)
   
   Cw(1)    = 0d0
   Cw(nx+1) = 0d0
-  Cb(1)    = 0d0
-  Cb(nx+1) = 0d0
 
   if (linear_drag) then
      
@@ -35,28 +33,39 @@ subroutine Cw_coefficient (utp, Cw, Cb)
         
 !        Cw(i) = Cdw*sqrt( (utp(i) - uw(i))**2d0 + small1)
         Cw(i) = Cdw*sqrt( (utp(i) - uwn2(i))**2d0 + small1) ! to be consistent with NEMO
-        
-!        bathy_at_u = ( bathy(i-1) + bathy(i) ) / 2d0
-	bathy_at_u = min(bathy(i-1), bathy(i))
-	
-        if (bathy_at_u .gt. 30d0) then ! too deep for bottom drag
-	  Cb(i) = 0d0
-	else
-	  hc=bathy_at_u/k1
-	  h_at_u = max( h(i-1), h(i) )
-	  
-	  if ( h_at_u .gt. hc ) then
-	    A_at_u = max( A(i-1), A(i) )
-	    Cbfactor=k2/(abs(utp(i))+umin)
-	    Cb(i) = Cbfactor * (h_at_u - hc) * dexp(-CC * ( 1d0 - A_at_u ))
-	  else
-	    Cb(i) = 0d0
-	  endif
-	 endif
 
      enddo
      
   endif
+
+  
+!------- Basal stress ---------
+
+  Cb(1)    = 0d0
+  Cb(nx+1) = 0d0
+  
+  do i = 2, nx
+   
+   bathy_at_u = min(bathy(i-1), bathy(i))
+	
+   if (bathy_at_u .gt. 30d0) then ! too deep for bottom drag
+    Cb(i) = 0d0
+   else
+    hc=bathy_at_u/k1
+    h_at_u = max( h(i-1), h(i) )
+	  
+    if ( h_at_u .gt. hc ) then
+     A_at_u = max( A(i-1), A(i) )
+     Cbfactor=k2/(abs(utp(i))+umin)
+     Cb(i) = Cbfactor * (h_at_u - hc) * dexp(-CC * ( 1d0 - A_at_u ))
+    else
+     Cb(i) = 0d0
+    endif
+   endif
+
+  enddo
+  
+!------------------------------
 
   return
 end subroutine Cw_coefficient
