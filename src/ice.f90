@@ -70,7 +70,7 @@ program ice
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
   Deltat     = 300d0   ! time step [s]
-  nstep      = 288     ! lenght of the run in nb of time steps
+  nstep      = 100     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)

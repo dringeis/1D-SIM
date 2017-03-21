@@ -5,6 +5,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
   use resolution
   use numerical
   use option
+  use shallow_water
 
   implicit none
 
@@ -39,6 +40,22 @@ subroutine output_file(e, gamma_nl, solver, expnb)
   write(10,*) (linear_viscous)
   write(10,*) ('constant wind =')
   write(10,*) (constant_wind)
+  
+  write(10,*) ('OCEAN MODEL')
+  write(10,*) ('ocean model is =')
+  write(10,*) (oceanSIM)
+  if (oceanSIM) then
+   write(10,*) ('Implicit drag =')
+   write(10,*) (implicitDrag)
+   write(10,*) ('Asselin filter is =')
+   write(10,*) (Asselin)
+   if (Asselin) then 
+    write(10,*) ('gamma value for Asselin filter =')
+    write(10,10) (Agamma)
+   endif
+   write(10,*) ('water depth (m) =')
+   write(10,10) (Hw)
+  endif
 
   write(10,*) ('')
   write(10,*) ('SOLVER AND NUMERICS')
@@ -54,7 +71,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
      write(10,12) (maxiteGMRES)
      write(10,*) ('gamma_nl (tol) =')
      write(10,10) (gamma_nl)
-     
+   
   close(10)
 
 10 format (f24.10)
