@@ -228,7 +228,7 @@
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
 	if ( L2normnew .lt. L2norm ) exit
-	print *, 'LINESEARCH', beta, L2normnew, L2norm
+!	print *, 'LINESEARCH', beta, L2normnew, L2norm
       
       enddo
   

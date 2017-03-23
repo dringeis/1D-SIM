@@ -314,12 +314,12 @@ program ice
 !------------------------------------------------------------------------
 
 !     call check_neg_vel(u)
-     call minmaxtracer(h,1)
-     call minmaxtracer(A,2)
-     call minmaxtracer(u,3)
+     call minmaxtracer(h,1,ts)
+     call minmaxtracer(A,2,ts)
+     call minmaxtracer(u,3,ts)
      if (oceanSIM) then
-      call minmaxtracer(etaw,4)
-      call minmaxtracer(uw,5)
+      call minmaxtracer(etaw,4,ts)
+      call minmaxtracer(uw,5,ts)
      endif
 
   enddo

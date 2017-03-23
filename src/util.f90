@@ -50,15 +50,21 @@ subroutine check_neg_vel(utp)
   return
 end subroutine check_neg_vel
 
-subroutine minmaxtracer(var,id)
+subroutine minmaxtracer(var,id, ts)
   use size
 
   implicit none
 
   integer :: i
-  integer, intent(in) :: id ! h: id=1, A: id=2, zeta: id=3
+  integer, save :: negice, negwater
+  integer, intent(in) :: id, ts ! h: id=1, A: id=2, zeta: id=3
   double precision, intent(in) :: var(0:nx+1)
   double precision :: vmin, vmax
+  
+  if (ts .eq. 1) then
+    negice=0
+    negwater=0
+  endif
   
   vmin=1d100
   vmax=-1d100
@@ -75,11 +81,13 @@ subroutine minmaxtracer(var,id)
   elseif (id .eq. 2) then
      print *, 'min, max A =', vmin, vmax
   elseif (id .eq. 3) then
-     print *, 'min, max u ice =', vmin, vmax
+  if (vmin .lt. 0d0) negice=negice+1
+     print *, 'min, max u ice =', vmin, vmax, negice
   elseif (id .eq. 4) then
      print *, 'min, max eta water =', vmin, vmax
   elseif (id .eq. 5) then
-     print *, 'min, max u water =', vmin, vmax
+  if (vmin .lt. 0d0) negwater=negwater+1
+     print *, 'min, max u water =', vmin, vmax, negwater
   else
      print *, 'WRONG ID'
   endif
