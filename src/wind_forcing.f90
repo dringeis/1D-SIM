@@ -31,7 +31,7 @@ subroutine wind_forcing (tauair, ts)
        enddo
        print *, 'tauair', ts, 100d0*tauair(50)/(Cda * (speed)**2d0)
     else
-	modulation = cos(2*pi*ts*Deltat/period)
+	modulation = sin(2*pi*ts*Deltat/period)
        
        do i = 2, nx
           tauair(i) = modulation * Cda * (speed)**2d0
