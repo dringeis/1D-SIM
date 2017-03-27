@@ -169,7 +169,7 @@ program ice
   rho        = 900d0        ! ice density
   rhowater   = 1026d0       ! water density
   ge         = 9.8d0        ! Earth's gravitional acceleration
-  Hw         = 5d0          ! mean water depth (for shallow water model)
+  Hw         = 2.5d0          ! mean water depth (for shallow water model)
   bw         = 0.0005d0/Hw  ! friction term for the uw momentum eq (always implicit).
 
   Cda        = rhoair   * Cdair
