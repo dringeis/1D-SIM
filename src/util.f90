@@ -165,11 +165,11 @@ MODULE diag_stress
 
 IMPLICIT NONE
 
-  DOUBLE PRECISION :: tauiw100, tauwi100
+  DOUBLE PRECISION :: tauaidiag, tauiwdiag, tauwidiag
   
 END MODULE diag_stress
 
-subroutine calc_diag_stress (utp, Cw)
+subroutine calc_diag_stress (idiag, utp, Cw, tauair)
   use size
   use numerical
   use global_var
@@ -178,22 +178,26 @@ subroutine calc_diag_stress (utp, Cw)
 
   implicit none
       
-  integer :: i
-
-  double precision, intent(in)  :: utp(1:nx+1), Cw(1:nx+1)
+  integer, intent(in) :: idiag
+  
+  double precision, intent(in)  :: utp(1:nx+1), Cw(1:nx+1), tauair(1:nx+1)
   double precision :: a_at_u, h_at_u
-   
-  i=100
 
-  a_at_u = ( A(i) + A(i-1) ) / 2d0
+  a_at_u = ( A(idiag) + A(idiag-1) ) / 2d0
   a_at_u=max(a_at_u, smallA)
 
 !------------------------------------------------------------------------
-!     Cw*u : water drag term
+!     air stress on ice
+!------------------------------------------------------------------------  
+  
+  tauaidiag = a_at_u*tauair(idiag)
+  
+!------------------------------------------------------------------------
+!     water stress on ice
 !------------------------------------------------------------------------
      
-  tauwi100 = -1d0 * a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
-                                                               ! with NEMO
+  tauwidiag = -1d0 * a_at_u*Cw(idiag) * ( utp(idiag) - uwn2(idiag) ) ! to be consistent
+                                                                    ! with NEMO
   return
 end subroutine calc_diag_stress
 

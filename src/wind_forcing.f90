@@ -15,7 +15,7 @@ subroutine wind_forcing (tauair, ts)
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
   speed = 10d0 ! [m/s]
-  period = 3d0*24d0*3600d0 ! period of cos in seconds (set to 3 days)
+  period = 6d0*3600d0 ! period of cos in seconds (set to 3 days)
   pi = 3.14159265d0
   apar = 6d0*3600d0
 

@@ -279,9 +279,9 @@ subroutine output_u_and_du ( ts, k, utp, du )
   return
 end subroutine output_u_and_du
 
-subroutine output_diag_stress(ts, expnb)
+subroutine output_diag_stress(ts, expnb, idiag)
 
-! output diagnostic (ice-ocean and vice versa) stress at i=100
+! output diagnostic (ice-ocean and vice versa) stress at i=idiag
 
   use resolution
   use diag_stress
@@ -291,7 +291,7 @@ subroutine output_diag_stress(ts, expnb)
   character filename*70
 
   integer :: Dt, Dx, adv
-  integer, intent(in) :: ts, expnb
+  integer, intent(in) :: ts, expnb, idiag
   double precision :: ratio
 
   if (adv_scheme .eq. 'upwind') then
@@ -303,17 +303,17 @@ subroutine output_diag_stress(ts, expnb)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  ratio = tauwi100/tauiw100
+  ratio = tauwidiag/tauiwdiag
   
-  write (filename, '("output/diag_iw_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
+  write (filename, '("output/diag_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
 	 Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
   
-  write(10,10) ts, tauwi100, tauiw100, ratio
+  write(10,10) ts, idiag, tauwidiag, tauiwdiag, ratio, tauaidiag
 
   close(10)
 
-10 format (i5,1x,f12.8,1x,f12.8,1x,f12.8)
+10 format (i5,1x, i5,1x,f12.8,1x,f12.8,1x,f12.8,1x,f12.8)
 
   return
 end subroutine output_diag_stress

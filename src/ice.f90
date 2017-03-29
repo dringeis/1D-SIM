@@ -32,7 +32,7 @@ program ice
   implicit none
 
   logical :: p_flag, restart
-  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver
+  integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, Cdair, Cdwater
@@ -63,15 +63,16 @@ program ice
   oceanSIM       = .true. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
-  diag_iw_stress = .false. ! diagnostic for ice-ocean stress at i=100
+  DiagStress     = .false. ! diagnostic for ice-ocean stress at i=idiag
+  idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX) 
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
-  Deltat     = 300d0   ! time step [s]
-  nstep      = 100     ! lenght of the run in nb of time steps
+  Deltat     = 600d0   ! time step [s]
+  nstep      = 288     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
@@ -276,9 +277,9 @@ program ice
 !------------------------------------------------------------------------
 !     Diagnostic of ice-ocean stress
 !------------------------------------------------------------------------     
-     if (diag_iw_stress) then
+     if (DiagStress) then
       call Cw_coefficient (u, Cw, Cb)
-      call calc_diag_stress (u, Cw)
+      call calc_diag_stress (idiag, u, Cw, tauair)
      endif
 !------------------------------------------------------------------------       
      
@@ -298,9 +299,9 @@ program ice
        call advect_etaw (etaw)
        call Cw_coefficient (u, Cw, Cb)
        if (IMEX .eq. 0) then
-        call momentum_uw (tauair, Cdair, Cw, An1, u)
+        call momentum_uw (idiag, tauair, Cdair, Cw, An1, u)
        elseif (IMEX .gt. 0) then
-        call momentum_uw (tauair, Cdair, Cw, A, u)
+        call momentum_uw (idiag, tauair, Cdair, Cw, A, u)
        endif
        if (Asselin) then
 	call Asselin_filter (etaw, uw)
@@ -330,7 +331,7 @@ program ice
      if (oceanSIM) then
       call minmaxtracer(etaw,4,ts)
       call minmaxtracer(uw,5,ts)
-      if (diag_iw_stress) call output_diag_stress (ts, expnb)
+      if (DiagStress) call output_diag_stress (ts, expnb, idiag)
      endif
 
   enddo

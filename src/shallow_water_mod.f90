@@ -54,7 +54,7 @@ subroutine advect_etaw (etawtp)
   
 end subroutine advect_etaw
 
-subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
+subroutine momentum_uw (idiag, tauair, Cdair, Cw, Atp, utp)
   
   use size
   use resolution
@@ -70,6 +70,7 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   double precision, intent(in) :: tauair(1:nx+1), Cw(1:nx+1), Cdair
   double precision, intent(in) :: Atp(0:nx+1), utp(1:nx+1)
   double precision :: invtwodt, RHS, LHS, Ht_at_u, A_At_u, Diocoeff ! Ht=Hw+etaw
+  integer, intent(in) :: idiag
   integer :: i
   
   invtwodt = 1d0 / ( 2d0*Deltat )
@@ -114,10 +115,10 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
 
 !----- Diagnostic for ice-ocean stress ---------
   
-  if (diag_iw_stress) then
-   if (i .eq. 100) then
+  if (DiagStress) then
+   if (i .eq. idiag) then
   
-    tauiw100 = tauiw(i) * Ht_at_u * rhowater
+    tauiwdiag = tauiw(idiag) * Ht_at_u * rhowater
   
    endif
   endif
