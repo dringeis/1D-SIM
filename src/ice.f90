@@ -63,6 +63,7 @@ program ice
   oceanSIM       = .true. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
+  diag_iw_stress = .false. ! diagnostic for ice-ocean stress at i=100
   Agamma         = 1d-02 ! Asselin filter parameter
 
   solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
@@ -272,6 +273,15 @@ program ice
      
      endif
 
+!------------------------------------------------------------------------
+!     Diagnostic of ice-ocean stress
+!------------------------------------------------------------------------     
+     if (diag_iw_stress) then
+      call Cw_coefficient (u, Cw, Cb)
+      call calc_diag_stress (u, Cw)
+     endif
+!------------------------------------------------------------------------       
+     
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
@@ -310,7 +320,7 @@ program ice
      endif
 
 !------------------------------------------------------------------------
-!     calculate diagnostics and check stability conditions            
+!     calculate diagnostics            
 !------------------------------------------------------------------------
 
 !     call check_neg_vel(u)
@@ -320,6 +330,7 @@ program ice
      if (oceanSIM) then
       call minmaxtracer(etaw,4,ts)
       call minmaxtracer(uw,5,ts)
+      if (diag_iw_stress) call output_diag_stress (ts, expnb)
      endif
 
   enddo

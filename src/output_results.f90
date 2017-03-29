@@ -278,3 +278,42 @@ subroutine output_u_and_du ( ts, k, utp, du )
 
   return
 end subroutine output_u_and_du
+
+subroutine output_diag_stress(ts, expnb)
+
+! output diagnostic (ice-ocean and vice versa) stress at i=100
+
+  use resolution
+  use diag_stress
+  use option
+  implicit none
+
+  character filename*70
+
+  integer :: Dt, Dx, adv
+  integer, intent(in) :: ts, expnb
+  double precision :: ratio
+
+  if (adv_scheme .eq. 'upwind') then
+    adv = 1
+  elseif (adv_scheme .eq. 'upwindRK2') then
+    adv = 2
+  endif
+
+  Dt=int(Deltat/60d0) ! in min
+  Dx=int(Deltax/1000d0) ! in km
+
+  ratio = tauwi100/tauiw100
+  
+  write (filename, '("output/diag_iw_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
+	 Dx,IMEX,adv,BDF2,expnb
+  open (10, file = filename, access = 'append')
+  
+  write(10,10) ts, tauwi100, tauiw100, ratio
+
+  close(10)
+
+10 format (i5,1x,f12.8,1x,f12.8,1x,f12.8)
+
+  return
+end subroutine output_diag_stress

@@ -62,6 +62,8 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
   use global_var
   use shallow_water
   use MOMeqSW_output
+  use option
+  use diag_stress
   
   implicit none
   
@@ -109,7 +111,16 @@ subroutine momentum_uw (tauair, Cdair, Cw, Atp, utp)
     tauiw(i)= -1d0 * Diocoeff * ( uwn1(i) - utp(i) )
    endif
    buw(i) = -1d0 * bw * uw(i)
-!-----------------------------------------------
+
+!----- Diagnostic for ice-ocean stress ---------
+  
+  if (diag_iw_stress) then
+   if (i .eq. 100) then
+  
+    tauiw100 = tauiw(i) * Ht_at_u * rhowater
+  
+   endif
+  endif
   
   enddo
   

@@ -157,6 +157,48 @@ subroutine stab_condition(Cw,zeta)
   return
 end subroutine stab_condition
 
+!****************************************************************************
+!     diagnostic for ice-ocean stress
+!****************************************************************************
+
+MODULE diag_stress
+
+IMPLICIT NONE
+
+  DOUBLE PRECISION :: tauiw100, tauwi100
+  
+END MODULE diag_stress
+
+subroutine calc_diag_stress (utp, Cw)
+  use size
+  use numerical
+  use global_var
+  use shallow_water
+  use diag_stress
+
+  implicit none
+      
+  integer :: i
+
+  double precision, intent(in)  :: utp(1:nx+1), Cw(1:nx+1)
+  double precision :: a_at_u, h_at_u
+   
+  i=100
+
+  a_at_u = ( A(i) + A(i-1) ) / 2d0
+  a_at_u=max(a_at_u, smallA)
+
+!------------------------------------------------------------------------
+!     Cw*u : water drag term
+!------------------------------------------------------------------------
+     
+  tauwi100 = -1d0 * a_at_u*Cw(i) * ( utp(i) - uwn2(i) ) ! to be consistent
+                                                               ! with NEMO
+  return
+end subroutine calc_diag_stress
+
+
+
 
 
 
