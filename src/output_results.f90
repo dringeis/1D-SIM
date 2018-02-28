@@ -15,6 +15,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
   double precision, intent(in)  :: utp(1:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
+  double precision :: Erate(1:nx+1) ! KE rate loss/gain by rheology term
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -33,12 +34,17 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   sigma(nx+1) = 0d0
   sig_norm(0) = 0d0
   sig_norm(nx+1) = 0d0
+  Erate = 0d0
 
   do i = 1, nx
      div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
      sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
      sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength 
 !     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
+  enddo
+  
+  do i = 2, nx
+   Erate(i) = utp(i) * ( sigma(i) - sigma(i-1) ) / Deltax
   enddo
   
   write (filename, '("output/h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
@@ -73,6 +79,10 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 !		    IMEX, adv,ts,expnb
 !  open (17, file = filename, status = 'unknown')
 
+  write (filename, '("output/Er_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
+		    Dx,solver, IMEX, adv,BDF2,ts,expnb
+  open (18, file = filename, status = 'unknown')
+
 
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
@@ -82,8 +92,9 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 !  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
 !  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
   write(12,10) ( utp(i),       i = 1, nx+1 )
+  write(18,10) ( Erate(i),     i = 1, nx+1 )
 
-  do k = 10, 17
+  do k = 10, 18
      close(k)
   enddo
 

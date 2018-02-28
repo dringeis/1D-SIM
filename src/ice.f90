@@ -60,7 +60,7 @@ program ice
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
   adv_scheme     = 'upwind' ! upwind, upwindRK2
-  oceanSIM       = .true. ! for shallow water model
+  oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
   DiagStress     = .false. ! diagnostic for ice-ocean stress at i=idiag
@@ -343,8 +343,9 @@ program ice
      print *, 'mean nb of fgmres it per time level: ', fgmres_per_ts/(nstep*1d0)
   endif
 
+  deallocate(etaw, etawn1, etawn2, uw, uwn1, uwn2) 
   if (oceanSIM) then
-   deallocate(etaw, etawn1, etawn2, uw, uwn1, uwn2, duwdt, gedetawdx, tauiw, tauaw, buw) 
+   deallocate(duwdt, gedetawdx, tauiw, tauaw, buw) 
   endif
   
 end program ice

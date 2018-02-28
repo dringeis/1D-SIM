@@ -25,9 +25,10 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   small = 0.0001d0
 
+  allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
+  allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
+  
   if (oceanSIM) then 
-     allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
-     allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
      allocate(duwdt(1:nx+1), gedetawdx(1:nx+1), buw(1:nx+1))
      allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif
@@ -38,9 +39,13 @@ subroutine ini_get (utp, restart, expres, ts_res)
   h(nx+1) = 0d0
   A(0)    = 0d0
   A(nx+1) = 0d0
-  uw(1)    = 0d0 ! close bc
-  uw(nx+1) = 0d0 ! close bc  
-  etaw=0d0
+  uw      = 0d0
+  uwn1    = 0d0
+  uwn2    = 0d0
+  etaw    = 0d0
+  etawn1  = 0d0
+  etawn2  = 0d0
+  
   scaling=1d0 ! initialize scaling field (only used for JFNK)
 
   if (restart) then 
