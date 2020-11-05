@@ -183,7 +183,6 @@ program ice
 
   call ini_get (u, restart, expres, ts_res)
   un1=u
-  if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
   tauair = 0d0 ! initialization (watchout for restart)
   nbhr = 0d0
   fgmres_per_ts = 0
