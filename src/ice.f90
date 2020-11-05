@@ -59,7 +59,7 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
-  adv_scheme     = 'upwind' ! upwind, upwindRK2
+  adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
@@ -105,7 +105,7 @@ program ice
       stop
     endif
   endif
-  if (BDF2 .eq. 1 .and. adv_scheme .ne. 'upwindRK2') then
+  if (BDF2 .eq. 1 .and. adv_scheme .ne. 'upwindRK2') then ! semilag should work (leapfrog...) check this
       print *, 'set adv_scheme = upwindRK2'
       stop
   endif
@@ -183,6 +183,8 @@ program ice
 
   call ini_get (u, restart, expres, ts_res)
   un1=u
+  hn1=h
+  An1=A
   tauair = 0d0 ! initialization (watchout for restart)
   nbhr = 0d0
   fgmres_per_ts = 0
@@ -198,6 +200,11 @@ program ice
 
      if ( BDF2 .eq. 1 ) un2 = un1 ! BDF2 needs u at 3 time levels
                                   ! Attention not initialized the 1st time level.
+
+     if ( adv_scheme .eq. 'semilag') then ! semilag is 3 time level scheme
+        hn2 = hn1
+        An2 = An1
+     endif
 
 !------------------------------------------------------------------------
 !     update previous time level solutions
@@ -230,7 +237,7 @@ program ice
      do k = 1, Nmax_OL 
         
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  call advection (un1, u, hn1, An1, h, A) ! advection scheme for tracers
+	  call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
 	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
 	endif
 	
@@ -285,7 +292,7 @@ program ice
       call cpu_time(time2)
       print *, 'cpu time = ', time2-time1
 
-     if (IMEX .eq. 0) call advection (un1, u, hn1, An1, h, A)  ! standard approach no IMEX
+     if (IMEX .eq. 0) call advection (un1, u, hn1, An1, hn2, An2, h, A)
 
 !     call meantracer(h,meanvalue)
 

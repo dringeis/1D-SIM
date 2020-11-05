@@ -1,4 +1,4 @@
-subroutine advection (un1, utp, hin, Ain, hout, Aout)
+subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   use size
   use resolution
   use option
@@ -8,7 +8,8 @@ subroutine advection (un1, utp, hin, Ain, hout, Aout)
   integer :: i
 
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
-  double precision, intent(in) :: hin(0:nx+1), Ain(0:nx+1)
+  double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
+  double precision, intent(in) :: hn2in(0:nx+1), An2in(0:nx+1)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
@@ -25,7 +26,7 @@ subroutine advection (un1, utp, hin, Ain, hout, Aout)
 !     compute RHS of dh/dt=-d(hu)/dx (same idea for A)
 !------------------------------------------------------------------------
 
-  call fluxh_A (utp, hin, Ain, fluxh, fluxA)
+  call fluxh_A (utp, hn1in, An1in, fluxh, fluxA)
 
 !------------------------------------------------------------------------
 !     update the tracer values
@@ -34,10 +35,10 @@ subroutine advection (un1, utp, hin, Ain, hout, Aout)
             
   do i = 1, nx
 
-     hout(i) = hin(i) - DtoverDx*fluxh(i)    
+     hout(i) = hn1in(i) - DtoverDx*fluxh(i)    
      hout(i) = max(hout(i), 0d0)
 
-     Aout(i) = Ain(i) - DtoverDx*fluxA(i)    
+     Aout(i) = An1in(i) - DtoverDx*fluxA(i)    
      Aout(i) = max(Aout(i), 0d0)
      Aout(i) = min(Aout(i), 1d0)     
      
@@ -45,14 +46,14 @@ subroutine advection (un1, utp, hin, Ain, hout, Aout)
   
   elseif (adv_scheme .eq. 'upwindRK2') then 
   
-  call fluxh_A (un1, hin, Ain, fluxh, fluxA) 
+  call fluxh_A (un1, hn1in, An1in, fluxh, fluxA) 
   
   do i = 1, nx ! predictor step
 
-     hstar(i) = hin(i) - (DtoverDx/2d0)*fluxh(i)
+     hstar(i) = hn1in(i) - (DtoverDx/2d0)*fluxh(i)
      hstar(i) = max(hstar(i), 0d0)
 
-     Astar(i) = Ain(i) - (DtoverDx/2d0)*fluxA(i)    
+     Astar(i) = An1in(i) - (DtoverDx/2d0)*fluxA(i)    
      Astar(i) = max(Astar(i), 0d0)
      Astar(i) = min(Astar(i), 1d0)     
      
@@ -63,10 +64,10 @@ subroutine advection (un1, utp, hin, Ain, hout, Aout)
   
   do i = 1, nx ! corrector step
 
-     hout(i) = hin(i) - DtoverDx*fluxh(i)
+     hout(i) = hn1in(i) - DtoverDx*fluxh(i)
      hout(i) = max(hout(i), 0d0)
 
-     Aout(i) = Ain(i) - DtoverDx*fluxA(i)    
+     Aout(i) = An1in(i) - DtoverDx*fluxA(i)    
      Aout(i) = max(Aout(i), 0d0)
      Aout(i) = min(Aout(i), 1d0)     
      
