@@ -5,7 +5,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i
+  integer :: i, k
 
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
@@ -14,7 +14,10 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
   double precision :: fluxh(1:nx), fluxA(1:nx)
- 
+  double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
+  double precision :: fmhprime, fmAprime
+  double precision :: hbef, Abef ! init (before) positions of particles in semilag  
+
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
   Aout(0) = 0d0
@@ -72,7 +75,81 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      Aout(i) = min(Aout(i), 1d0)     
      
   enddo
-  
+
+  elseif (adv_scheme .eq. 'semilag') then
+
+!------------------------------------------------------------------------ 
+!     Semi-Lagrangian scheme for advection. 
+!     This is a 3 time level scheme (h is obtained from hn1 and hn2)
+!     Staniforth and Côté, Monthly Weather Review 1991.
+!------------------------------------------------------------------------ 
+
+     alpham=0.01
+     do i = 1, nx
+
+!------------------------------------------------------------------------  
+! find velocity at x-alpham  and t=n1
+!------------------------------------------------------------------------
+     
+        do k = 1, 5
+           um = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
+        enddo
+
+!------------------------------------------------------------------------
+! find hbef and Abef (initial position of particle at time level n-2)
+!------------------------------------------------------------------------
+        
+        if (i .eq. 1) then
+           hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i+1) - hn2in(i) ) / Deltax
+           Abef = An2in(i) - 2d0 * alpham * ( An2in(i+1) - An2in(i) ) / Deltax
+        elseif (i .eq. nx) then
+           hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i) - hn2in(i-1) ) / Deltax
+           Abef = An2in(i) - 2d0 * alpham * ( An2in(i) - An2in(i-1) ) / Deltax
+        else
+           hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
+           Abef = An2in(i) - ( An2in(i+1) - An2in(i-1) )*alpham / Deltax
+        endif
+        hbef = max(hbef, 0d0)
+        Abef = max(Abef, 0d0)
+        Abef = min(Abef, 1d0)
+
+!------------------------------------------------------------------------  
+! find fmh, fmA (time level n-1)
+!------------------------------------------------------------------------ 
+
+        if (i .eq. 1) then
+           fmhprime= (hn1in(i+1)+hn1in(i))*(un1(i+2)-un1(i))/(2d0*Deltax2) - &
+                      2d0*hn1in(i)*(un1(i+1)-un1(i)) / Deltax2
+           fmAprime= (An1in(i+1)+An1in(i))*(un1(i+2)-un1(i))/(2d0*Deltax2) - &
+                      2d0*An1in(i)*(un1(i+1)-un1(i)) / Deltax2
+        elseif (i .eq. nx) then
+           fmhprime= 2d0*hn1in(i)*(un1(i+1)-un1(i)) / Deltax2 - &
+                    (hn1in(i)+hn1in(i-1))*(un1(i+1)-un1(i-1))/(2d0*Deltax2)
+           fmAprime= 2d0*An1in(i)*(un1(i+1)-un1(i)) / Deltax2 - &
+                    (An1in(i)+An1in(i-1))*(un1(i+1)-un1(i-1))/(2d0*Deltax2)
+        else
+           fmhprime=( (hn1in(i+1)+hn1in(i))*(un1(i+2)-un1(i)) - &
+                      (hn1in(i)+hn1in(i-1))*(un1(i+1)-un1(i-1)) ) / (4d0*Deltax2)
+           fmAprime=( (An1in(i+1)+An1in(i))*(un1(i+2)-un1(i)) -&
+                      (An1in(i)+An1in(i-1))*(un1(i+1)-un1(i-1))) / (4d0*Deltax2)
+        endif
+
+        fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
+        fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
+
+!------------------------------------------------------------------------
+! find hout, Aout (after, time level n)
+!------------------------------------------------------------------------ 
+
+        hout(i) = hbef - 2d0*Deltat*fmh
+        hout(i) = max(hout(i), 0d0)
+        Aout(i) = Abef - 2d0*Deltat*fmA
+        Aout(i) = max(Aout(i), 0d0)
+        Aout(i) = min(Aout(i), 1d0)
+
+     enddo
+
+
   endif
   
   return
