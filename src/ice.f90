@@ -59,7 +59,7 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
-  adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
+  adv_scheme     = 'semilag' ! upwind, upwindRK2, semilag
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw

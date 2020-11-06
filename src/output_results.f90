@@ -21,6 +21,8 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
     adv = 1
   elseif (adv_scheme .eq. 'upwindRK2') then
     adv = 2
+ elseif (adv_scheme .eq. 'semilag') then
+    adv = 3
   endif
 
   Dt=int(Deltat) ! in s
