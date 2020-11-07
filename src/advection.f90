@@ -93,6 +93,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
         do k = 1, 5
            um = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
+           alpham=Deltat*um
         enddo
 
 !------------------------------------------------------------------------
