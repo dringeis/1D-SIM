@@ -119,20 +119,21 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
 
         if (i .eq. 1) then
-           fmhprime= (hn1in(i+1)+hn1in(i))*(un1(i+2)-un1(i))/(2d0*Deltax2) - &
-                      2d0*hn1in(i)*(un1(i+1)-un1(i)) / Deltax2
-           fmAprime= (An1in(i+1)+An1in(i))*(un1(i+2)-un1(i))/(2d0*Deltax2) - &
-                      2d0*An1in(i)*(un1(i+1)-un1(i)) / Deltax2
+           fmhprime= ( hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                       hn1in(i)  *(un1(i+1)-un1(i)  ) ) / Deltax2
+           fmAprime= ( An1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                       An1in(i)  *(un1(i+1)-un1(i)  ) ) / Deltax2
         elseif (i .eq. nx) then
-           fmhprime= 2d0*hn1in(i)*(un1(i+1)-un1(i)) / Deltax2 - &
-                    (hn1in(i)+hn1in(i-1))*(un1(i+1)-un1(i-1))/(2d0*Deltax2)
-           fmAprime= 2d0*An1in(i)*(un1(i+1)-un1(i)) / Deltax2 - &
-                    (An1in(i)+An1in(i-1))*(un1(i+1)-un1(i-1))/(2d0*Deltax2)
+           fmhprime= ( hn1in(i)  *(un1(i+1)-un1(i) ) - &
+                       hn1in(i-1)*(un1(i)-un1(i-1) ) ) / Deltax2
+           fmAprime= ( An1in(i)  *(un1(i+1)-un1(i) ) - &
+                       An1in(i-1)*(un1(i)-un1(i-1) ) ) / Deltax2
         else
-           fmhprime=( (hn1in(i+1)+hn1in(i))*(un1(i+2)-un1(i)) - &
-                      (hn1in(i)+hn1in(i-1))*(un1(i+1)-un1(i-1)) ) / (4d0*Deltax2)
-           fmAprime=( (An1in(i+1)+An1in(i))*(un1(i+2)-un1(i)) -&
-                      (An1in(i)+An1in(i-1))*(un1(i+1)-un1(i-1))) / (4d0*Deltax2)
+           fmhprime=( hn1in(i+1)*(un1(i+2) - un1(i+1)) - &
+                      hn1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
+
+           fmAprime=( An1in(i+1)*(un1(i+2) - un1(i+1)) - &
+                      An1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
         endif
 
         fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
