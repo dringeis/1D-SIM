@@ -7,6 +7,8 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   integer :: i, k
 
+  logical :: limiter
+
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
   double precision, intent(in) :: hn2in(0:nx+1), An2in(0:nx+1)
@@ -17,6 +19,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
+  double precision :: upper, lower
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -86,7 +89,8 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !     Pellerin et al, Monthly Weather Review 1995. 
 !
 !------------------------------------------------------------------------ 
-
+     
+     limiter=.true. ! see Pellerin et al. MWR 1995
      alpham=0.01
      do i = 1, nx
 
@@ -106,12 +110,42 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
         if (i .eq. 1) then
            hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i+1) - hn2in(i) ) / Deltax
            Abef = An2in(i) - 2d0 * alpham * ( An2in(i+1) - An2in(i) ) / Deltax
+           if (limiter) then
+              upper=max(hn2in(i), hn2in(i+1))
+              lower=min(hn2in(i), hn2in(i+1))
+              if (hbef .gt. upper) hbef=upper
+              if (hbef .lt. lower) hbef=lower
+              upper=max(An2in(i), An2in(i+1))
+              lower=min(An2in(i), An2in(i+1))
+              if (Abef .gt. upper) Abef=upper
+              if (Abef .lt. lower) Abef=lower
+           endif
         elseif (i .eq. nx) then
            hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i) - hn2in(i-1) ) / Deltax
            Abef = An2in(i) - 2d0 * alpham * ( An2in(i) - An2in(i-1) ) / Deltax
+           if (limiter) then
+              upper=max(hn2in(i-1), hn2in(i))
+              lower=min(hn2in(i-1), hn2in(i))
+              if (hbef .gt. upper) hbef=upper
+              if (hbef .lt. lower) hbef=lower
+              upper=max(An2in(i-1), An2in(i))
+              lower=min(An2in(i-1), An2in(i))
+              if (Abef .gt. upper) Abef=upper
+              if (Abef .lt. lower) Abef=lower
+           endif
         else
            hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
            Abef = An2in(i) - ( An2in(i+1) - An2in(i-1) )*alpham / Deltax
+           if (limiter) then
+              upper=max(hn2in(i-1), hn2in(i), hn2in(i+1))
+              lower=min(hn2in(i-1), hn2in(i), hn2in(i+1))
+              if (hbef .gt. upper) hbef=upper
+              if (hbef .lt. lower) hbef=lower
+              upper=max(An2in(i-1), An2in(i), An2in(i+1))
+              lower=min(An2in(i-1), An2in(i), An2in(i+1))
+              if (Abef .gt. upper) Abef=upper
+              if (Abef .lt. lower) Abef=lower
+           endif
         endif
         hbef = max(hbef, 0d0)
         Abef = max(Abef, 0d0)
