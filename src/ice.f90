@@ -295,12 +295,6 @@ program ice
 
      if (IMEX .eq. 0) call advection (un1, u, hn1, An1, hn2, An2, h, A)
 
-     if (adv_scheme .eq. 'semilag') then ! Asselin filter...improve this!!!!!!!!
-        do i=1,nx
-         !  hn1(i) = hn1(i) + Agamma * ( hn2(i) -2d0 * hn1(i) + h(i) )
-        enddo
-     endif
-
 !     call meantracer(h,meanvalue)
 
 !------------------------------------------------------------------------

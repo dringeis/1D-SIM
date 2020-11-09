@@ -81,7 +81,10 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
 !     Semi-Lagrangian scheme for advection. 
 !     This is a 3 time level scheme (h is obtained from hn1 and hn2)
+!     
 !     Staniforth and Côté, Monthly Weather Review 1991.
+!     Pellerin et al, Monthly Weather Review 1995. 
+!
 !------------------------------------------------------------------------ 
 
      alpham=0.01
