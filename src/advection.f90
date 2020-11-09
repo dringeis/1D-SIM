@@ -7,7 +7,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   integer :: i, k
 
-  logical :: limiter
+  logical :: limiter, order2
 
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
@@ -91,6 +91,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
      
      limiter=.true. ! see Pellerin et al. MWR 1995
+     order2=.true.
      alpham=0.01
      do i = 1, nx
 
@@ -136,6 +137,14 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
         else
            hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
            Abef = An2in(i) - ( An2in(i+1) - An2in(i-1) )*alpham / Deltax
+           
+           if (order2) then
+              hbef=hbef + 2d0*(alpham**2d0)* &
+                              (hn2in(i-1)-2d0*hn2in(i)+hn2in(i+1))/Deltax2
+              Abef=Abef + 2d0*(alpham**2d0)* &
+                              (An2in(i-1)-2d0*An2in(i)+An2in(i+1))/Deltax2
+           endif
+
            if (limiter) then
               upper=max(hn2in(i-1), hn2in(i), hn2in(i+1))
               lower=min(hn2in(i-1), hn2in(i), hn2in(i+1))
