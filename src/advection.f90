@@ -101,6 +101,9 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
         do k = 1, 5
            um = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
+           if (order2 .and. i .gt. 1 .and. i .lt. nx) then
+              um=um + (alpham**2d0)*(un1(i+2)-un1(i+1)-un1(i)+un1(i-1))/(4d0*Deltax2)
+           endif
            alpham=Deltat*um
         enddo
 
@@ -184,6 +187,18 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 
         fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
         fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
+
+        if (order2) then
+           
+           fmh=fmh+(alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                                  2d0*hn1in(i)*(un1(i+1)-un1(i)) + &
+                                  hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
+
+           fmA=fmA+(alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                  2d0*An1in(i)*(un1(i+1)-un1(i)) + &
+                                  An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
+
+        endif
 
 !------------------------------------------------------------------------
 ! find hout, Aout (after, time level n)
