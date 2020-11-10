@@ -5,7 +5,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i, k
+  integer :: i, k, lim_scheme
 
   logical :: limiter, order2
 
@@ -19,7 +19,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower
+  double precision :: upper, lower, apply_lim1
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -91,6 +91,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
      
      limiter=.true. ! see Pellerin et al. MWR 1995
+     lim_scheme=1   ! 1: simple, 2: Pellerin et al. MWR 1995
      order2=.true.
      alpham=0.01
      do i = 1, nx
@@ -117,12 +118,11 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            if (limiter) then
               upper=max(hn2in(i), hn2in(i+1))
               lower=min(hn2in(i), hn2in(i+1))
-              if (hbef .gt. upper) hbef=upper
-              if (hbef .lt. lower) hbef=lower
+              hbef=apply_lim1(hbef, upper, lower)
+
               upper=max(An2in(i), An2in(i+1))
               lower=min(An2in(i), An2in(i+1))
-              if (Abef .gt. upper) Abef=upper
-              if (Abef .lt. lower) Abef=lower
+              Abef=apply_lim1(Abef, upper, lower)
            endif
         elseif (i .eq. nx) then
            hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i) - hn2in(i-1) ) / Deltax
@@ -130,12 +130,11 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            if (limiter) then
               upper=max(hn2in(i-1), hn2in(i))
               lower=min(hn2in(i-1), hn2in(i))
-              if (hbef .gt. upper) hbef=upper
-              if (hbef .lt. lower) hbef=lower
+              hbef=apply_lim1(hbef, upper, lower)
+
               upper=max(An2in(i-1), An2in(i))
               lower=min(An2in(i-1), An2in(i))
-              if (Abef .gt. upper) Abef=upper
-              if (Abef .lt. lower) Abef=lower
+              Abef=apply_lim1(Abef, upper, lower)
            endif
         else
            hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
@@ -149,14 +148,27 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            endif
 
            if (limiter) then
+             
+              ! ---- for h --------
               upper=max(hn2in(i-1), hn2in(i), hn2in(i+1))
               lower=min(hn2in(i-1), hn2in(i), hn2in(i+1))
-              if (hbef .gt. upper) hbef=upper
-              if (hbef .lt. lower) hbef=lower
+
+              if (lim_scheme .eq. 1) then
+                 hbef=apply_lim1(hbef, upper, lower)
+              elseif (lim_scheme .eq. 2) then
+                 
+              endif
+              
+              ! ---- for A -------- 
               upper=max(An2in(i-1), An2in(i), An2in(i+1))
               lower=min(An2in(i-1), An2in(i), An2in(i+1))
-              if (Abef .gt. upper) Abef=upper
-              if (Abef .lt. lower) Abef=lower
+              
+              if (lim_scheme .eq. 1) then
+                 Abef=apply_lim1(Abef, upper, lower)
+              elseif(lim_scheme .eq. 2) then
+
+              endif
+
            endif
         endif
         hbef = max(hbef, 0d0)
@@ -218,7 +230,6 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   return
 end subroutine advection
 
-
 subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
   use size
   use resolution
@@ -263,6 +274,15 @@ subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
   
 end subroutine fluxh_A
   
+function apply_lim1(var, upper, lower) result(var_lim)
+  double precision, intent(in) :: var, upper, lower ! input
+  double precision             :: var_lim ! output
+  
+  var_lim=var
+  if (var .gt. upper) var_lim=upper
+  if (var .lt. lower) var_lim=lower
+
+end function
 
 
 
