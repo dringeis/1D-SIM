@@ -19,7 +19,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower, apply_lim1
+  double precision :: upper, lower, apply_lim1, apply_lim2
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -91,7 +91,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
      
      limiter=.true. ! see Pellerin et al. MWR 1995
-     lim_scheme=1   ! 1: simple, 2: Pellerin et al. MWR 1995
+     lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
      order2=.true.
      alpham=0.01
      do i = 1, nx
@@ -156,7 +156,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               if (lim_scheme .eq. 1) then
                  hbef=apply_lim1(hbef, upper, lower)
               elseif (lim_scheme .eq. 2) then
-                 
+                 hbef=apply_lim2(hbef,upper,lower,alpham,hn2in(i-1),hn2in(i),hn2in(i+1))
               endif
               
               ! ---- for A -------- 
@@ -166,7 +166,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               if (lim_scheme .eq. 1) then
                  Abef=apply_lim1(Abef, upper, lower)
               elseif(lim_scheme .eq. 2) then
-
+                 Abef=apply_lim2(Abef,upper,lower,alpham,An2in(i-1),An2in(i),An2in(i+1))
               endif
 
            endif
@@ -284,6 +284,25 @@ function apply_lim1(var, upper, lower) result(var_lim)
 
 end function
 
+function apply_lim2(var, upper, lower, alpham, var_im1, var_i, var_ip1) result(var_lim)
+  use resolution
+  
+  double precision, intent(in) :: var, upper, lower, alpham, var_im1, var_i, var_ip1 ! input
+  double precision             :: var_lim ! output                                    
+  double precision             :: slope
+
+  var_lim=var
+
+  if (var .gt. upper .or. var .lt. lower) then
+     if (alpham .gt. 0) then ! left of var_i
+        slope = ( var_i - var_im1 ) / Deltax
+     elseif (alpham .le. 0) then ! right of var_i
+        slope = ( var_ip1 - var_i ) / Deltax
+     endif
+     var_lim = var_i - (slope*alpham)
+  endif
+
+end function
 
 
 
