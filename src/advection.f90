@@ -195,7 +195,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
                                   hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
 
            fmA=fmA+(alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
-                  2d0*An1in(i)*(un1(i+1)-un1(i)) + &
+                                  2d0*An1in(i)*(un1(i+1)-un1(i)) + &
                                   An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
 
         endif
