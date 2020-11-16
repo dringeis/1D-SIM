@@ -5,9 +5,9 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i, k, lim_scheme
+  integer :: i, k, lim_scheme, order
 
-  logical :: limiter, order2
+  logical :: limiter
 
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
@@ -92,7 +92,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
      limiter=.true. ! see Pellerin et al. MWR 1995
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
-     order2=.true.
+     order=2
      alpham=0.01
      do i = 1, nx
 
@@ -102,7 +102,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
         do k = 1, 5
            um = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
-           if (order2 .and. i .gt. 1 .and. i .lt. nx) then
+           if (order .gt. 1 .and. i .gt. 1 .and. i .lt. nx) then ! O2...O3 not coded yet  
               um=um + (alpham**2d0)*(un1(i+2)-un1(i+1)-un1(i)+un1(i-1))/(4d0*Deltax2)
            endif
            alpham=Deltat*um
@@ -137,14 +137,22 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               Abef=apply_lim1(Abef, upper, lower)
            endif
         else
-           hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
-           Abef = An2in(i) - ( An2in(i+1) - An2in(i-1) )*alpham / Deltax
+
+           if (order .eq. 1) then
+
+              hbef = hn2in(i) - ( hn2in(i+1) - hn2in(i-1) )*alpham / Deltax
+              Abef = An2in(i) - ( An2in(i+1) - An2in(i-1) )*alpham / Deltax
            
-           if (order2) then
-              hbef=hbef + 2d0*(alpham**2d0)* &
-                              (hn2in(i-1)-2d0*hn2in(i)+hn2in(i+1))/Deltax2
-              Abef=Abef + 2d0*(alpham**2d0)* &
-                              (An2in(i-1)-2d0*An2in(i)+An2in(i+1))/Deltax2
+           elseif (order .eq. 2) then
+              
+              hbef=hn2in(i) - (hn2in(i+1) - hn2in(i-1))*alpham / Deltax + &
+                   2d0*(alpham**2d0)*(hn2in(i-1)-2d0*hn2in(i)+hn2in(i+1))/Deltax2
+
+              Abef=An2in(i) - (An2in(i+1) - An2in(i-1))*alpham / Deltax + &
+                   2d0*(alpham**2d0)*(An2in(i-1)-2d0*An2in(i)+An2in(i+1))/Deltax2
+           
+           elseif (order .eq. 3) then
+
            endif
 
            if (limiter) then
@@ -197,19 +205,21 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
                       An1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
         endif
 
-        fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
-        fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
+        if (order .eq. 1) then
+           fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
+           fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
 
-        if (order2) then
+        elseif (order .gt. 1) then ! O2...O3 not coded yet
            
-           fmh=fmh+(alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
+           fmh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime + &
+                     (alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
                                   2d0*hn1in(i)*(un1(i+1)-un1(i)) + &
                                   hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
 
-           fmA=fmA+(alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
+           fmA=An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime + &
+                     (alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
                                   2d0*An1in(i)*(un1(i+1)-un1(i)) + &
                                   An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
-
         endif
 
 !------------------------------------------------------------------------
@@ -301,6 +311,26 @@ function apply_lim2(var, upper, lower, alpham, var_im1, var_i, var_ip1) result(v
      endif
      var_lim = var_i - (slope*alpham)
   endif
+
+end function
+
+function cubic_interp (v1, v2, v3, v4, xdist) result(v_interp)
+  use resolution
+
+! see https://www.paulinternet.nl/?page=bicubic 
+
+  double precision, intent(in) :: v1, v2, v3, v4, xdist! input                                 
+  double precision             :: v_interp ! output                                                                         
+  double precision             :: f1_0 ! 1st derivative of f at x=0
+  double precision             :: f1_1 ! 1st derivative of f at x=1 (Dx)
+  double precision             :: a, b ! parameters for cubic interpolation
+
+  f1_0 = ( v3 - v1 ) / (2d0*Deltax)
+  f1_1 = ( v4 - v2 ) / (2d0*Deltax)
+  a = 2d0*v2 - 2d0*v3 + f1_0 + f1_1
+  b = -3d0*v2 + 3d0*v3 - 2d0*f1_0 -f1_1
+
+  v_interp = a*(xdist**3d0) + b*(xdist**2d0) + f1_0*xdist + v2
 
 end function
 
