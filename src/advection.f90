@@ -5,7 +5,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i, k, lim_scheme, order
+  integer :: i, k, lim_scheme, order, ibeg, iend
 
   logical :: limiter
 
@@ -19,7 +19,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower, apply_lim1, apply_lim2
+  double precision :: upper, lower, apply_lim1, apply_lim2, cubic_interp, xdist
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -92,7 +92,16 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
      limiter=.true. ! see Pellerin et al. MWR 1995
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
-     order=2
+     order=3
+     
+     if (order .le. 2) then
+        ibeg=1
+        iend=nx
+     elseif (order .eq. 3) then
+        ibeg=2
+        iend=nx-1
+     endif
+
      alpham=0.01
      do i = 1, nx
 
@@ -112,7 +121,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 ! find hbef and Abef (initial position of particle at time level n-2)
 !------------------------------------------------------------------------
         
-        if (i .eq. 1) then
+        if (i .le. ibeg) then
            hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i+1) - hn2in(i) ) / Deltax
            Abef = An2in(i) - 2d0 * alpham * ( An2in(i+1) - An2in(i) ) / Deltax
            if (limiter) then
@@ -124,7 +133,8 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               lower=min(An2in(i), An2in(i+1))
               Abef=apply_lim1(Abef, upper, lower)
            endif
-        elseif (i .eq. nx) then
+
+         elseif (i .ge. iend) then
            hbef = hn2in(i) - 2d0 * alpham * ( hn2in(i) - hn2in(i-1) ) / Deltax
            Abef = An2in(i) - 2d0 * alpham * ( An2in(i) - An2in(i-1) ) / Deltax
            if (limiter) then
@@ -153,9 +163,19 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            
            elseif (order .eq. 3) then
 
+              if (alpham .ge. 0d0) then
+                 xdist=Deltax-alpham
+                 hbef=cubic_interp (hn2in(i-2), hn2in(i-1), hn2in(i), hn2in(i+1), xdist)
+                 Abef=cubic_interp (An2in(i-2), An2in(i-1), An2in(i), An2in(i+1), xdist)
+              else ! alpham .lt. 0d0
+                 xdist=-1d0*alpham
+                 hbef=cubic_interp (hn2in(i-1), hn2in(i), hn2in(i+1), hn2in(i+2), xdist)
+                 Abef=cubic_interp (An2in(i-1), An2in(i), An2in(i+1), An2in(i+2), xdist)
+              endif
+
            endif
 
-           if (limiter) then
+           if (limiter) then ! LIMITER COULD BE IMPROVED FOR O3
              
               ! ---- for h --------
               upper=max(hn2in(i-1), hn2in(i), hn2in(i+1))
