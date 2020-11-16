@@ -59,7 +59,7 @@ subroutine minmaxtracer(var,id, ts)
   integer, save :: negice, negwater
   integer, intent(in) :: id, ts ! h: id=1, A: id=2, zeta: id=3
   double precision, intent(in) :: var(0:nx+1)
-  double precision :: vmin, vmax
+  double precision :: vmin, vmax, htotal
   
   if (ts .eq. 1) then
     negice=0
@@ -68,16 +68,20 @@ subroutine minmaxtracer(var,id, ts)
   
   vmin=1d100
   vmax=-1d100
+  
+  if (id .eq. 1) htotal=0d0
 
   do i = 1, nx
 
      if (var(i) .gt. vmax) vmax=var(i)
      if (var(i) .lt. vmin) vmin=var(i)
+     if (id .eq. 1) htotal = htotal + var(i)
 
   enddo
 
   if (id .eq. 1) then
      print *, 'min, max h =', vmin, vmax
+     print *, 'Total h =', htotal
   elseif (id .eq. 2) then
      print *, 'min, max A =', vmin, vmax
   elseif (id .eq. 3) then

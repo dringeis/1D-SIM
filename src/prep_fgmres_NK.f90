@@ -216,7 +216,7 @@
 	u = uk1 + beta*du
       
 	if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  call advection (un1, u, hn1, An1, h, A) ! advection scheme for tracers
+	  call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers 
 	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
 	endif
 	
