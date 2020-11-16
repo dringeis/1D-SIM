@@ -164,11 +164,11 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            elseif (order .eq. 3) then
 
               if (alpham .ge. 0d0) then
-                 xdist=Deltax - 2d0*alpham
+                 xdist=(Deltax - 2d0*alpham)/Deltax
                  hbef=cubic_interp (hn2in(i-2), hn2in(i-1), hn2in(i), hn2in(i+1), xdist)
                  Abef=cubic_interp (An2in(i-2), An2in(i-1), An2in(i), An2in(i+1), xdist)
               else ! alpham .lt. 0d0
-                 xdist=-2d0*alpham
+                 xdist=-2d0*alpham/Deltax
                  hbef=cubic_interp (hn2in(i-1), hn2in(i), hn2in(i+1), hn2in(i+2), xdist)
                  Abef=cubic_interp (An2in(i-1), An2in(i), An2in(i+1), An2in(i+2), xdist)
               endif
@@ -338,6 +338,7 @@ function cubic_interp (v1, v2, v3, v4, xdist) result(v_interp)
   use resolution
 
 ! see https://www.paulinternet.nl/?page=bicubic 
+! dist is between 0 and 1
 
   double precision, intent(in) :: v1, v2, v3, v4, xdist! input                                 
   double precision             :: v_interp ! output                                                                         
@@ -345,8 +346,10 @@ function cubic_interp (v1, v2, v3, v4, xdist) result(v_interp)
   double precision             :: f1_1 ! 1st derivative of f at x=1 (Dx)
   double precision             :: a, b ! parameters for cubic interpolation
 
-  f1_0 = ( v3 - v1 ) / (2d0*Deltax)
-  f1_1 = ( v4 - v2 ) / (2d0*Deltax)
+!  f1_0 = ( v3 - v1 ) / (2d0*Deltax)
+!  f1_1 = ( v4 - v2 ) / (2d0*Deltax)
+  f1_0 = ( v3 - v1 ) / 2d0
+  f1_1 = ( v4 - v2 ) / 2d0
   a = 2d0*v2 - 2d0*v3 + f1_0 + f1_1
   b = -3d0*v2 + 3d0*v3 - 2d0*f1_0 -f1_1
 
