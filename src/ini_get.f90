@@ -84,6 +84,14 @@ subroutine ini_get (utp, restart, expres, ts_res)
      h(i) = max(1d-06, h(i))
      bathy(i)=100d0
   enddo
+
+!  do i = 10, 40
+!     h(i) = 1d0
+!     A(i) = 1d0
+!     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall                                                                   
+!     h(i) = max(1d-06, h(i))
+!     bathy(i)=100d0
+!  enddo
   
   if (oceanSIM) then 
      uwn1=uw
