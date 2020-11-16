@@ -164,11 +164,11 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            elseif (order .eq. 3) then
 
               if (alpham .ge. 0d0) then
-                 xdist=Deltax-alpham
+                 xdist=Deltax - 2d0*alpham
                  hbef=cubic_interp (hn2in(i-2), hn2in(i-1), hn2in(i), hn2in(i+1), xdist)
                  Abef=cubic_interp (An2in(i-2), An2in(i-1), An2in(i), An2in(i+1), xdist)
               else ! alpham .lt. 0d0
-                 xdist=-1d0*alpham
+                 xdist=-2d0*alpham
                  hbef=cubic_interp (hn2in(i-1), hn2in(i), hn2in(i+1), hn2in(i+2), xdist)
                  Abef=cubic_interp (An2in(i-1), An2in(i), An2in(i+1), An2in(i+2), xdist)
               endif

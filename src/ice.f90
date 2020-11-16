@@ -59,7 +59,7 @@ program ice
   rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
-  adv_scheme     = 'upwind' ! upwind, upwindRK2, semilag
+  adv_scheme     = 'semilag' ! upwind, upwindRK2, semilag
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
@@ -72,7 +72,7 @@ program ice
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
   
   Deltat     = 600d0   ! time step [s]
-  nstep      = 288     ! lenght of the run in nb of time steps
+  nstep      = 1440     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
@@ -94,6 +94,7 @@ program ice
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)=1
+  out_step(2)=1440
 
 !------------------------------------------------------------------------ 
 ! verify choice of solver and options
