@@ -7,7 +7,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   integer :: i, k, lim_scheme, order, ibeg, iend
 
-  logical :: limiter
+  logical :: limiter, special_land
 
   double precision, intent(in) :: un1(1:nx+1), utp(1:nx+1)
   double precision, intent(in) :: hn1in(0:nx+1), An1in(0:nx+1)
@@ -15,11 +15,11 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
-  double precision :: fluxh(1:nx), fluxA(1:nx)
+  double precision :: fluxh(1:nx), fluxA(1:nx), flux
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower, apply_lim1, apply_lim2, cubic_interp, xdist
+  double precision :: upper, lower, apply_lim1, apply_lim2, cubic_interp, xdist, calc_flux
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -93,6 +93,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      limiter=.true. ! see Pellerin et al. MWR 1995
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
      order=3
+     special_land = .true.
      
      if (order .le. 2) then
         ibeg=1
@@ -246,9 +247,22 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 ! find hout, Aout (after, time level n)
 !------------------------------------------------------------------------ 
 
-        hout(i) = hbef - 2d0*Deltat*fmh
+        if (i .eq. 1 .and. special_land) then ! land on left
+           flux=calc_flux(utp(i),utp(i+1),hn1in(i-1),hn1in(i), hn1in(i+1)) ! for h
+           hout(i) = hn1in(i) - DtoverDx*flux
+           flux=calc_flux(utp(i),utp(i+1),An1in(i-1),An1in(i), An1in(i+1)) ! for A                                                    
+           Aout(i) = An1in(i) - DtoverDx*flux
+        elseif (i .eq. nx .and. special_land) then ! land on right
+           flux=calc_flux(utp(i),utp(i+1),hn1in(i-1),hn1in(i), hn1in(i+1)) ! for h                                               
+           hout(i) = hn1in(i) - DtoverDx*flux
+           flux=calc_flux(utp(i),utp(i+1),An1in(i-1),An1in(i), An1in(i+1)) ! for A                                                    
+           Aout(i) = An1in(i) - DtoverDx*flux
+        else
+           hout(i) = hbef - 2d0*Deltat*fmh
+           Aout(i) = Abef - 2d0*Deltat*fmA
+        endif
+
         hout(i) = max(hout(i), 0d0)
-        Aout(i) = Abef - 2d0*Deltat*fmA
         Aout(i) = max(Aout(i), 0d0)
         Aout(i) = min(Aout(i), 1d0)
 
@@ -357,6 +371,29 @@ function cubic_interp (v1, v2, v3, v4, xdist) result(v_interp)
 
 end function
 
+function calc_flux (ui, uip1, Tim1, Ti, Tip1) result(flux)
+  use resolution
+
+  double precision, intent(in) :: ui, uip1, Tim1, Ti, Tip1 ! T=tracer
+  double precision :: flux, flux1, flux2
+
+  if (ui .gt. Deltax/Deltat) print *, 'WARNING: u > dx/dt', ui
+
+  if (ui .ge. 0d0) then ! left side of cell                                                                                     
+     flux1 = ui*Tim1
+  else
+     flux1 = ui*Ti
+  endif
+
+  if (uip1 .ge. 0d0) then ! right side of cell                                                                                  
+     flux2 = uip1*Ti
+  else
+     flux2 = uip1*Tip1
+  endif
+
+  flux = flux2 - flux1
+
+end function calc_flux
 
 
 
