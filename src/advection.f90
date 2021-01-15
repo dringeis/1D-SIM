@@ -5,7 +5,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i, k, lim_scheme, order, ibeg, iend
+  integer :: i, k, lim_scheme, order, ibeg, iend, ie, iw
 
   logical :: limiter, special_land
 
@@ -18,8 +18,10 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: fluxh(1:nx), fluxA(1:nx), flux
   double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
+  double precision :: fw, fe, fxw, fxe
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower, apply_lim1, apply_lim2, cubic_interp, xdist, calc_flux
+  double precision :: upper, lower, xdn2, hbefnew
+  double precision :: apply_lim1, apply_lim2, fx, cubic_interp, calc_flux ! functions
 
   hout(0) = 0d0    ! closed b.c.s
   hout(nx+1) = 0d0
@@ -92,13 +94,13 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      
      limiter=.true. ! see Pellerin et al. MWR 1995
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
-     order=3
+     order=4        ! cubic interp
      special_land = .true.
      
      if (order .le. 2) then
         ibeg=1
         iend=nx
-     elseif (order .eq. 3) then
+     elseif (order .eq. 4) then
         ibeg=2
         iend=nx-1
      endif
@@ -162,17 +164,28 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               Abef=An2in(i) - (An2in(i+1) - An2in(i-1))*alpham / Deltax + &
                    2d0*(alpham**2d0)*(An2in(i-1)-2d0*An2in(i)+An2in(i+1))/Deltax2
            
-           elseif (order .eq. 3) then
+           elseif (order .eq. 4) then
 
               if (alpham .ge. 0d0) then
-                 xdist=(Deltax - 2d0*alpham)/Deltax
-                 hbef=cubic_interp (hn2in(i-2), hn2in(i-1), hn2in(i), hn2in(i+1), xdist)
-                 Abef=cubic_interp (An2in(i-2), An2in(i-1), An2in(i), An2in(i+1), xdist)
+                 xdn2=(Deltax - 2d0*alpham)/Deltax
+                 iw=i-1
+                 ie=i
               else ! alpham .lt. 0d0
-                 xdist=-2d0*alpham/Deltax
-                 hbef=cubic_interp (hn2in(i-1), hn2in(i), hn2in(i+1), hn2in(i+2), xdist)
-                 Abef=cubic_interp (An2in(i-1), An2in(i), An2in(i+1), An2in(i+2), xdist)
+                 xdn2=-2d0*alpham/Deltax
+                 iw=i
+                 ie=i+1
               endif
+
+              fw=hn2in(iw)
+              fe=hn2in(ie)
+              fxw=fx(hn2in(iw+1), hn2in(iw-1), 2d0)
+              fxe=fx(hn2in(ie+1), hn2in(ie-1), 2d0)
+              hbef=cubic_interp (fw, fe, fxw, fxe, xdn2)
+              fw=An2in(iw)
+              fe=An2in(ie)
+              fxw=fx(An2in(iw+1), An2in(iw-1), 2d0)
+              fxe=fx(An2in(ie+1), An2in(ie-1), 2d0)
+              Abef=cubic_interp (fw, fe, fxw, fxe, xdn2)
 
            endif
 
@@ -230,7 +243,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
            fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
 
-        elseif (order .gt. 1) then ! O2...O3 not coded yet
+        elseif (order .gt. 1) then ! O2...O4 not coded yet
            
            fmh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime + &
                      (alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
@@ -348,28 +361,22 @@ function apply_lim2(var, upper, lower, alpham, var_im1, var_i, var_ip1) result(v
 
 end function
 
-function cubic_interp (v1, v2, v3, v4, xdist) result(v_interp)
+function cubic_interp (fw, fe, fxw, fxe, xdist) result(finterp)
   use resolution
 
-! see https://www.paulinternet.nl/?page=bicubic 
-! dist is between 0 and 1
+! see https://www.paulinternet.nl/?page=bicubic
+! dist is between 0 (west=w) and 1 (east=e)
 
-  double precision, intent(in) :: v1, v2, v3, v4, xdist! input                                 
-  double precision             :: v_interp ! output                                                                         
-  double precision             :: f1_0 ! 1st derivative of f at x=0
-  double precision             :: f1_1 ! 1st derivative of f at x=1 (Dx)
+  double precision, intent(in) :: fw, fe, fxw, fxe, xdist    ! input
   double precision             :: a, b ! parameters for cubic interpolation
+  double precision             :: finterp                    ! output
+                                                                      
+  a = 2d0*fw - 2d0*fe + fxw + fxe
+  b = -3d0*fw + 3d0*fe - 2d0*fxw -fxe
+  
+  finterp = a*(xdist**3d0) + b*(xdist**2d0) + fxw*xdist + fw
 
-!  f1_0 = ( v3 - v1 ) / (2d0*Deltax)
-!  f1_1 = ( v4 - v2 ) / (2d0*Deltax)
-  f1_0 = ( v3 - v1 ) / 2d0
-  f1_1 = ( v4 - v2 ) / 2d0
-  a = 2d0*v2 - 2d0*v3 + f1_0 + f1_1
-  b = -3d0*v2 + 3d0*v3 - 2d0*f1_0 -f1_1
-
-  v_interp = a*(xdist**3d0) + b*(xdist**2d0) + f1_0*xdist + v2
-
-end function
+end function cubic_interp
 
 function calc_flux (ui, uip1, Tim1, Ti, Tip1) result(flux)
   use resolution
@@ -395,7 +402,15 @@ function calc_flux (ui, uip1, Tim1, Ti, Tip1) result(flux)
 
 end function calc_flux
 
+function fx(fright, fleft, deno) result(dfdx)
+      
+      double precision, intent(in) :: fright, fleft                                 
+      double precision, intent(in) :: deno
+      double precision             :: dfdx ! output df/dx                                          
 
+      dfdx = ( fright - fleft ) / deno
+      
+end function fx
 
 
 
