@@ -31,22 +31,18 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   if (adv_scheme .eq. 'upwind') then
   
 !------------------------------------------------------------------------
-!     compute RHS of dh/dt=-d(hu)/dx (same idea for A)
-!------------------------------------------------------------------------
-
-     call fluxh_A (utp, hn1in, An1in, fluxh, fluxA)
-
-!------------------------------------------------------------------------
-!     update the tracer values
+!     update h following dh/dt=-d(hu)/dx (same idea for A)
 !     (in a separate do-loop to conserve mass)
 !------------------------------------------------------------------------
             
      do i = 1, nx
 
-        hout(i) = hn1in(i) - DtoverDx*fluxh(i)    
+        flux=calc_flux(utp(i),utp(i+1),hn1in(i-1),hn1in(i), hn1in(i+1)) ! for h                                                                
+        hout(i) = hn1in(i) - DtoverDx*flux
         hout(i) = max(hout(i), 0d0)
 
-        Aout(i) = An1in(i) - DtoverDx*fluxA(i)    
+        flux=calc_flux(utp(i),utp(i+1),An1in(i-1),An1in(i), An1in(i+1)) ! for A
+        Aout(i) = An1in(i) - DtoverDx*flux
         Aout(i) = max(Aout(i), 0d0)
         Aout(i) = min(Aout(i), 1d0)     
      
@@ -54,28 +50,29 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   elseif (adv_scheme .eq. 'upwindRK2') then 
   
-     call fluxh_A (un1, hn1in, An1in, fluxh, fluxA) 
-  
      do i = 1, nx ! predictor step
 
-        hstar(i) = hn1in(i) - (DtoverDx/2d0)*fluxh(i)
+        flux=calc_flux(un1(i),un1(i+1),hn1in(i-1),hn1in(i),hn1in(i+1)) ! for h
+        hstar(i) = hn1in(i) - (DtoverDx/2d0)*flux
         hstar(i) = max(hstar(i), 0d0)
 
-        Astar(i) = An1in(i) - (DtoverDx/2d0)*fluxA(i)    
+        flux=calc_flux(un1(i),un1(i+1),An1in(i-1),An1in(i),An1in(i+1)) ! for A
+        Astar(i) = An1in(i) - (DtoverDx/2d0)*flux
         Astar(i) = max(Astar(i), 0d0)
         Astar(i) = min(Astar(i), 1d0)     
      
      enddo
   
      ustar = ( utp + un1 ) / 2d0
-     call fluxh_A (ustar, hstar, Astar, fluxh, fluxA) 
   
      do i = 1, nx ! corrector step
 
-        hout(i) = hn1in(i) - DtoverDx*fluxh(i)
+        flux=calc_flux(ustar(i),ustar(i+1),hstar(i-1),hstar(i),hstar(i+1)) ! for h  
+        hout(i) = hn1in(i) - DtoverDx*flux
         hout(i) = max(hout(i), 0d0)
         
-        Aout(i) = An1in(i) - DtoverDx*fluxA(i)    
+        flux=calc_flux(ustar(i),ustar(i+1),Astar(i-1),Astar(i),Astar(i+1)) ! for A
+        Aout(i) = An1in(i) - DtoverDx*flux
         Aout(i) = max(Aout(i), 0d0)
         Aout(i) = min(Aout(i), 1d0)     
      
@@ -268,50 +265,6 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   return
 end subroutine advection
-
-subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
-  use size
-  use resolution
-  
-  implicit none
-  
-  integer :: i
-
-  double precision, intent(in) :: utp(1:nx+1)
-  double precision, intent(in) :: htp(0:nx+1), Atp(0:nx+1)
-  double precision, intent (out) :: fluxh(1:nx), fluxA(1:nx)
-  double precision :: flux1h, flux2h, flux1A, flux2A
-  
-  do i = 1, nx
-
-! verify CFL condition
-
-     if (utp(i) .gt. Deltax/Deltat) print *, 'WARNING: u > dx/dt', i,utp(i)
-
-! calculate deltah at tracer point i
-
-     if (utp(i) .ge. 0d0) then ! left side of cell
-        flux1h = utp(i)*htp(i-1) 
-        flux1A = utp(i)*Atp(i-1) 
-     else
-        flux1h = utp(i)*htp(i)
-        flux1A = utp(i)*Atp(i)
-     endif
-     
-     if (utp(i+1) .ge. 0d0) then ! right side of cell
-        flux2h = utp(i+1)*htp(i) 
-        flux2A = utp(i+1)*Atp(i)
-     else
-        flux2h = utp(i+1)*htp(i+1)
-        flux2A = utp(i+1)*Atp(i+1)
-     endif
-
-     fluxh(i) = flux2h - flux1h 
-     fluxA(i) = flux2A - flux1A 
-
-  enddo
-  
-end subroutine fluxh_A
 
 subroutine calc_div (utp, div)
   use size
