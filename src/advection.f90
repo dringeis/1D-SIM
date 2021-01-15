@@ -15,12 +15,12 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision, intent(out) :: hout(0:nx+1), Aout(0:nx+1)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
-  double precision :: fluxh(1:nx), fluxA(1:nx), flux
-  double precision :: alpham, um, fmh, fmA ! um=u at mid path, fmh=hdu/dx at mid path
+  double precision :: fluxh(1:nx), fluxA(1:nx), flux, div(nx)
+  double precision :: alpham, fmh, fmA ! fmh=hdu/dx at mid path
   double precision :: fmhprime, fmAprime
   double precision :: fw, fe, fxw, fxe
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
-  double precision :: upper, lower, xdn2, hbefnew
+  double precision :: upper, lower, xd, xdn1, xdn2, uinterp
   double precision :: apply_lim1, apply_lim2, fx, cubic_interp, calc_flux ! functions
 
   hout(0) = 0d0    ! closed b.c.s
@@ -96,6 +96,8 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
      order=4        ! cubic interp
      
+     call calc_div(un1,div) ! calc divergence at n-1 for RHS [hdiv(u)]^{n-1}
+
      alpham=0.01
      do i = 1, nx
         
@@ -107,13 +109,22 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------  
 ! find velocity at x-alpham  and t=n1
 !------------------------------------------------------------------------
-     
+
            do k = 1, 5
-              um = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
-              if (order .gt. 1) then ! O2...O3 not coded yet  
-                 um=um + (alpham**2d0)*(un1(i+2)-un1(i+1)-un1(i)+un1(i-1))/(4d0*Deltax2)
+              if (order == 1) then
+                 uinterp = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax
+              elseif (order == 2) then
+                 uinterp = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax + &
+                      (alpham**2d0)*(un1(i+2)-un1(i+1)-un1(i)+un1(i-1))/(4d0*Deltax2)
+              elseif (order ==  4) then
+                 xd = 0.5d0 - alpham / Deltax ! same wether alpham is + or - 
+                 fw = un1(i)
+                 fe = un1(i+1)
+                 fxw= fx(un1(i+1), un1(i-1), 2d0)
+                 fxe= fx(un1(i+2), un1(i), 2d0)
+                 uinterp=cubic_interp (fw, fe, fxw,  fxe, xd)
               endif
-              alpham=Deltat*um
+              alpham=Deltat*uinterp
            enddo
 
 !------------------------------------------------------------------------
@@ -136,11 +147,13 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            elseif (order .eq. 4) then ! cubic interpolation
 
               if (alpham .ge. 0d0) then
-                 xdn2=(Deltax - 2d0*alpham)/Deltax
+                 xdn2= 1d0  - 2d0*alpham /Deltax
+                 xdn1= 1d0  - alpham /Deltax
                  iw=i-1
                  ie=i
               else ! alpham .lt. 0d0
                  xdn2=-2d0*alpham/Deltax
+                 xdn1=-1d0*alpham/Deltax
                  iw=i
                  ie=i+1
               endif
@@ -186,31 +199,47 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
            Abef = max(Abef, 0d0)
            Abef = min(Abef, 1d0)
 
-!------------------------------------------------------------------------  
-! find fmh, fmA (time level n-1)
+!------------------------------------------------------------------------                                        
+! find right hand side terms rhsh and rhsA (time level n-1 = n1)
+! minus sign added later in final calc of hout, Aout
 !------------------------------------------------------------------------ 
+          
+           if (order .le. 2) then
 
-           fmhprime=( hn1in(i+1)*(un1(i+2) - un1(i+1)) - &
-                hn1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
+              fmhprime=( hn1in(i+1)*(un1(i+2) - un1(i+1)) - &
+                   hn1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
            
-           fmAprime=( An1in(i+1)*(un1(i+2) - un1(i+1)) - &
-                An1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
+              fmAprime=( An1in(i+1)*(un1(i+2) - un1(i+1)) - &
+                   An1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
 
-           if (order .eq. 1) then
-              fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
-              fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
-
-           elseif (order .gt. 1) then ! O2...O4 not coded yet
+              if (order .eq. 1) then
+                 fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
+                 fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
+                 
+              elseif (order .eq. 2) then ! O2...O4 not coded yet
            
-              fmh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime + &
-                   (alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
-                   2d0*hn1in(i)*(un1(i+1)-un1(i)) + &
-                   hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
+                 fmh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime + &
+                      (alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                      2d0*hn1in(i)*(un1(i+1)-un1(i)) + &
+                      hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
               
-              fmA=An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime + &
-                   (alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
-                   2d0*An1in(i)*(un1(i+1)-un1(i)) + &
-                   An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
+                 fmA=An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime + &
+                      (alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
+                      2d0*An1in(i)*(un1(i+1)-un1(i)) + &
+                      An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
+              endif
+
+           else
+              fw=hn1in(iw)*div(iw)
+              fe=hn1in(ie)*div(ie)
+              fxw=fx(fe, hn1in(iw-1)*div(iw-1), 2d0)
+              fxe=fx(hn1in(ie+1)*div(ie+1), fw, 2d0)
+              fmh=cubic_interp (fw, fe, fxw, fxe, xdn1)
+              fw=An1in(iw)*div(iw)
+              fe=An1in(ie)*div(ie)
+              fxw=fx(fe, An1in(iw-1)*div(iw-1), 2d0)
+              fxe=fx(An1in(ie+1)*div(ie+1), fw, 2d0)
+              fmA=cubic_interp (fw, fe, fxw, fxe, xdn1)
            endif
 
 !------------------------------------------------------------------------
@@ -283,6 +312,22 @@ subroutine fluxh_A (utp, htp, Atp, fluxh, fluxA)
   enddo
   
 end subroutine fluxh_A
+
+subroutine calc_div (utp, div)
+  use size
+  use resolution  
+  
+  implicit none
+  
+  integer i
+  double precision, intent(in) :: utp(1:nx+1)
+  double precision, intent(out):: div(nx)
+
+  do i = 1, nx
+     div(i) = ( utp(i+1)-utp(i) ) / Deltax 
+  enddo
+
+end subroutine calc_div
   
 function apply_lim1(var, upper, lower) result(var_lim)
   double precision, intent(in) :: var, upper, lower ! input
