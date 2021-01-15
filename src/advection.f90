@@ -16,8 +16,8 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: hstar(0:nx+1), Astar(0:nx+1)
   double precision :: ustar(1:nx+1)
   double precision :: fluxh(1:nx), fluxA(1:nx), flux, div(nx)
-  double precision :: alpham, fmh, fmA ! fmh=hdu/dx at mid path
-  double precision :: fmhprime, fmAprime
+  double precision :: alpham, rhsh, rhsA ! rhsh=hdu/dx at mid path
+  double precision :: rhshprime, rhsAprime
   double precision :: fw, fe, fxw, fxe
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
   double precision :: upper, lower, xd, xdn1, xdn2, uinterp
@@ -206,24 +206,24 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
           
            if (order .le. 2) then
 
-              fmhprime=( hn1in(i+1)*(un1(i+2) - un1(i+1)) - &
+              rhshprime=( hn1in(i+1)*(un1(i+2) - un1(i+1)) - &
                    hn1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
            
-              fmAprime=( An1in(i+1)*(un1(i+2) - un1(i+1)) - &
+              rhsAprime=( An1in(i+1)*(un1(i+2) - un1(i+1)) - &
                    An1in(i-1)*(un1(i)   - un1(i-1)) ) / (2d0*Deltax2)
 
               if (order .eq. 1) then
-                 fmh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime
-                 fmA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime
+                 rhsh = hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*rhshprime
+                 rhsA = An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*rhsAprime
                  
               elseif (order .eq. 2) then ! O2...O4 not coded yet
            
-                 fmh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmhprime + &
+                 rhsh=hn1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*rhshprime + &
                       (alpham**2d0)*(hn1in(i+1)*(un1(i+2)-un1(i+1)) - &
                       2d0*hn1in(i)*(un1(i+1)-un1(i)) + &
                       hn1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
               
-                 fmA=An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*fmAprime + &
+                 rhsA=An1in(i)*(un1(i+1)-un1(i))/Deltax - alpham*rhsAprime + &
                       (alpham**2d0)*(An1in(i+1)*(un1(i+2)-un1(i+1)) - &
                       2d0*An1in(i)*(un1(i+1)-un1(i)) + &
                       An1in(i-1)*(un1(i)-un1(i-1)) ) / (2d0*(Deltax**3))
@@ -234,20 +234,20 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
               fe=hn1in(ie)*div(ie)
               fxw=fx(fe, hn1in(iw-1)*div(iw-1), 2d0)
               fxe=fx(hn1in(ie+1)*div(ie+1), fw, 2d0)
-              fmh=cubic_interp (fw, fe, fxw, fxe, xdn1)
+              rhsh=cubic_interp (fw, fe, fxw, fxe, xdn1)
               fw=An1in(iw)*div(iw)
               fe=An1in(ie)*div(ie)
               fxw=fx(fe, An1in(iw-1)*div(iw-1), 2d0)
               fxe=fx(An1in(ie+1)*div(ie+1), fw, 2d0)
-              fmA=cubic_interp (fw, fe, fxw, fxe, xdn1)
+              rhsA=cubic_interp (fw, fe, fxw, fxe, xdn1)
            endif
 
 !------------------------------------------------------------------------
 ! find hout, Aout (after, time level n)
 !------------------------------------------------------------------------ 
 
-           hout(i) = hbef - 2d0*Deltat*fmh
-           Aout(i) = Abef - 2d0*Deltat*fmA
+           hout(i) = hbef - 2d0*Deltat*rhsh
+           Aout(i) = Abef - 2d0*Deltat*rhsA
 
         elseif (caseSL == 2) then ! upwind used close to walls
 
