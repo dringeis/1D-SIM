@@ -5,7 +5,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   
   implicit none
   
-  integer :: i, k, lim_scheme, order, ie, iw, caseSL
+  integer :: i, k, lim_scheme, order, ie, iw, caseSL, CIoption
 
   logical :: SLlimiter
 
@@ -18,7 +18,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
   double precision :: fluxh(1:nx), fluxA(1:nx), flux, div(nx)
   double precision :: alpham, rhsh, rhsA ! rhsh=hdu/dx at mid path
   double precision :: rhshprime, rhsAprime
-  double precision :: fw, fe, fxw, fxe
+  double precision :: fw, fe, fxw, fxe, deno
   double precision :: hbef, Abef ! init (before) positions of particles in semilag  
   double precision :: upper, lower, xd, xdn1, xdn2, uinterp
   double precision :: apply_lim1, apply_lim2, fx, cubic_interp, calc_flux ! functions
@@ -90,6 +90,7 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 !------------------------------------------------------------------------ 
      
      SLlimiter=.true. ! see Pellerin et al. MWR 1995
+     CIoption=2 ! defines region for cubic interpolation of u at mid point
      lim_scheme=2   ! 1: simple, 2: Pellerin et al. MWR 1995
      order=4        ! cubic interp
      
@@ -114,11 +115,20 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
                  uinterp = (un1(i+1)+un1(i))/2d0 - (un1(i+1)-un1(i))*alpham/Deltax + &
                       (alpham**2d0)*(un1(i+2)-un1(i+1)-un1(i)+un1(i-1))/(4d0*Deltax2)
               elseif (order ==  4) then
-                 xd = 0.5d0 - alpham / Deltax ! same wether alpham is + or - 
-                 fw = un1(i)
-                 fe = un1(i+1)
-                 fxw= fx(un1(i+1), un1(i-1), 2d0)
-                 fxe= fx(un1(i+2), un1(i), 2d0)
+                 if (CIoption == 1) then
+                    xd = 0.5d0 - alpham / Deltax ! same wether alpham is + or - 
+                    fw = un1(i)
+                    fe = un1(i+1)
+                    fxw= fx(un1(i+1), un1(i-1), 2d0)
+                    fxe= fx(un1(i+2), un1(i), 2d0)
+                 elseif (CIoption == 2) then
+                    xd = 1.5d0 - alpham / Deltax ! same wether alpham is + or - 
+                    fw = un1(i-1)
+                    fe = un1(i+2)
+                    deno=2d0/3d0
+                    fxw= fx(un1(i), un1(i-2), deno)
+                    fxe= fx(un1(i+3), un1(i+1), deno)
+                 endif
                  uinterp=cubic_interp (fw, fe, fxw,  fxe, xd)
               endif
               alpham=Deltat*uinterp
