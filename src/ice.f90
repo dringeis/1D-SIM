@@ -80,8 +80,8 @@ program ice
   Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
   
   omega      = 1.5d0    ! relax parameter for SOR
-  tol_SOR    = 1d-10    ! tol for SOR solver
-  maxiteSOR  = 10000     ! max nb of ite for SOR
+  tol_SOR    = 1d-6    ! tol for SOR solver
+  maxiteSOR  = 1000     ! max nb of ite for SOR
   iteSOR_pre = 10       ! nb of iterations for the SOR precond
   maxiteGMRES= 50      ! max nb of ite for GMRES
   gamma_nl = 1d-03
@@ -94,7 +94,8 @@ program ice
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   out_step(1)=1
-  out_step(2)=1440
+  out_step(2)=100
+  out_step(3)=1440
 
 !------------------------------------------------------------------------ 
 ! verify choice of solver and options
