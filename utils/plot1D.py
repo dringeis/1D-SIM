@@ -95,11 +95,10 @@ def loadxr_SIM1D(datas, attrs={}, save=False):
     #return the dataset
     return ds
 
-def plot_SIM1D(ds,varn,tsts=[0,1],step=1):
-
+def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
     for var in varn:
         plt.figure()
-        for i in range(int(tsts[0]*ds[var].shape[0]), int(tsts[1]*ds[var].shape[0]), step):
+        for i in range(int(tslim[0]*ds[var].shape[0]), int(tslim[1]*ds[var].shape[0]), step):
             ds[var][i].plot(linestyle='dashed', label=str("t="+str(ds['time'][i].values) + " s"))
         plt.legend()
         plt.grid()
