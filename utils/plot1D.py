@@ -10,7 +10,7 @@ plt.rc('font', family='sans')
 def loadxr_sNC(ds,name='', path=''):
 
     if name == '':
-        name = ds.attrs['entry']['ri']+'.nc'
+        name = ds.attrs['entry']['ri'] + ds.attrs['entry']['exp'] + '.nc'
     if path == '':
         path = ds.attrs['entry']['fdr']
         if path[-1] != '/':
@@ -54,10 +54,10 @@ def loadxr_data(datas):
     # Create a dictionnary with all the variable at all timesteps
     d_vars = dict()
     run = datas['ri']
-    px = datas['px']
+    exp = datas['exp']
     for var in datas['vrs']:
         for tpst in datas['tps']:
-            fname = str('../output/'+var+'_'+run+'_ts'+tpst+px)
+            fname = str('../output/'+var+'_'+run+'_ts'+tpst+exp)
             data = np.loadtxt(fname)
             if var in d_vars:
                 d_vars[var] = np.append(d_vars[var], [data], axis=0)
@@ -120,9 +120,9 @@ if __name__ == "__main__":
         'fdr': '../output/',
         'vrs': ['A', 'h', 'div', 'Er', 'u'],
         'vx': {'A': 'xc', 'h': 'xc', 'div': 'xc', 'Er': 'xg', 'u': 'xg'},
-        'ri': '00600s_010km_solv1_IMEX0_adv3_BDF20',
+        'ri': '00600s_010km_solv2_IMEX0_adv3_BDF20',
         'tps': ['000001', '000100', '001440'],
-        'px': '.01',
+        'exp': '.01',
         'dt': 600
     }
 
