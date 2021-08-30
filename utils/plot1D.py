@@ -131,6 +131,7 @@ if __name__ == "__main__":
 
     # Exemple of use
 
+    # Creation of the timestep array
     tps = timesteps(10, 1800, 10)
 
     #data to load in an xarray
@@ -159,6 +160,7 @@ if __name__ == "__main__":
 
     # plot_SIM1D_PM(ds, varn)
 
-    ds['A'].plot(vmin=0.9999, cmap='Blues_r')
+    # ds['A'].plot(vmin=0.9999, cmap='Blues_r')
+    ds['div'].plot(cmap='RdBu_r')
 
     plt.show()

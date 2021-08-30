@@ -68,19 +68,19 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
         Dx,solver, IMEX, adv,BDF2,ts,expnb
   open (13, file = filename, status = 'unknown')
 
-!  write (filename, '("output/zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!  write (filename, '(A,"zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
 !       IMEX, adv,ts,expnb
 !  open (14, file = filename, status = 'unknown')
 
-!  write (filename, '("output/sigma_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!  write (filename, '(A,"sigma_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
 !       IMEX, adv,ts,expnb
 !  open (15, file = filename, status = 'unknown')
 
-!  write (filename, '("output/zeta_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!  write (filename, '(A,"zeta_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
 !       IMEX, adv,ts,expnb
 !  open (16, file = filename, status = 'unknown')
 
-!  write (filename, '("output/sig_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') Dt,Dx, &
+!  write (filename, '(A,"sig_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
 !       IMEX, adv,ts,expnb
 !  open (17, file = filename, status = 'unknown')
 

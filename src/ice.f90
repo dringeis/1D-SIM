@@ -73,17 +73,17 @@ program ice
 
   Deltat     = 10d0   ! time step [s]
   nstep      = 1800     ! lenght of the run in nb of time steps
-  Nmax_OL    = 200
+  Nmax_OL    = 500
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
   N_sub = 900
   Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
 
   omega      = 1.5d0    ! relax parameter for SOR
-  tol_SOR    = 1d-6    ! tol for SOR solver
+  tol_SOR    = 1d-8    ! tol for SOR solver
   maxiteSOR  = 1000     ! max nb of ite for SOR
-  iteSOR_pre = 10       ! nb of iterations for the SOR precond
-  maxiteGMRES= 50      ! max nb of ite for GMRES
+  iteSOR_pre = 500       ! nb of iterations for the SOR precond
+  maxiteGMRES= 500      ! max nb of ite for GMRES
   gamma_nl = 1d-03
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
