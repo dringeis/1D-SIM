@@ -90,7 +90,7 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 3
+  expnb      = 4
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
@@ -192,8 +192,9 @@ program ice
   do ts = tsini, tsfin ! time loop
 
     ! nbhr = nbhr + Deltat / 3600d0 ! in hours
+    ! print *, 'time level, cumulative time (h) =', ts, nbhr
     nbhr = nbhr + Deltat ! in seconds
-    print *, 'time level, cumulative time (h) =', ts, nbhr
+    print *, 'time level, cumulative time (s) =', ts, nbhr
 
 
     call cpu_time(timecrap)

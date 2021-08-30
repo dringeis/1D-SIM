@@ -26,7 +26,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
     adv = 3
   endif
 
-  fldr='output.03/' !output folder
+  fldr='output.04/' !output folder
 
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km

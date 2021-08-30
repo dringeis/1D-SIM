@@ -15,7 +15,7 @@ subroutine wind_forcing (tauair, ts)
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
   nf = 129
-  tau_f = 1.0
+  tau_f = 0.5
   speed = 10d0 ! [m/s]
   period = 6d0*3600d0 ! period of cos in seconds (set to 3 days)
   pi = 3.14159265d0
@@ -33,7 +33,8 @@ subroutine wind_forcing (tauair, ts)
         tauair(i) = 0
       enddo
       do i = nf+1, nx
-        tauair(i) = tau_f
+        ! tauair(i) = tau_f ! constant stress in x
+        tauair(i) = tau_f*(i-nf+1)/(nx-nf+1) ! progressive increase of wind in x
       enddo
 
     else

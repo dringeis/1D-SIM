@@ -104,8 +104,6 @@ def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
         plt.grid()
         plt.title(str('variable ' + var))
 
-    plt.show()
-
     return None
 
 def plot_SIM1D_PM(ds, varn):
@@ -114,8 +112,6 @@ def plot_SIM1D_PM(ds, varn):
         ds[var].plot()
         # plt.colorbar()
         plt.title(str('variable ' + var))
-
-    plt.show()
 
     return None
 
@@ -136,12 +132,12 @@ if __name__ == "__main__":
 
     #data to load in an xarray
     datas = {
-        'fdr': '../output.03/',
+        'fdr': '../output.04/',
         'vrs': ['A', 'h', 'div', 'Er', 'u'],
         'vx': {'A': 'xc', 'h': 'xc', 'div': 'xc', 'Er': 'xg', 'u': 'xg'},
         'ri': '00010s_001km_solv1_IMEX0_adv3_BDF20',
         'tps': tps,
-        'exp': '.03',
+        'exp': '.04',
         'dt': 10
     }
 
@@ -156,11 +152,12 @@ if __name__ == "__main__":
 
     # Plotting for one dataset
     varn = ["u", "h", "A", "div", "Er"]
-    # plot_SIM1D(ds, varn)
 
-    # plot_SIM1D_PM(ds, varn)
+    plot_SIM1D(ds, varn, step=10)
 
-    # ds['A'].plot(vmin=0.9999, cmap='Blues_r')
-    ds['div'].plot(cmap='RdBu_r')
+    plot_SIM1D_PM(ds, varn)
+
+    # ds['A'].plot(vmin=0., cmap='Blues_r')
+    # ds['div'].plot(cmap='RdBu_r')
 
     plt.show()
