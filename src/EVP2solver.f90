@@ -116,9 +116,9 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
 !     B1: rho*h*u^n-1 / Deltat ! for EVP* solver
 !------------------------------------------------------------------------
-	if ( solver .eq. 4 ) then
-	  B1 = B1 + ( rho * h_at_u(i) * un1tp(i) ) / Deltat
-	endif
+    if ( solver .eq. 4 ) then
+      B1 = B1 + ( rho * h_at_u(i) * un1tp(i) ) / Deltat
+    endif
 !------------------------------------------------------------------------
 !     B1: dsigma/dx
 !------------------------------------------------------------------------
@@ -128,16 +128,16 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
 !     advance u from u^s-1 to u^s
 !------------------------------------------------------------------------
-	if ( solver .eq. 3 ) then
-	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + a_at_u(i) * Cw(i) + Cb(i)
-        elseif (solver .eq. 4 ) then
-	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + &
-		  ( rho * h_at_u(i) )*(1d0/Deltat) + a_at_u(i) * Cw(i) + Cb(i)
-	endif
+    if ( solver .eq. 3 ) then
+      gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + a_at_u(i) * Cw(i) + Cb(i)
+    elseif (solver .eq. 4 ) then
+      gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + &
+               ( rho * h_at_u(i) )*(1d0/Deltat) + a_at_u(i) * Cw(i) + Cb(i)
+    endif
 
-        utp(i) = B1 / gamma
+      utp(i) = B1 / gamma
 
-     enddo
+    enddo
 
   enddo
 

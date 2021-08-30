@@ -95,14 +95,14 @@
 !------------------------------------------------------------------------
       glob=2
       if (glob .eq. 0) then
-	uk1 = uk1 + du ! u^k+1 = u^k + du^k
+    uk1 = uk1 + du ! u^k+1 = u^k + du^k
       elseif (glob .eq. 1) then
-	call calc_s( uk1, du, s )
-	uk1 = uk1 + s*du
+    call calc_s( uk1, du, s )
+    uk1 = uk1 + s*du
       elseif (glob .eq. 2) then
-	call linesearch(L2norm, uk1, du, un1, un2, tauair)
+    call linesearch(L2norm, uk1, du, un1, un2, tauair)
       endif
-!	 call output_u_and_du ( ts, k, uk1, du )
+!    call output_u_and_du ( ts, k, uk1, du )
 
          return
        end subroutine prepFGMRES_NK
@@ -174,11 +174,11 @@
       maxdu = 0d0
 
       do i = 2, nx
-	if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp =abs(aa*uk1(i)/du(i))
-	if ( abs(du(i)) .gt. maxdu ) then
-	  maxdu = abs(du(i))
-	  imaxdu = i
-	endif
+    if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp =abs(aa*uk1(i)/du(i))
+    if ( abs(du(i)) .gt. maxdu ) then
+      maxdu = abs(du(i))
+      imaxdu = i
+    endif
       enddo
 
       temp=max(temp,0.05d0)
@@ -213,22 +213,22 @@
 
         beta = 1d0/(2d0**(1d0*(l-1)))
 
-	u = uk1 + beta*du
+    u = uk1 + beta*du
 
-	if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
-	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
-	endif
+    if (IMEX .gt. 0) then ! IMEX method 1 or 2
+      call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
+      call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
+    endif
 
-	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
-	call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
-	call calc_R (u, zeta, eta, Cw, Cb, tauair, Rtp)
-	call Fu (u, un1, un2, h, Rtp, F_uk1)
+    call viscouscoefficient (u, zeta, eta) ! u is u^k-1
+    call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
+    call calc_R (u, zeta, eta, Cw, Cb, tauair, Rtp)
+    call Fu (u, un1, un2, h, Rtp, F_uk1)
 
-	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
+    L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
-	if ( L2normnew .lt. L2norm ) exit
-!	print *, 'LINESEARCH', beta, L2normnew, L2norm
+    if ( L2normnew .lt. L2norm ) exit
+!   print *, 'LINESEARCH', beta, L2normnew, L2norm
 
       enddo
 
