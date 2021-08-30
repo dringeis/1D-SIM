@@ -67,40 +67,40 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
   enddo
 
   do l = 1, maxiteSOR
-     maxerror = 0d0
+    maxerror = 0d0
 
-     do i = 2, nx
+    do i = 2, nx
 
 !------------------------------------------------------------------------
 !     b : forcing term
 !------------------------------------------------------------------------
 
-        B1 = b(i)
+      B1 = b(i)
 
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 
-	B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
-		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
+      B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
+          +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
 
-        residual = B1/D(i) - utp(i)
-        utp(i) = utp(i) + omega * residual
+      residual = B1/D(i) - utp(i)
+      utp(i) = utp(i) + omega * residual
 
-        if (.not. p_flag) then
-           if ( abs( residual ) .gt. maxerror ) then
-              maxerror = abs( residual )
-           endif
+      if (.not. p_flag) then
+        if ( abs( residual ) .gt. maxerror ) then
+          maxerror = abs( residual )
         endif
+      endif
 
-     enddo
+    enddo
 
-     if (.not. p_flag) then
-        if ( maxerror .lt. tol_SOR ) then
+    if (.not. p_flag) then
+      if ( maxerror .lt. tol_SOR ) then
         print *, 'nb of SOR ite=', l
         exit
-        endif
-     endif
+      endif
+    endif
 
   enddo
 
@@ -156,7 +156,7 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
         residual = B1/Adiag(i) - utp(i)
         utp(i) = utp(i) + omega * residual
 
-	 if ( abs( residual ) .gt. maxerror ) then
+     if ( abs( residual ) .gt. maxerror ) then
              maxerror = abs( residual )
          endif
 
@@ -222,7 +222,7 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
         residual = B1/J(i) - du(i)
         du(i) = du(i) + omega * residual
 
-	 if ( abs( residual ) .gt. maxerror ) then
+     if ( abs( residual ) .gt. maxerror ) then
              maxerror = abs( residual )
          endif
 

@@ -33,7 +33,7 @@ program ice
 
   logical :: p_flag, restart
   integer :: i, ii, ts, tsini, nstep, tsfin, k, s, Nmax_OL, solver, idiag
-  integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts
+  integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts, out_freq
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, Cdair, Cdwater
   double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
@@ -67,12 +67,12 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 2        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  solver     = 1        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
   IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX)
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
 
-  Deltat     = 600d0   ! time step [s]
-  nstep      = 1440     ! lenght of the run in nb of time steps
+  Deltat     = 10d0   ! time step [s]
+  nstep      = 1800     ! lenght of the run in nb of time steps
   Nmax_OL    = 200
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
@@ -90,12 +90,13 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 1
+  expnb      = 3
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
-  out_step(1)=1
-  out_step(2)=100
-  out_step(3)=1440
+  ! out_step(1)=1
+  ! out_step(2)=100
+  ! out_step(3)=1440
+  out_freq = 10
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -141,6 +142,8 @@ program ice
     Deltax   =  10d03
   elseif  ( nx .eq. 400 ) then
     Deltax   =  5d03
+  elseif  ( nx .eq. 260 ) then ! New hig-res smaller experiment
+    Deltax   =  1d03
   else
     print *,  'Wrong grid size dimenion', nx
     STOP
@@ -188,7 +191,8 @@ program ice
 
   do ts = tsini, tsfin ! time loop
 
-    nbhr = nbhr + Deltat / 3600d0
+    ! nbhr = nbhr + Deltat / 3600d0 ! in hours
+    nbhr = nbhr + Deltat ! in seconds
     print *, 'time level, cumulative time (h) =', ts, nbhr
 
 
@@ -253,7 +257,7 @@ program ice
         if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
 
         if (solver .eq. 1) then
-          print *, 'L2-norm after k ite=', ts, k-1, L2norm
+          ! print *, 'L2-norm after k ite=', ts, k-1, L2norm
           call bvect(tauair, un1, Cw, b)
           call SOR (b, u, h, A, zeta, eta, Cw, Cb, p_flag, ts)
           ! call SOR_A (b, u, zeta, eta, Cw, k, ts)
@@ -289,7 +293,7 @@ program ice
 !------------------------------------------------------------------------
 
     call cpu_time(time2)
-    print *, 'cpu time = ', time2-time1
+    ! print *, 'cpu time = ', time2-time1
 
     if (IMEX .eq. 0) call advection (un1, u, hn1, An1, hn2, An2, h, A)
 
@@ -316,9 +320,16 @@ program ice
 !     output results
 !------------------------------------------------------------------------
 
-    if (ts .eq. out_step(1) .or. ts .eq. out_step(2) .or. &
-        ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
-        ts .eq. out_step(5)) then
+    ! if (ts .eq. out_step(1) .or. ts .eq. out_step(2) .or. &
+    !     ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
+    !     ts .eq. out_step(5)) then
+    !   print *, 'outputting results'
+    !   call output_results(ts, expnb, solver, u, zeta, eta)
+    !   call output_file(e, gamma_nl, solver, expnb)
+    ! endif
+
+    ! output at some timestep frequency out_freq
+    if (( MOD(ts,out_freq) .EQ. 0.0d0 ) .OR. (ts .EQ. nstep)) then
       print *, 'outputting results'
       call output_results(ts, expnb, solver, u, zeta, eta)
       call output_file(e, gamma_nl, solver, expnb)

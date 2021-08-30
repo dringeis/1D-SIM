@@ -47,12 +47,12 @@ subroutine viscouscoefficient(utp, zeta, eta)
     if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)
 
       if ( regularization .eq. 'tanh' ) then
-	P_half(i) = (Pp_half(i)-Tp_half(i)) * ( deno / denomin ) * tanh(denomin*(1d0/deno))
+        P_half(i) = (Pp_half(i)-Tp_half(i)) * ( deno / denomin ) * tanh(denomin*(1d0/deno))
       elseif ( regularization .eq. 'Kreyscher' ) then
         P_half(i) = (Pp_half(i)-Tp_half(i)) * deno / ( deno + denomin )
       elseif ( regularization .eq. 'capping' ) then
-	denonum=alpha*sqrt( (dudx)**2d0)
-	P_half(i) = (Pp_half(i)-Tp_half(i)) * denonum / deno
+        denonum=alpha*sqrt( (dudx)**2d0)
+        P_half(i) = (Pp_half(i)-Tp_half(i)) * denonum / deno
       endif
 
     else

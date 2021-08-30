@@ -31,7 +31,7 @@ def loadxr_coords(d_vars):
             nx = d_vars[j].shape[1]
 
     # Cell centers coordinates
-    xc = np.linspace(0, 2e6, nx)
+    xc = np.linspace(0, 260, nx)
 
     # Cell Boundaries coordinates
     xg = (xc[1:] + xc[:-1]) / 2
@@ -57,7 +57,7 @@ def loadxr_data(datas):
     exp = datas['exp']
     for var in datas['vrs']:
         for tpst in datas['tps']:
-            fname = str('../output/'+var+'_'+run+'_ts'+tpst+exp)
+            fname = str(datas['fdr']+var+'_'+run+'_ts'+tpst+exp)
             data = np.loadtxt(fname)
             if var in d_vars:
                 d_vars[var] = np.append(d_vars[var], [data], axis=0)
@@ -108,21 +108,40 @@ def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
 
     return None
 
+def plot_SIM1D_PM(ds, varn):
+    for var in varn:
+        plt.figure()
+        ds[var].plot()
+        # plt.colorbar()
+        plt.title(str('variable ' + var))
+
+    plt.show()
+
+    return None
+
+def timesteps(tb,te,step):
+    tps = range(tb, te, step)
+    tps = list(map(str, tps))
+    tps = [str(item).zfill(6) for item in tps]
+    return tps
+
 ##########################
 
 if __name__ == "__main__":
 
     # Exemple of use
 
+    tps = timesteps(10, 1800, 10)
+
     #data to load in an xarray
     datas = {
-        'fdr': '../output/',
+        'fdr': '../output.03/',
         'vrs': ['A', 'h', 'div', 'Er', 'u'],
         'vx': {'A': 'xc', 'h': 'xc', 'div': 'xc', 'Er': 'xg', 'u': 'xg'},
-        'ri': '00600s_010km_solv2_IMEX0_adv3_BDF20',
-        'tps': ['000001', '000100', '001440'],
-        'exp': '.01',
-        'dt': 600
+        'ri': '00010s_001km_solv1_IMEX0_adv3_BDF20',
+        'tps': tps,
+        'exp': '.03',
+        'dt': 10
     }
 
     # attribute if the NC array is to be shared (Optional)
@@ -132,7 +151,14 @@ if __name__ == "__main__":
 
     # Loading all datas specified in "datas" as a xarray dataset
     ds = loadxr_SIM1D(datas, attrs=attrs, save=True)
+    print(ds)
 
     # Plotting for one dataset
     varn = ["u", "h", "A", "div", "Er"]
-    plot_SIM1D(ds, varn)
+    # plot_SIM1D(ds, varn)
+
+    # plot_SIM1D_PM(ds, varn)
+
+    ds['A'].plot(vmin=0.9999, cmap='Blues_r')
+
+    plt.show()
