@@ -8,7 +8,7 @@ subroutine wind_forcing (tauair, ts)
   use option
 
   implicit none
-     
+
   integer :: i
   integer, intent(in) :: ts
   double precision :: speed, period, modulation, pi, apar
@@ -29,12 +29,12 @@ subroutine wind_forcing (tauair, ts)
           tauair(i) = 0.15
 
 !	tauair(i) = (Cda * (speed)**2d0)*(1d0-exp(-1d0*ts*Deltat/apar)) ! at n
-       
+
        enddo
        print *, 'tauair', ts, 100d0*tauair(50)/(Cda * (speed)**2d0)
     else
 	modulation = sin(2*pi*ts*Deltat/period)
-       
+
        do i = 2, nx
           tauair(i) = modulation * Cda * (speed)**2d0
        enddo

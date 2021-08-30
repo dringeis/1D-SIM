@@ -3,7 +3,7 @@
                                L2norm, k, ts, fgmres_its)
         use size
         use numerical
-        
+
       implicit none
 
       integer :: icode, iter, iout, i, glob
@@ -15,7 +15,7 @@
       double precision, intent(in)  :: L2norm
       double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1)
       double precision, intent(in)  :: Cw(1:nx+1), Cb(1:nx+1), htp(0:nx+1)
-      double precision, intent(in) :: Atp(0:nx+1), tauair(1:nx+1) 
+      double precision, intent(in) :: Atp(0:nx+1), tauair(1:nx+1)
       double precision :: du(1:nx+1), rhs(1:nx+1)
       double precision :: vv(1:nx+1,img1), wk(1:nx+1,img)!, Funeg(1:nx+1)
       double precision :: wk1(1:nx+1), wk2(1:nx+1)
@@ -39,7 +39,7 @@
       rhs = -1d0*F_uk1 ! mult by -1 because we solve Jdu = -F(u)
 
 !------------------------------------------------------------------------
-!     Initial guess vector: because we solve for du and du is just a 
+!     Initial guess vector: because we solve for du and du is just a
 !     correction, we set the initial guess to zero
 !------------------------------------------------------------------------
 
@@ -48,11 +48,11 @@
 !------------------------------------------------------------------------
 !     Choosing the forcing term (eta_e)
 !------------------------------------------------------------------------
-      
+
       call forcing_term (k,ts,L2norm,gamma)
 
 !------------------------------------------------------------------------
-!      Begining of FGMRES method    
+!      Begining of FGMRES method
 !------------------------------------------------------------------------
       print *, 'L2-norm after k ite=', ts, k-1, L2norm, gamma
       eps = gamma * L2norm ! setting the tolerance for fgmres
@@ -62,7 +62,7 @@
       icode = 0
 
  10   CONTINUE
-      
+
       call fgmres (nx+1,img,rhs,du,iter,vv,wk,wk1,wk2, &
                    eps,maxiteGMRES,iout,icode,fgmres_its)
 
@@ -72,14 +72,14 @@
 
          GOTO 10
       ELSEIF ( icode >= 2 ) THEN
-         epsilon = 4d-07 ! approximates Jv below (results show that a large eps (1d-05 - 1d-06) is good 
-                         ! in pack ice but a smaller eps (1d-07 - 1d-10) is better for loose ice. 
-         call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, un2, tauair, epsilon) 
+         epsilon = 4d-07 ! approximates Jv below (results show that a large eps (1d-05 - 1d-06) is good
+                         ! in pack ice but a smaller eps (1d-07 - 1d-10) is better for loose ice.
+         call JacfreeVec (wk1, wk2, F_uk1, uk1, un1, un2, tauair, epsilon)
          GOTO 10
       ENDIF
 
 !------------------------------------------------------------------------
-!      End of FGMRES method    
+!      End of FGMRES method
 !------------------------------------------------------------------------
 
       if (fgmres_its .eq. maxiteGMRES) then
@@ -106,9 +106,9 @@
 
          return
        end subroutine prepFGMRES_NK
-      
+
    subroutine forcing_term(k,ts,L2norm,gamma)
-  
+
       use numerical
       implicit none
 
@@ -121,7 +121,7 @@
 
       gamma_ini = 0.99d0
       phi_e     = 1d0
-      alp_e     = 1.5d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0 
+      alp_e     = 1.5d0 !      alp_e = (1d0 + 5d0**0.5d0)/2d0 !2d0
 
       if (k .eq. 1) then
 
@@ -137,10 +137,10 @@
          if (L2norm .gt. L2norm_t) then
 
             gamma = gamma_ini
-      
+
          else
 
-            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6 
+            gamma = phi_e * (L2norm/L2normk_1)**alp_e ! Eisenstat, 1996,eq2.6
             gamma = min(gamma_ini,gamma)
             gamma = max(0.01d0,gamma)
 
@@ -172,7 +172,7 @@
       aa = 0.25d0
       temp=100000d0
       maxdu = 0d0
-      
+
       do i = 2, nx
 	if ( abs(aa*uk1(i)/du(i)) .lt. temp) temp =abs(aa*uk1(i)/du(i))
 	if ( abs(du(i)) .gt. maxdu ) then
@@ -180,7 +180,7 @@
 	  imaxdu = i
 	endif
       enddo
-  
+
       temp=max(temp,0.05d0)
       s = min(1d0,temp)
 
@@ -208,29 +208,29 @@
       double precision :: L2normnew, beta
 
       uk1 = u
-      
+
       do l=1,4
-      
+
         beta = 1d0/(2d0**(1d0*(l-1)))
-	
+
 	u = uk1 + beta*du
-      
+
 	if (IMEX .gt. 0) then ! IMEX method 1 or 2
-	  call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers 
+	  call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
 	  call ice_strength (h, A) ! Pp_half is Pp/2 where Pp is the ice strength (Tp_half: tensile strength)
 	endif
-	
+
 	call viscouscoefficient (u, zeta, eta) ! u is u^k-1
 	call Cw_coefficient (u, Cw, Cb)            ! u is u^k-1
 	call calc_R (u, zeta, eta, Cw, Cb, tauair, Rtp)
-	call Fu (u, un1, un2, h, Rtp, F_uk1) 
+	call Fu (u, un1, un2, h, Rtp, F_uk1)
 
 	L2normnew = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
 	if ( L2normnew .lt. L2norm ) exit
 !	print *, 'LINESEARCH', beta, L2normnew, L2norm
-      
+
       enddo
-  
+
     end subroutine linesearch
 

@@ -1,5 +1,5 @@
 subroutine output_file(e, gamma_nl, solver, expnb)
- 
+
   use size
   use rheology
   use resolution
@@ -13,10 +13,10 @@ subroutine output_file(e, gamma_nl, solver, expnb)
 
   integer, intent(in) :: solver, expnb
   double precision, intent(in) :: e, gamma_nl
-  
+
   write (filename, '("output/info.",i2.2)') expnb
   open (10, file = filename, status = 'unknown')
-  
+
   write(10,*) ('PHYSICAL PARAMETERS')
   write(10,*) ('')
   write(10,*) ('C =')
@@ -40,7 +40,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
   write(10,*) (linear_viscous)
   write(10,*) ('constant wind =')
   write(10,*) (constant_wind)
-  
+
   write(10,*) ('OCEAN MODEL')
   write(10,*) ('ocean model is =')
   write(10,*) (oceanSIM)
@@ -49,7 +49,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
    write(10,*) (implicitDrag)
    write(10,*) ('Asselin filter is =')
    write(10,*) (Asselin)
-   if (Asselin) then 
+   if (Asselin) then
     write(10,*) ('gamma value for Asselin filter =')
     write(10,10) (Agamma)
    endif
@@ -71,7 +71,7 @@ subroutine output_file(e, gamma_nl, solver, expnb)
      write(10,12) (maxiteGMRES)
      write(10,*) ('gamma_nl (tol) =')
      write(10,10) (gamma_nl)
-   
+
   close(10)
 
 10 format (f24.10)

@@ -14,25 +14,25 @@ subroutine ini_get (utp, restart, expres, ts_res)
   use option
 
   implicit none
-     
+
   logical, intent(in) :: restart
   integer, intent(in) :: expres, ts_res
   integer :: i
   double precision, intent(inout)  :: utp(1:nx+1)
   double precision :: rdnb, small
 
-  character(LEN=30) filename  ! restart file name 
+  character(LEN=30) filename  ! restart file name
 
   small = 0.0001d0
 
   allocate(etaw(0:nx+1), etawn1(0:nx+1), etawn2(0:nx+1))
   allocate(uw(1:nx+1), uwn1(1:nx+1), uwn2(1:nx+1))
-  
-  if (oceanSIM) then 
+
+  if (oceanSIM) then
      allocate(duwdt(1:nx+1), gedetawdx(1:nx+1), buw(1:nx+1))
      allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif
-  
+
   utp(1)    = 0d0 ! close bc
   utp(nx+1) = 0d0 ! close bc
   h(0)    = 0d0
@@ -45,15 +45,15 @@ subroutine ini_get (utp, restart, expres, ts_res)
   etaw    = 0d0
   etawn1  = 0d0
   etawn2  = 0d0
-  
+
   scaling=1d0 ! initialize scaling field (only used for JFNK)
 
-  if (restart) then 
+  if (restart) then
      print *, 'Restart code should be verified'
      stop
      write (filename,'("output/h_",i3.3,".",i2.2)') ts_res, expres
      open (10, file = filename, status = 'old')
-     
+
      write (filename,'("output/A_",i3.3,".",i2.2)') ts_res, expres
      open (11, file = filename, status = 'old')
 
@@ -72,7 +72,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   do i = 2, nx
 !     call random_number(rdnb)
-!     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess  
+!     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess
      utp(i) = 0d0
      uw(i)  = 0d0
   enddo
@@ -88,12 +88,12 @@ subroutine ini_get (utp, restart, expres, ts_res)
   do i = 10, 40
      h(i) = 1d0
      A(i) = 1d0
-!     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall                                                                   
+!     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall
 !     h(i) = max(1d-06, h(i))
 !     bathy(i)=100d0
   enddo
-  
-  if (oceanSIM) then 
+
+  if (oceanSIM) then
      uwn1=uw
      uwn2=uw
      etawn1=etaw
@@ -104,7 +104,7 @@ subroutine ini_get (utp, restart, expres, ts_res)
      tauaw=0d0
      buw=0d0
   endif
-  
+
 !  do i = 11, nx-10
 !     h(i) = 1d0
 !     A(i) = 0.7d0
@@ -116,12 +116,12 @@ subroutine ini_get (utp, restart, expres, ts_res)
 !  do i = 1, 20
 !     bathy(i)=10d0
 !  enddo
- 
+
 !  do i = 1, 19
 !     h(i) = 1d0
 !     A(i) = 1d0
 !  enddo
- 
+
   endif
 
   return

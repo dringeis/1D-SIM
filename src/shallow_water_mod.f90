@@ -13,7 +13,7 @@ use size
   DOUBLE PRECISION :: Hw, bw, Cdairw ! Cdair:over ice, Cdairw: over water
   DOUBLE PRECISION :: Agamma ! for Asselin filter
   LOGICAL :: implicitDrag
-  
+
 END MODULE shallow_water
 
 MODULE MOMeqSW_output
@@ -26,36 +26,36 @@ use size
 !------------------------------------------------------------------------
 !     Subroutine for advecting etaw
 !------------------------------------------------------------------------
-  
+
 END MODULE MOMeqSW_output
 
 subroutine advect_etaw (etawtp)
-  
+
   use size
   use resolution
   use shallow_water
-  
+
   implicit none
-  
+
   double precision, intent(out) :: etawtp(0:nx+1)
   double precision :: RHS, Htleft, Htright ! Ht=Hw+etaw
   integer :: i
-  
+
   ! leapfrog approach with centered (n1) term on the RHS
-  
+
   do i = 1, nx
-  
+
    Htleft  = Hw + ( etawn1(i-1) + etawn1(i) ) /2d0
    Htright = Hw + ( etawn1(i+1) + etawn1(i) ) /2d0
    RHS     = -1d0*( uwn1(i+1)*Htright - uwn1(i)*Htleft ) / Deltax
    etawtp(i) = etawn2(i) + 2d0*Deltat*RHS
-  
+
   enddo
-  
+
 end subroutine advect_etaw
 
 subroutine momentum_uw (idiag, tauair, Cdair, Cw, Atp, utp)
-  
+
   use size
   use resolution
   use properties
@@ -64,34 +64,34 @@ subroutine momentum_uw (idiag, tauair, Cdair, Cw, Atp, utp)
   use MOMeqSW_output
   use option
   use diag_stress
-  
+
   implicit none
-  
+
   double precision, intent(in) :: tauair(1:nx+1), Cw(1:nx+1), Cdair
   double precision, intent(in) :: Atp(0:nx+1), utp(1:nx+1)
   double precision :: invtwodt, RHS, LHS, Ht_at_u, A_At_u, Diocoeff ! Ht=Hw+etaw
   integer, intent(in) :: idiag
   integer :: i
-  
+
   invtwodt = 1d0 / ( 2d0*Deltat )
   ! leapfrog approach with centered (n1) term on the RHS
-  
+
   do i = 2, nx
-  
+
    RHS=0d0
    LHS=0d0
    RHS = RHS + invtwodt * uwn2(i)                        ! part of inertial term
    RHS = RHS - ge * ( etawn1(i) - etawn1(i-1) ) / Deltax ! pressure gradient
 !   RHS = RHS - bw * uwn1(i)                              ! basal friction
-   
-   A_at_u = ( Atp(i) + Atp(i-1) ) / 2d0  
+
+   A_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
 !   Ht_at_u = Hw + ( etawn1(i) + etawn1(i-1) ) / 2d0
-   Ht_at_u = Hw + ( etaw(i) + etaw(i-1) ) / 2d0 
-   RHS = RHS + ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater ) 
+   Ht_at_u = Hw + ( etaw(i) + etaw(i-1) ) / 2d0
+   RHS = RHS + ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater )
    ! rescaled if Cdairw .ne. Cdair
-   
+
    Diocoeff = ( A_At_u * Cw(i) ) / ( Ht_at_u * rhowater )
-   
+
    if (implicitDrag) then ! basal friction is always implicit (as in NEMO, FD)
     LHS = invtwodt + bw + Diocoeff
     RHS = RHS + Diocoeff * utp(i)
@@ -99,13 +99,13 @@ subroutine momentum_uw (idiag, tauair, Cdair, Cw, Atp, utp)
     LHS = invtwodt + bw   ! basal friction is always implicit (as in NEMO, FD)
     RHS = RHS - Diocoeff * ( uwn1(i) - utp(i) )
    endif
-   
+
    uw(i) = RHS / LHS
-  
+
 !----- MOM eq terms...just for outputs ---------
    duwdt(i)= invtwodt * ( uw(i) - uwn2(i) )
    gedetawdx(i) = - ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
-   tauaw(i) = ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater ) 
+   tauaw(i) = ( 1d0 - A_at_u ) * Cdairw * tauair(i) / ( Cdair * Ht_at_u * rhowater )
    if (implicitDrag) then
     tauiw(i)= -1d0 * Diocoeff * ( uw(i) - utp(i) )
    else
@@ -114,40 +114,40 @@ subroutine momentum_uw (idiag, tauair, Cdair, Cw, Atp, utp)
    buw(i) = -1d0 * bw * uw(i)
 
 !----- Diagnostic for ice-ocean stress ---------
-  
+
   if (DiagStress) then
    if (i .eq. idiag) then
-  
+
     tauiwdiag = tauiw(idiag) * Ht_at_u * rhowater
-  
+
    endif
   endif
-  
+
   enddo
-  
+
 end subroutine momentum_uw
 
 subroutine Asselin_filter (etawtp, uwtp)
-  
+
   use size
   use shallow_water
-  
+
   implicit none
-  
+
   double precision, intent(in) :: etawtp(0:nx+1) ! etaw^n
   double precision, intent(in) :: uwtp(1:nx+1) ! uw^n
   integer :: i
-  
+
   do i = 1, nx
-  
+
    etawn1(i) = etawn1(i) + Agamma * ( etawn2(i) -2d0 * etawn1(i) + etawtp(i) )
-  
+
   enddo
-  
+
   do i = 2, nx
-  
+
    uwn1(i) = uwn1(i) + Agamma * ( uwn2(i) -2d0 * uwn1(i) + uwtp(i) )
-  
+
   enddo
-  
+
 end subroutine Asselin_filter

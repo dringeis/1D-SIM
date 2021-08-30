@@ -1,5 +1,5 @@
 
-subroutine calc_scaling ( Atp ) 
+subroutine calc_scaling ( Atp )
 
   use size
   use numerical
@@ -9,10 +9,10 @@ subroutine calc_scaling ( Atp )
 ! Preconditioner: calculates M x = rhs where rhs is wk1. x is the initial
 ! guess. x is set to 0 here. The solution x is then put in wk2.
 !--------------------------------------------------------------------------
-  
+
   implicit none
-      
-  integer :: i    
+
+  integer :: i
   double precision, intent(in)  :: Atp(0:nx+1)
   double precision :: a_at_u
 
@@ -23,8 +23,8 @@ subroutine calc_scaling ( Atp )
      scaling(i)=1d0/a_at_u
 
   enddo
-  
-  
+
+
 end subroutine calc_scaling
 
 

@@ -12,7 +12,7 @@ subroutine EVP2solver (tauair, utp, ts, solver)
   use rheology
 
   implicit none
-      
+
   integer :: i, s
   integer, intent(in) :: ts, solver
   double precision, intent(in)  :: tauair(1:nx+1)
@@ -24,34 +24,34 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !  double precision :: Fevp(1:nx+1), L2normb ! calc EVP L2norm
 
   left  = 1d0/(Deltate) + ( 1d0 )/(T*alpha2) ! no change during subcycling
-  
+
 !------------------------------------------------------------------------
 ! initial value of sigma and utp
 !------------------------------------------------------------------------
-  
+
   un1tp = utp ! for EVP* solver
-  
+
   if ( ts .eq. 1 ) then ! initial sigma set to VP for 1st time level (only) for standard evp
-    
+
     call viscouscoefficient (utp, zeta, eta)
     call Cw_coefficient (utp, Cw, Cb)
-    do i = 1, nx 
+    do i = 1, nx
 
       sigma(i) = (eta(i)+ zeta(i))*( utp(i+1) - utp(i) ) / Deltax - P_half(i)
 
     enddo
   endif
-    
+
   do i = 1, nx ! could be improved for precond...
-  
+
      h_at_u(i) = ( h(i) + h(i-1) ) / 2d0 ! no change during subcycling
      a_at_u(i) = ( A(i) + A(i-1) ) / 2d0
      a_at_u(i)=max(a_at_u(i), smallA)
- 
+
   enddo
 
 !------------------------------------------------------------------------
-! beginning of subcycling loop 
+! beginning of subcycling loop
 !------------------------------------------------------------------------
 
   do s = 1, N_sub ! subcycling loop
@@ -88,23 +88,23 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
 
      do i = 2, nx
-     
+
 !------------------------------------------------------------------------
 !     B1: air drag
 !------------------------------------------------------------------------
-        
+
         B1 = a_at_u(i) * tauair(i)
-        
+
 !------------------------------------------------------------------------
 !     B1: part of water drag
 !------------------------------------------------------------------------
-        
+
         B1 = B1 + a_at_u(i) * Cw(i) * uwn2(i) ! to be consistent with NEMO
-        
+
 !------------------------------------------------------------------------
 !     -rhoh detaw/dx : ocean tilt term
 !------------------------------------------------------------------------
-     
+
         B1 = B1 - rho * h_at_u(i) * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
 
 !------------------------------------------------------------------------
@@ -122,19 +122,19 @@ subroutine EVP2solver (tauair, utp, ts, solver)
 !------------------------------------------------------------------------
 !     B1: dsigma/dx
 !------------------------------------------------------------------------
-     
-        B1 = B1 + ( sigma(i) - sigma(i-1) )/ Deltax 
-     
+
+        B1 = B1 + ( sigma(i) - sigma(i-1) )/ Deltax
+
 !------------------------------------------------------------------------
 !     advance u from u^s-1 to u^s
 !------------------------------------------------------------------------
 	if ( solver .eq. 3 ) then
 	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + a_at_u(i) * Cw(i) + Cb(i)
         elseif (solver .eq. 4 ) then
-	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + & 
+	  gamma = ( rho * h_at_u(i) )*(1d0/Deltate) + &
 		  ( rho * h_at_u(i) )*(1d0/Deltat) + a_at_u(i) * Cw(i) + Cb(i)
-	endif	
-        
+	endif
+
         utp(i) = B1 / gamma
 
      enddo

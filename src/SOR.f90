@@ -11,7 +11,7 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
   use option
 
   implicit none
-      
+
   integer :: i, l
   integer, intent(in) :: ts
   logical, intent(in) :: p_flag ! T: precond, F: standard solver
@@ -36,10 +36,10 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !------------------------------------------------------------------------
 
      h_at_u = ( htp(i) + htp(i-1) ) / 2d0
-     
+
      if ( BDF2 .eq. 0 ) then
-      D(i) = ( rho * h_at_u ) / Deltat 
-     elseif ( BDF2 .eq. 1 ) then 
+      D(i) = ( rho * h_at_u ) / Deltat
+     elseif ( BDF2 .eq. 1 ) then
       D(i) = ( 3d0 * rho * h_at_u ) / ( 2d0*Deltat )
      endif
 
@@ -55,32 +55,32 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     Cb*u : bottom drag term
 !------------------------------------------------------------------------
 
-      D(i) = D(i) + Cb(i)      
-      
+      D(i) = D(i) + Cb(i)
+
 !------------------------------------------------------------------------
 !     d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
-     
+
       D(i) = D(i) + (zeta(i)+eta(i)+zeta(i-1)+eta(i-1)) / Deltax2
       D(i)=scaling(i)*D(i) ! for JFNK
-      
+
   enddo
 
   do l = 1, maxiteSOR
      maxerror = 0d0
 
      do i = 2, nx
-        
+
 !------------------------------------------------------------------------
 !     b : forcing term
 !------------------------------------------------------------------------
-        
+
         B1 = b(i)
 
 !------------------------------------------------------------------------
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
-	
+
 	B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
 		  +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
 
@@ -94,14 +94,14 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
         endif
 
      enddo
-     
+
      if (.not. p_flag) then
         if ( maxerror .lt. tol_SOR ) then
         print *, 'nb of SOR ite=', l
         exit
         endif
      endif
-    
+
   enddo
 
   return
@@ -119,10 +119,10 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
   use numerical
 
   implicit none
-      
+
   integer :: i, l
   integer, intent(in) :: k,ts
-  double precision, intent(inout) :: utp(1:nx+1) 
+  double precision, intent(inout) :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1),Cw(1:nx+1)
   double precision, intent(in)  :: b(1:nx+1)
 
@@ -132,15 +132,15 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
   call formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
 
   do l = 1, maxiteSOR
-     
+
      maxerror = 0d0
 
      do i = 2, nx
-        
+
 !------------------------------------------------------------------------
 !     b : rhs
 !------------------------------------------------------------------------
-        
+
         B1 = b(i)
 
 !------------------------------------------------------------------------
@@ -148,7 +148,7 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
 !------------------------------------------------------------------------
 
         B1 = B1 - Aleft(i)*utp(i-1) - Aright(i)*utp(i+1)
-        
+
 !------------------------------------------------------------------------
 !     get latest u
 !------------------------------------------------------------------------
@@ -161,7 +161,7 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
          endif
 
      enddo
-     
+
      if ( maxerror .lt. tol_SOR ) exit
 
   enddo
@@ -181,10 +181,10 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
   use numerical
 
   implicit none
-      
+
   integer :: i, l
   integer, intent(in) :: k,ts
-  double precision, intent(inout) :: utp(1:nx+1) 
+  double precision, intent(inout) :: utp(1:nx+1)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1), upts(1:nx+1)
   double precision, intent(in)  :: tauair(1:nx+1), Cw(1:nx+1)
   double precision, intent(in)  :: Futp(1:nx+1)
@@ -198,15 +198,15 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
   du = 0d0
 
   do l = 1, maxiteSOR
-     
+
      maxerror = 0d0
 
      do i = 2, nx
-        
+
 !------------------------------------------------------------------------
 !     -F : rhs
 !------------------------------------------------------------------------
-        
+
         B1 = -Futp(i)
 
 !------------------------------------------------------------------------
@@ -214,7 +214,7 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
 !------------------------------------------------------------------------
 
         B1 = B1 - Jleft(i)*du(i-1) - Jright(i)*du(i+1)
-        
+
 !------------------------------------------------------------------------
 !     get latest du
 !------------------------------------------------------------------------
@@ -227,9 +227,9 @@ subroutine SOR_J (utp, Futp, zeta, eta, Cw, upts, tauair, k, ts)
          endif
 
      enddo
-     
+
      print *, 'max error', l, maxerror
-     
+
      if ( maxerror .lt. tol_SOR ) exit
 
   enddo
