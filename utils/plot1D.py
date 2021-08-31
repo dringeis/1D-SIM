@@ -22,7 +22,7 @@ def loadxr_sNC(ds,name='', path=''):
 
     return None
 
-def loadxr_coords(d_vars):
+def loadxr_coords(d_vars, datas):
 
     # Looking at datas for dimensions
     nx = 0
@@ -56,6 +56,7 @@ def loadxr_data(datas):
     run = datas['ri']
     exp = datas['exp']
     for var in datas['vrs']:
+        print(var)
         for tpst in datas['tps']:
             fname = str(datas['fdr']+var+'_'+run+'_ts'+tpst+exp)
             data = np.loadtxt(fname)
@@ -71,7 +72,7 @@ def loadxr_SIM1D(datas, attrs={}, save=False):
     d_vars = loadxr_data(datas)
 
     # Extract the coordinates for the data dictionnary
-    coords = loadxr_coords(d_vars)
+    coords = loadxr_coords(d_vars,datas)
 
     #Create the data array dictionnary with the coordinates
     data_vars = dict()
@@ -100,7 +101,7 @@ def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
         plt.figure()
         for i in range(int(tslim[0]*ds[var].shape[0]), int(tslim[1]*ds[var].shape[0]), step):
             ds[var][i].plot(linestyle='dashed', label=str("t="+str(ds['time'][i].values) + " s"))
-        plt.legend()
+#         plt.legend()
         plt.grid()
         plt.title(str('variable ' + var))
 

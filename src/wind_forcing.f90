@@ -16,6 +16,7 @@ subroutine wind_forcing (tauair, ts)
 
   nf = 129
   tau_f = 0.5
+
   speed = 10d0 ! [m/s]
   period = 6d0*3600d0 ! period of cos in seconds (set to 3 days)
   pi = 3.14159265d0

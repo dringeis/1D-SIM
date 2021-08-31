@@ -31,8 +31,8 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
 
   div(0) = 0d0
   div(nx+1) = 0d0
-!  zeta(0) = 0d0
-!  zeta(nx+1) = 0d0
+  ! zeta(0) = 0d0
+  ! zeta(nx+1) = 0d0
   sigma(0) = 0d0
   sigma(nx+1) = 0d0
   sig_norm(0) = 0d0
@@ -40,65 +40,65 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
   Erate = 0d0
 
   do i = 1, nx
-     div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
-     sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
-     sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength
-!     zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
+    div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
+    sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
+    sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength
+    ! zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
 
   do i = 2, nx
     Erate(i) = utp(i) * ( sigma(i) - sigma(i-1) ) / Deltax
   enddo
 
-  write (filename, '(A,"h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, Dt, &
-        Dx,solver,IMEX, adv,BDF2,ts,expnb
+  write (filename, '(A,"h_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (10, file = filename, status = 'unknown')
 
-  write (filename, '(A,"A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
+  write (filename, '(A,"A_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (11, file = filename, status = 'unknown')
 
-  write (filename, '(A,"u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
+  write (filename, '(A,"u_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (12, file = filename, status = 'unknown')
 
-  write (filename, '(A,"div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
+  write (filename, '(A,"div_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (13, file = filename, status = 'unknown')
 
-!  write (filename, '(A,"zeta_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
-!       IMEX, adv,ts,expnb
-!  open (14, file = filename, status = 'unknown')
+  write (filename, '(A,"zeta_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+  open (14, file = filename, status = 'unknown')
 
-!  write (filename, '(A,"sigma_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
-!       IMEX, adv,ts,expnb
-!  open (15, file = filename, status = 'unknown')
+  write (filename, '(A,"sigma_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+  open (15, file = filename, status = 'unknown')
 
-!  write (filename, '(A,"zeta_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
-!       IMEX, adv,ts,expnb
-!  open (16, file = filename, status = 'unknown')
+  ! write (filename, '(A,"zeta_norm_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+  !     fldr, Dt, Dx, IMEX, adv,ts,expnb
+  ! open (16, file = filename, status = 'unknown')
 
-!  write (filename, '(A,"sig_norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_ts",i4.4,".",i2.2)') fldr, Dt,Dx, &
-!       IMEX, adv,ts,expnb
-!  open (17, file = filename, status = 'unknown')
+  write (filename, '(A,"sig_norm_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+  open (17, file = filename, status = 'unknown')
 
-  write (filename, '(A,"Er_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
+  write (filename, '(A,"Er_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (18, file = filename, status = 'unknown')
 
 
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
   write(13,10) ( div(i),     i = 0, nx+1 )
-!  write(14,10) ( zeta(i),    i = 0, nx+1 )
-!  write(15,10) ( sigma(i),   i = 0, nx+1 )
-!  write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
-!  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
+  write(14,10) ( zeta(i),    i = 0, nx+1 )
+  write(15,10) ( sigma(i),   i = 0, nx+1 )
+  ! write(16,10) ( zeta_norm(i),    i = 0, nx+1 )
+  write(17,10) ( sig_norm(i),   i = 0, nx+1 )
   write(12,10) ( utp(i),       i = 1, nx+1 )
   write(18,10) ( Erate(i),     i = 1, nx+1 )
 
   do k = 10, 18
-     close(k)
+    close(k)
   enddo
 
   if (oceanSIM) then
@@ -208,7 +208,7 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb, fldr)
   Dx=int(Deltax/1000d0) ! in km
 
   write (filename, '(A,"Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt, &
-   Dx,IMEX,adv,BDF2,expnb
+         Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
 
   write(10,10) ts,k-1,fgmres_per_ts
