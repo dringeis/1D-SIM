@@ -43,6 +43,7 @@ program ice
   double precision :: F_uk1(1:nx+1), R_uk1(1:nx+1) ! could use F for R
   double precision :: meanvalue, time1, time2, timecrap
   double precision :: L2norm, gamma_nl, nl_target, nbhr
+  character(Len=10) :: fldr
 
   out_step = 0
   sigma    = 0d0 ! initial stresses are zero
@@ -90,13 +91,14 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 4
+  expnb      = 5
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
   ! out_step(2)=100
   ! out_step(3)=1440
   out_freq = 10
+  fldr = 'output.05/'
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -252,7 +254,7 @@ program ice
 
         if (k .eq. 1) then
           nl_target = gamma_nl*L2norm
-          ! call output_ini_L2norm(ts,L2norm,expnb)
+          ! call output_ini_L2norm(ts, L2norm, expnb, fldr)
         endif
 
         if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
@@ -274,7 +276,7 @@ program ice
 
       enddo ! ENDDO outerloop
     meanN = meanN + k-1
-    ! call output_nb_ite (ts, k ,fgmres_per_ts, expnb)
+    ! call output_nb_ite (ts, k ,fgmres_per_ts, expnb, fldr)
 
     elseif (solver .eq. 3 .or. solver .eq. 4) then ! explicit (EVP)
 
@@ -325,15 +327,15 @@ program ice
     !     ts .eq. out_step(3) .or. ts .eq. out_step(4) .or. &
     !     ts .eq. out_step(5)) then
     !   print *, 'outputting results'
-    !   call output_results(ts, expnb, solver, u, zeta, eta)
-    !   call output_file(e, gamma_nl, solver, expnb)
+    !   call output_results(ts, expnb, solver, u, zeta, eta, fldr)
+    !   call output_file(e, gamma_nl, solver, expnb, fldr)
     ! endif
 
-    ! output at some timestep frequency out_freq
+    ! output at some timestep frequency out_freq and always on the last timestep
     if (( MOD(ts,out_freq) .EQ. 0.0d0 ) .OR. (ts .EQ. nstep)) then
       print *, 'outputting results'
-      call output_results(ts, expnb, solver, u, zeta, eta)
-      call output_file(e, gamma_nl, solver, expnb)
+      call output_results(ts, expnb, solver, u, zeta, eta, fldr)
+      call output_file(e, gamma_nl, solver, expnb, fldr)
     endif
 
 !------------------------------------------------------------------------
@@ -347,7 +349,7 @@ program ice
     if (oceanSIM) then
       call minmaxtracer(etaw,4,ts)
       call minmaxtracer(uw,5,ts)
-      if (DiagStress) call output_diag_stress (ts, expnb, idiag)
+      if (DiagStress) call output_diag_stress (ts, expnb, idiag, fldr)
     endif
 
   enddo ! enddo timeloop

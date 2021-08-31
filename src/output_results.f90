@@ -1,4 +1,4 @@
-subroutine output_results(ts, expnb, solver, utp, zeta, eta)
+subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
   use size
   use resolution
   use global_var
@@ -25,8 +25,6 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   elseif (adv_scheme .eq. 'semilag') then
     adv = 3
   endif
-
-  fldr='output.04/' !output folder
 
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km
@@ -105,46 +103,46 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
 
   if (oceanSIM) then
 
-  write (filename, '("output/etaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (18, file = filename, status = 'unknown')
+    write (filename, '(A,"etaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, &
+           Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+    open (18, file = filename, status = 'unknown')
 
-  write (filename, '("output/uw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') Dt, &
-        Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (19, file = filename, status = 'unknown')
+    write (filename, '(A,"uw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') fldr, &
+           Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+    open (19, file = filename, status = 'unknown')
 
-  write (filename, '("output/duwdt_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
-        Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (20, file = filename, status = 'unknown')
+    write (filename, '(A,"duwfldr, dt_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+          fldr, Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+    open (20, file = filename, status = 'unknown')
 
-  write (filename, '("output/gdetawdx_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
-        Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (21, file = filename, status = 'unknown')
+    write (filename, '(A,"gdetawdx_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+          fldr, Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+    open (21, file = filename, status = 'unknown')
 
-  write (filename, '("output/tauaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
-        Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (22, file = filename, status = 'unknown')
+    write (filename, '(A,"tauaw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+          fldr, Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+    open (22, file = filename, status = 'unknown')
 
-  write (filename, '("output/tauiw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
-        Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (23, file = filename, status = 'unknown')
+    write (filename, '(A,"tauiw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+          fldr, Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+    open (23, file = filename, status = 'unknown')
 
-  write (filename, '("output/buw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
-        Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
-  open (24, file = filename, status = 'unknown')
+    write (filename, '(A,"buw_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+          fldr, Dt, Dx,solver, IMEX, adv,BDF2,ts,expnb
+    open (24, file = filename, status = 'unknown')
 
 
-  write(18,10) ( etaw(i),      i = 0, nx+1 )
-  write(19,10) ( uw(i),        i = 1, nx+1 )
-  write(20,10) ( duwdt(i),     i = 1, nx+1 )
-  write(21,10) ( gedetawdx(i), i = 1, nx+1 )
-  write(22,10) ( tauaw(i),     i = 1, nx+1 )
-  write(23,10) ( tauiw(i),     i = 1, nx+1 )
-  write(24,10) ( buw(i),       i = 1, nx+1 )
+    write(18,10) ( etaw(i),      i = 0, nx+1 )
+    write(19,10) ( uw(i),        i = 1, nx+1 )
+    write(20,10) ( duwdt(i),     i = 1, nx+1 )
+    write(21,10) ( gedetawdx(i), i = 1, nx+1 )
+    write(22,10) ( tauaw(i),     i = 1, nx+1 )
+    write(23,10) ( tauiw(i),     i = 1, nx+1 )
+    write(24,10) ( buw(i),       i = 1, nx+1 )
 
-  do k = 18, 24
-     close(k)
-  enddo
+    do k = 18, 24
+      close(k)
+    enddo
 
   endif
 
@@ -153,7 +151,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta)
   return
 end subroutine output_results
 
-subroutine output_residual(ts, k, expnb, F)
+subroutine output_residual(ts, k, expnb, F, fldr)
   use size
   use resolution
   use option
@@ -165,6 +163,7 @@ subroutine output_residual(ts, k, expnb, F)
   integer :: i, Dt, Dx, adv
   integer, intent(in) :: ts, k, expnb
   double precision, intent(in):: F(1:nx+1)
+  character(Len=10) :: fldr
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -175,7 +174,7 @@ subroutine output_residual(ts, k, expnb, F)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') Dt, &
+  write (filename, '(A,"res_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".",i2.2)') fldr, Dt, &
         Dx,IMEX,adv,BDF2,ts,k,expnb
   open (11, file = filename, status = 'unknown')
 
@@ -188,7 +187,7 @@ subroutine output_residual(ts, k, expnb, F)
   return
 end subroutine output_residual
 
-subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
+subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb, fldr)
   use resolution
   use option
   implicit none
@@ -197,6 +196,7 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
 
   integer, intent(in) :: ts, k, fgmres_per_ts, expnb
   integer :: Dt, Dx, adv
+  character(Len=10) :: fldr
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -207,7 +207,7 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
   Dt=int(Deltat) ! in s
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt, &
+  write (filename, '(A,"Nbite_",i5.5,"s_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt, &
    Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
 
@@ -220,7 +220,7 @@ subroutine output_nb_ite(ts, k, fgmres_per_ts, expnb)
   return
 end subroutine output_nb_ite
 
-subroutine output_ini_L2norm(ts, L2norm, expnb)
+subroutine output_ini_L2norm(ts, L2norm, expnb, fldr)
   use resolution
   use option
   implicit none
@@ -230,6 +230,7 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
   integer :: Dt, Dx, adv
   integer, intent(in) :: ts, expnb
   double precision, intent(in) :: L2norm
+  character(Len=10) :: fldr
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -240,7 +241,7 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
+  write (filename, '(A,"iniL2norm_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt, &
    Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
 
@@ -253,7 +254,7 @@ subroutine output_ini_L2norm(ts, L2norm, expnb)
   return
 end subroutine output_ini_L2norm
 
-subroutine output_u_and_du ( ts, k, utp, du )
+subroutine output_u_and_du ( ts, k, utp, du, fldr)
   use size
   use resolution
 !  use global_var
@@ -266,6 +267,7 @@ subroutine output_u_and_du ( ts, k, utp, du )
   integer :: i, Dt, Dx, adv
   integer, intent(in) :: ts, k
   double precision, intent(in)  :: utp(1:nx+1), du(1:nx+1)
+  character(Len=10) :: fldr
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -276,11 +278,11 @@ subroutine output_u_and_du ( ts, k, utp, du )
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '("output/uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') Dt,&
+  write (filename, '(A,"uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') fldr, Dt,&
         Dx,IMEX, adv,BDF2,ts,k
   open (10, file = filename, status = 'unknown')
 
-  write (filename, '("output/du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1"_ts",i4.4,"_k",i3.3,".dat")') Dt,&
+  write (filename, '(A,"du_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') fldr, Dt, &
         Dx,IMEX, adv,BDF2,ts,k
   open (11, file = filename, status = 'unknown')
 
@@ -295,7 +297,7 @@ subroutine output_u_and_du ( ts, k, utp, du )
   return
 end subroutine output_u_and_du
 
-subroutine output_diag_stress(ts, expnb, idiag)
+subroutine output_diag_stress(ts, expnb, idiag, fldr)
 
 ! output diagnostic (ice-ocean and vice versa) stress at i=idiag
 
@@ -309,6 +311,7 @@ subroutine output_diag_stress(ts, expnb, idiag)
   integer :: Dt, Dx, adv
   integer, intent(in) :: ts, expnb, idiag
   double precision :: ratio
+  character(Len=10) :: fldr
 
   if (adv_scheme .eq. 'upwind') then
     adv = 1
@@ -321,7 +324,7 @@ subroutine output_diag_stress(ts, expnb, idiag)
 
   ratio = tauwidiag/tauiwdiag
 
-  write (filename, '("output/diag_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') Dt,&
+  write (filename, '(A,"diag_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt,&
    Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
 

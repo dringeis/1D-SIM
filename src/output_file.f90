@@ -1,4 +1,4 @@
-subroutine output_file(e, gamma_nl, solver, expnb)
+subroutine output_file(e, gamma_nl, solver, expnb, fldr)
 
   use size
   use rheology
@@ -13,8 +13,9 @@ subroutine output_file(e, gamma_nl, solver, expnb)
 
   integer, intent(in) :: solver, expnb
   double precision, intent(in) :: e, gamma_nl
+  character(Len=10) :: fldr
 
-  write (filename, '("output/info.",i2.2)') expnb
+  write (filename, '(A,"info.",i2.2)') fldr, expnb
   open (10, file = filename, status = 'unknown')
 
   write(10,*) ('PHYSICAL PARAMETERS')

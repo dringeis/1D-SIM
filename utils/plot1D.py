@@ -153,8 +153,10 @@ if __name__ == "__main__":
     # Plotting for one dataset
     varn = ["u", "h", "A", "div", "Er"]
 
+    # lines plots
     plot_SIM1D(ds, varn, step=10)
 
+    # pcolormesh plots
     plot_SIM1D_PM(ds, varn)
 
     # ds['A'].plot(vmin=0., cmap='Blues_r')
