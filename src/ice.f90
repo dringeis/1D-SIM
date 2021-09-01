@@ -91,14 +91,14 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 6
+  expnb      = 2
   expres     = 2
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
   ! out_step(2)=100
   ! out_step(3)=1440
   out_freq = 10
-  fldr = 'output.06/'
+  fldr = 'output.02/'
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -164,7 +164,7 @@ program ice
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
   alpha2     = 1d0 + e_2
-  kt         = -0.1d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
+  kt         = 0.0d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
 
   Cdair      = 1.2d-03      ! air-ice drag coeffient
   Cdairw     = 1.2d-03      ! air-water drag coeffient

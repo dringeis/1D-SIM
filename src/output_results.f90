@@ -42,7 +42,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
   do i = 1, nx
     div(i) = (utp(i+1)-utp(i)) / Deltax ! calc divergence
     sigma(i) = (zeta(i)+eta(i))*div(i) - P_half(i)
-    sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0/Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength
+    sig_norm(i) = (zeta(i)+eta(i))*div(i)*0.5d0 / Pp_half(i) - 0.5d0*P_half(i)/Pp_half(i) ! norm by ice strength
     ! zeta_norm(i) = zeta(i) / (zmax_par*Pp_half(i))
   enddo
 
@@ -278,7 +278,7 @@ subroutine output_u_and_du ( ts, k, utp, du, fldr)
   Dt=int(Deltat/60d0) ! in min
   Dx=int(Deltax/1000d0) ! in km
 
-  write (filename, '(A,"uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') fldr, Dt,&
+  write (filename, '(A,"uk1_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,"_ts",i4.4,"_k",i3.3,".dat")') fldr, Dt, &
         Dx,IMEX, adv,BDF2,ts,k
   open (10, file = filename, status = 'unknown')
 
@@ -324,7 +324,7 @@ subroutine output_diag_stress(ts, expnb, idiag, fldr)
 
   ratio = tauwidiag/tauiwdiag
 
-  write (filename, '(A,"diag_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt,&
+  write (filename, '(A,"diag_stress_",i3.3,"min_",i3.3,"km_IMEX",i1.1,"_adv",i1.1,"_BDF2_",i1.1,".",i2.2)') fldr, Dt, &
    Dx,IMEX,adv,BDF2,expnb
   open (10, file = filename, access = 'append')
 

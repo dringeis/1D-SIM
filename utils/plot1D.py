@@ -2,6 +2,7 @@ import numpy as np
 import pylab as plt
 import xarray as xr
 from datetime import datetime
+import matplotlib as mpl
 
 # Using LaTeX in figures
 plt.rc('text', usetex=True)
@@ -98,22 +99,35 @@ def loadxr_SIM1D(datas, attrs={}, save=False):
 
 def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
     for var in varn:
-        plt.figure()
-        for i in range(int(tslim[0]*ds[var].shape[0]), int(tslim[1]*ds[var].shape[0]), step):
-            ds[var][i].plot(linestyle='dashed', label=str("t="+str(ds['time'][i].values) + " s"))
-#         plt.legend()
-        plt.grid()
-        plt.title(str('variable ' + var))
-
+        if var in ds:
+            
+            nbrmax=int(tslim[1]*ds[var].shape[0])
+            nbrmin=int(tslim[0]*ds[var].shape[0])
+            lin_nbrs = range(nbrmin, nbrmax, step)
+            lin_nbrs_cb = range(nbrmin, nbrmax, step)
+            n_lines = len(lin_nbrs)
+            
+            norm = mpl.colors.Normalize(vmin=nbrmin, vmax=nbrmax)
+            cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.viridis)
+            
+            plt.figure()
+            for i in lin_nbrs:
+                ds[var][i].plot(linestyle='dashed', c=cmap.to_rgba(i + 1))
+            plt.grid()
+            plt.colorbar(cmap, label='Timesteps')
+            plt.title(str('variable ' + var))
+        else:
+            print(var,' is not in the dataset')
     return None
 
 def plot_SIM1D_PM(ds, varn):
     for var in varn:
-        plt.figure()
-        ds[var].plot()
-        # plt.colorbar()
-        plt.title(str('variable ' + var))
-
+        if var in ds:
+            plt.figure()
+            ds[var].plot()
+            plt.title(str('variable ' + var))
+        else:
+            print(var,' is not in the dataset')
     return None
 
 def timesteps(tb,te,step):
