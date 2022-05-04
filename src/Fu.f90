@@ -42,7 +42,7 @@ subroutine Fu (utp, un1, un2, htp, R_uk1, Fu_vec)
 !     Substract the R vector
 !------------------------------------------------------------------------
 
-      Fu_vec(i) = scaling(i) * ( Fu_vec(i) - R_uk1(i) )
+      Fu_vec(i) = scaling(i) * ABS( Fu_vec(i) - R_uk1(i) )
 
     enddo
 

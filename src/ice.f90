@@ -36,7 +36,7 @@ program ice
   integer :: out_step(5), expnb, expres, ts_res, fgmres_its, fgmres_per_ts, out_freq
   integer, save :: Nfail, meanN ! nb of failures, mean Newton ite per ts
   double precision :: e, rhoair, Cdair, Cdwater
-  double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1)
+  double precision :: u(1:nx+1), un1(1:nx+1), un2(1:nx+1), uk1(1:nx+1)
   double precision :: tauair(1:nx+1)    ! tauair
   double precision :: b(1:nx+1)         ! b vector
   double precision :: zeta(0:nx+1), eta(0:nx+1), sigma(0:nx+1), Cw(1:nx+1), Cb(1:nx+1)
@@ -57,10 +57,10 @@ program ice
   linear_drag    = .false.
   linear_viscous = .false. ! linear viscous instead of viscous-plastic
   constant_wind  = .true. ! T: 10m/s, F: spat and temp varying winds
-  rep_closure    = .true. ! replacement closure (see Kreysher et al. 2000)
+  rep_closure    = .false. ! replacement closure (see Kreysher et al. 2000)
   restart        = .false.
   regularization = 'tanh' ! tanh, Kreyscher, capping (Hibler)
-  adv_scheme     = 'semilag' ! upwind, upwindRK2, semilag
+  adv_scheme     = 'upwindRK2' ! upwind, upwindRK2, semilag
   oceanSIM       = .false. ! for shallow water model
   implicitDrag   = .true. ! for uwater mom eq.
   Asselin        = .true. ! Asselin filter for uw and etaw
@@ -68,22 +68,22 @@ program ice
   idiag          = 100
   Agamma         = 1d-02 ! Asselin filter parameter
 
-  solver     = 1        ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
-  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX)
+  solver     = 1       ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
+  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX)
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
 
   Deltat     = 10d0   ! time step [s]
   nstep      = 1800     ! lenght of the run in nb of time steps
-  Nmax_OL    = 500
+  Nmax_OL    = 1500
 
   T = 0.36d0*Deltat ! elast. damping time scale (Deltate < T < Deltat)
   N_sub = 900
   Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
 
   omega      = 1.5d0    ! relax parameter for SOR
-  tol_SOR    = 1d-8    ! tol for SOR solver
-  maxiteSOR  = 1000     ! max nb of ite for SOR
-  iteSOR_pre = 500       ! nb of iterations for the SOR precond
+  tol_SOR    = 1d-11     ! tol for SOR solver
+  maxiteSOR  = 1500     ! max nb of ite for SOR
+  iteSOR_pre = 50       ! nb of iterations for the SOR precond
   maxiteGMRES= 500      ! max nb of ite for GMRES
   gamma_nl = 1d-03
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
@@ -91,14 +91,14 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 2
-  expres     = 2
+  expnb      = 16
+  expres     = 16
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
   ! out_step(2)=100
   ! out_step(3)=1440
-  out_freq = 10
-  fldr = 'output.02/'
+  out_freq = 1
+  fldr = 'output.16/'
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -159,7 +159,7 @@ program ice
 !------------------------------------------------------------------------
 
   C          = 20d0         ! ice strength parameter (watchout no A for now)
-  Pstar      = 27.5d03      ! ice compression strength parameter
+  Pstar      = 2.75d04      ! ice compression strength parameter
   e          = 2d0          ! ratio long to short axis of ellipse
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
@@ -168,7 +168,7 @@ program ice
 
   Cdair      = 1.2d-03      ! air-ice drag coeffient
   Cdairw     = 1.2d-03      ! air-water drag coeffient
-  Cdwater    = 5.5d-03      ! water-ice drag coeffient
+  Cdwater    = 5.5d-02      ! water-ice drag coeffient Default: 5.5d-02
   rhoair     = 1.3d0        ! air density
   rho        = 900d0        ! ice density
   rhowater   = 1026d0       ! water density
@@ -217,6 +217,11 @@ program ice
     un1=u
     hn1=h
     An1=A
+
+    u(1)=u(nx+1) ! periodic boundary condition
+    A(0)=A(nx+1) ! periodic boundary condition
+    h(0)=h(nx+1) ! periodic boundary condition
+
     if (oceanSIM) then
       uwn2   = uwn1
       uwn1   = uw
@@ -238,7 +243,14 @@ program ice
 
       if (solver .eq. 2 ) call calc_scaling (An1) ! scaling=1 for other solvers
 
+      uk1 = un1
+
       do k = 1, Nmax_OL
+
+        ! Improves convergence a lot! Removes oscilations
+        do i = 1, nx+1
+          u(i) = 0.5 * ( u(i) + uk1(i) )
+        enddo
 
         if (IMEX .gt. 0) then ! IMEX method 1 or 2
           call advection (un1, u, hn1, An1, hn2, An2, h, A) ! advect tracers
@@ -252,12 +264,17 @@ program ice
 
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
-        if (k .eq. 1) then
-          nl_target = gamma_nl*L2norm
-          ! call output_ini_L2norm(ts, L2norm, expnb, fldr)
-        endif
+        ! Soft conditions for convergence (turn off to be like MITgcm)
+        !
+        ! if (k .eq. 1) then
+        !  nl_target = gamma_nl*L2norm
+        !  !call output_ini_L2norm(ts, L2norm, expnb, fldr)
+        ! endif
 
-        if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
+        ! if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
+        ! if (L2norm .lt. nl_target) exit
+
+        uk1 = u
 
         if (solver .eq. 1) then
           print *, 'L2-norm after k ite=', ts, k-1, L2norm
@@ -334,7 +351,7 @@ program ice
     ! output at some timestep frequency out_freq and always on the last timestep
     if (( MOD(ts,out_freq) .EQ. 0.0d0 ) .OR. (ts .EQ. nstep)) then
       print *, 'outputting results'
-      call output_results(ts, expnb, solver, u, zeta, eta, fldr)
+      call output_results(ts, expnb, solver, u, zeta, eta, F_uk1, fldr)
       call output_file(e, gamma_nl, solver, expnb, fldr)
     endif
 

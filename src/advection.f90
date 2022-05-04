@@ -273,6 +273,9 @@ subroutine advection (un1, utp, hn1in, An1in, hn2in, An2in, hout, Aout)
 
   endif
 
+  Aout(0)=Aout(nx+1) ! periodic boundary condition
+  hout(0)=hout(nx+1) ! periodic boundary condition
+
   return
 end subroutine advection
 

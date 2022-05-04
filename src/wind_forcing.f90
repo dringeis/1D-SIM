@@ -14,8 +14,8 @@ subroutine wind_forcing (tauair, ts)
   double precision :: speed, period, modulation, pi, apar, tau_f
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
-  nf = 129
-  tau_f = 0.1
+  nf = 1
+  tau_f = 1d0
   ts_end = 1800
 
   speed = 10d0 ! [m/s]
@@ -35,12 +35,12 @@ subroutine wind_forcing (tauair, ts)
       ! enddo
 
       ! forcing separated in 2
-      do i = 2, nf ! with apar = 6*3600, tauair is (1-e^-2) after 12 hours.
-        tauair(i) = 0
-      enddo
-      do i = nf+1, nx
-        ! tauair(i) = tau_f ! constant stress in x
-        tauair(i) = tau_f*ts/ts_end ! time increasing constant stress in x
+      ! do i = 2, nf
+      !   tauair(i) = 0
+      ! enddo
+      do i = 1, nx+1
+        tauair(i) = tau_f ! constant stress in x
+        !tauair(i) = tau_f*ts/ts_end ! time increasing constant stress in x
         ! tauair(i) = tau_f*(i-nf+1)/(nx-nf+1) ! progressive increase of wind in x
         ! tauair(i) = tau_f*(i-nf+1)/(nx-nf+1)*ts/ts_end ! progressive increase of wind in x
       enddo

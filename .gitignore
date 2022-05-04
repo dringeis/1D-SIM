@@ -1,6 +1,7 @@
 *.mod
 output*
 zoupa
-.ipynb*
-1D_tens_tests.ipynb
+*.ipynb*
+*sublime-*
+*sublime-*
 utils/__py*

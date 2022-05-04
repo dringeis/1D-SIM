@@ -1,4 +1,4 @@
-subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
+subroutine output_results(ts, expnb, solver, utp, zeta, eta, Res, fldr)
   use size
   use resolution
   use global_var
@@ -12,7 +12,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
 
   integer :: i, k, Dt, Dx, adv
   integer, intent(in) :: ts, expnb, solver
-  double precision, intent(in):: zeta(0:nx+1),eta(0:nx+1)
+  double precision, intent(in):: zeta(0:nx+1), eta(0:nx+1), Res(0:nx+1)
   double precision, intent(in)  :: utp(1:nx+1)
   double precision :: div(0:nx+1), sigma(0:nx+1), sig_norm(0:nx+1), zeta_norm(0:nx+1)
   double precision :: Erate(1:nx+1) ! KE rate loss/gain by rheology term
@@ -86,6 +86,12 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
          fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (18, file = filename, status = 'unknown')
 
+  ! Output of residual
+  if (solver .eq. 1 .or. solver .eq. 2 ) then
+    write (filename, '(A,"Res_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)')  &
+         fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
+    open (19, file = filename, status = 'unknown')
+  endif
 
   write(10,10) ( h(i),       i = 0, nx+1 )
   write(11,10) ( A(i),       i = 0, nx+1 )
@@ -96,6 +102,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, fldr)
   write(17,10) ( sig_norm(i),   i = 0, nx+1 )
   write(12,10) ( utp(i),       i = 1, nx+1 )
   write(18,10) ( Erate(i),     i = 1, nx+1 )
+  write(19,10) ( Res(i),     i = 0, nx+1 )
 
   do k = 10, 18
     close(k)

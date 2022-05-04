@@ -100,16 +100,16 @@ def loadxr_SIM1D(datas, attrs={}, save=False):
 def plot_SIM1D(ds, varn, tslim=[0, 1], step=1):
     for var in varn:
         if var in ds:
-            
+
             nbrmax=int(tslim[1]*ds[var].shape[0])
             nbrmin=int(tslim[0]*ds[var].shape[0])
             lin_nbrs = range(nbrmin, nbrmax, step)
             lin_nbrs_cb = range(nbrmin, nbrmax, step)
             n_lines = len(lin_nbrs)
-            
+
             norm = mpl.colors.Normalize(vmin=nbrmin, vmax=nbrmax)
             cmap = mpl.cm.ScalarMappable(norm=norm, cmap=mpl.cm.viridis)
-            
+
             plt.figure()
             for i in lin_nbrs:
                 ds[var][i].plot(linestyle='dashed', c=cmap.to_rgba(i + 1))

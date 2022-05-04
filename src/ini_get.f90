@@ -33,12 +33,12 @@ subroutine ini_get (utp, restart, expres, ts_res)
      allocate(tauiw(1:nx+1), tauaw(1:nx+1))
   endif
 
-  utp(1)    = 0d0 ! close bc
-  utp(nx+1) = 0d0 ! close bc
-  h(0)    = 0d0
-  h(nx+1) = 0d0
-  A(0)    = 0d0
-  A(nx+1) = 0d0
+  !utp(1)    = 0d0 ! close bc
+  !utp(nx+1) = 0d0 ! close bc
+  !h(0)    = 0d0
+  !h(nx+1) = 0d0
+  !A(0)    = 0d0
+  !A(nx+1) = 0d0
   uw      = 0d0
   uwn1    = 0d0
   uwn2    = 0d0
@@ -70,22 +70,22 @@ subroutine ini_get (utp, restart, expres, ts_res)
 
   else ! specify initial fields
 
-  do i = 2, nx
+  do i = 1, nx+1
 !     call random_number(rdnb)
 !     u(i) = small*(rdnb-0.5d0) !small random nb added to 1st initial guess
      utp(i) = 0d0
      uw(i)  = 0d0
   enddo
 
-  do i = 1, nx
-     h(i) = 0d0
-     A(i) = 0d0
+  do i = 0, nx+1
+     ! h(i) = 0d0
+     ! A(i) = 0d0
 !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall
 !     h(i) = max(1d-06, h(i))
-     bathy(i)=100d0
+     bathy(i)=200d0
   enddo
 
-  do i = 2, 250
+  do i = 0, nx+1
      h(i) = 1d0
      A(i) = 1d0
 !     A(i) = i/(nx*1d0) - 0.5d0/(1d0*nx) ! 0 at West wall and 1 at East wall

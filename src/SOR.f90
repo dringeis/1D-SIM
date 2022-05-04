@@ -22,7 +22,7 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
   double precision, intent(in)  :: b(1:nx+1)
   double precision              :: D(1:nx+1)
 
-  double precision :: h_at_u, a_at_u, B1, residual ,maxerror
+  double precision :: h_at_u, a_at_u, B1, residual ,maxerror, gamma, me_tol, tol, lm
 
   if (p_flag) then
      utp = 0d0              ! initial guess for precond
@@ -66,8 +66,17 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 
   enddo
 
+  ! maxerror = 0d0
+  ! gamma = 1d-1
+  tol = tol_SOR
+  lm = 0
+
   do l = 1, maxiteSOR
-    maxerror = 0d0
+
+    ! if (l .EQ. 2) then
+    !  tol = MIN(tol_SOR,maxerror*gamma)
+    !  print *, 'LSR tol', tol
+    ! endif
 
     do i = 2, nx
 
@@ -95,14 +104,22 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 
     enddo
 
-    if (.not. p_flag) then
-      if ( maxerror .lt. tol_SOR ) then
-        print *, 'nb of SOR ite=', l
+    if (l .GE. 4) then
+     if (.not. p_flag) then
+      if ( maxerror .lt. tol ) then
+        lm = l
         exit
       endif
+     endif
     endif
 
+    utp(1)=utp(nx+1) ! periodic boundary condition
+
   enddo
+
+  if ( lm .EQ. 0 ) lm = maxiteSOR
+
+  print *, 'nb of SOR ite=', lm
 
   return
 end subroutine SOR
@@ -126,10 +143,11 @@ subroutine SOR_A (b, utp, zeta, eta, Cw, k, ts)
   double precision, intent(in)  :: zeta(0:nx+1), eta(0:nx+1),Cw(1:nx+1)
   double precision, intent(in)  :: b(1:nx+1)
 
-  double precision :: B1, residual ,maxerror
+  double precision :: B1, residual ,maxerror, me_lm1
   double precision :: Aleft(1:nx+1), Adiag(1:nx+1), Aright(1:nx+1)
 
   call formA (utp, zeta, eta, Cw, ts, k, Aleft, Adiag, Aright)
+
 
   do l = 1, maxiteSOR
 
