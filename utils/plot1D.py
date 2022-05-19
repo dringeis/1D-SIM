@@ -5,8 +5,8 @@ from datetime import datetime
 import matplotlib as mpl
 
 # Using LaTeX in figures
-plt.rc('text', usetex=True)
-plt.rc('font', family='sans')
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='sans')
 
 def loadxr_sNC(ds,name='', path=''):
 

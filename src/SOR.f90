@@ -114,6 +114,8 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
     endif
 
     utp(1)=utp(nx+1) ! periodic boundary condition
+    utp(2)=utp(nx)   ! periodic boundary condition
+    utp(3)=utp(nx-1) ! periodic boundary condition
 
   enddo
 

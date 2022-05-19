@@ -91,14 +91,14 @@ program ice
   small2   = 1d-22      ! to have a continuously diff rheology term
   smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 16
-  expres     = 16
+  expnb      = 17
+  expres     = 17
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
   ! out_step(2)=100
   ! out_step(3)=1440
   out_freq = 1
-  fldr = 'output.16/'
+  fldr = 'output.17/'
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -219,8 +219,14 @@ program ice
     An1=A
 
     u(1)=u(nx+1) ! periodic boundary condition
+    u(2)=u(nx)   ! periodic boundary condition
+    u(3)=u(nx-1) ! periodic boundary condition
     A(0)=A(nx+1) ! periodic boundary condition
+    A(1)=A(nx)   ! periodic boundary condition
+    A(2)=A(nx-1) ! periodic boundary condition
     h(0)=h(nx+1) ! periodic boundary condition
+    h(1)=h(nx)   ! periodic boundary condition
+    h(2)=h(nx-1) ! periodic boundary condition
 
     if (oceanSIM) then
       uwn2   = uwn1
