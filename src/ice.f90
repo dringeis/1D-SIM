@@ -69,7 +69,7 @@ program ice
   Agamma         = 1d-02 ! Asselin filter parameter
 
   solver     = 1       ! 1: Picard+SOR, 2: JFNK, 3: EVP, 4: EVP*
-  IMEX       = 2       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX)
+  IMEX       = 0       ! 0: no IMEX, 1: Jdu=-F(IMEX), 2: J(IMEX)du=-F(IMEX)
   BDF2       = 0       ! 0: standard, 1: Backward difference formula (2nd order)
 
   Deltat     = 10d0   ! time step [s]
@@ -80,7 +80,7 @@ program ice
   N_sub = 900
   Deltate    = Deltat / (N_sub*1d0) ! for EVP solver
 
-  omega      = 1.5d0    ! relax parameter for SOR
+  omega      = 1d0    ! relax parameter for SOR
   tol_SOR    = 1d-11     ! tol for SOR solver
   maxiteSOR  = 1500     ! max nb of ite for SOR
   iteSOR_pre = 50       ! nb of iterations for the SOR precond
@@ -89,16 +89,16 @@ program ice
   dropini  = 1.5d0        ! defines initial drop in L2norm before gamma = 0.01
   small1   = 1d-10      ! to have a continuously diff water drag term
   small2   = 1d-22      ! to have a continuously diff rheology term
-  smallA   = 1d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
+  smallA   = 0d-03      ! for num stab of Atw and Ata (in zones with ~no ice)
 
-  expnb      = 17
-  expres     = 17
+  expnb      = 18
+  expres     = 18
   ts_res     = 50 ! time level of restart (!!! watchout for Deltat !!!)
   ! out_step(1)=1
   ! out_step(2)=100
   ! out_step(3)=1440
   out_freq = 1
-  fldr = 'output.17/'
+  fldr = 'output.18/'
 
 !------------------------------------------------------------------------
 ! verify choice of solver and options
@@ -146,6 +146,8 @@ program ice
     Deltax   =  5d03
   elseif  ( nx .eq. 260 ) then ! New hig-res smaller experiment
     Deltax   =  1d03
+  elseif  ( nx .eq. 12 ) then ! New hig-res smaller experiment
+    Deltax   =  1d03
   else
     print *,  'Wrong grid size dimenion', nx
     STOP
@@ -164,13 +166,13 @@ program ice
   e_2        = 1/(e**2d0)   !
   alpha      = sqrt(1d0 + e_2)
   alpha2     = 1d0 + e_2
-  kt         = 0.0d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
+  kt         = 0.00d0          ! T = kt * P (1.0 in Konig and Holland, 2010)
 
-  Cdair      = 1.2d-03      ! air-ice drag coeffient
+  Cdair      = 1.2d-03      ! air-ice drag coeffients
   Cdairw     = 1.2d-03      ! air-water drag coeffient
-  Cdwater    = 5.5d-02      ! water-ice drag coeffient Default: 5.5d-02
+  Cdwater    = 5.5d-03      ! water-ice drag coeffient Default: 5.5d-03
   rhoair     = 1.3d0        ! air density
-  rho        = 900d0        ! ice density
+  rho        = 910d0        ! ice density
   rhowater   = 1026d0       ! water density
   ge         = 9.8d0        ! Earth's gravitional acceleration
   Hw         = 2.5d0          ! mean water depth (for shallow water model)
@@ -218,15 +220,15 @@ program ice
     hn1=h
     An1=A
 
-    u(1)=u(nx+1) ! periodic boundary condition
-    u(2)=u(nx)   ! periodic boundary condition
-    u(3)=u(nx-1) ! periodic boundary condition
-    A(0)=A(nx+1) ! periodic boundary condition
-    A(1)=A(nx)   ! periodic boundary condition
-    A(2)=A(nx-1) ! periodic boundary condition
-    h(0)=h(nx+1) ! periodic boundary condition
-    h(1)=h(nx)   ! periodic boundary condition
-    h(2)=h(nx-1) ! periodic boundary condition
+    ! u(1)=u(nx+1) ! periodic boundary condition
+    ! u(2)=u(nx)   ! periodic boundary condition
+    ! u(3)=u(nx-1) ! periodic boundary condition
+    ! A(0)=A(nx+1) ! periodic boundary condition
+    ! A(1)=A(nx)   ! periodic boundary condition
+    ! A(2)=A(nx-1) ! periodic boundary condition
+    ! h(0)=h(nx+1) ! periodic boundary condition
+    ! h(1)=h(nx)   ! periodic boundary condition
+    ! h(2)=h(nx-1) ! periodic boundary condition
 
     if (oceanSIM) then
       uwn2   = uwn1
@@ -253,7 +255,7 @@ program ice
 
       do k = 1, Nmax_OL
 
-        ! Improves convergence a lot! Removes oscilations
+        ! Improves convergence a lot! Removes oscilations in residual
         do i = 1, nx+1
           u(i) = 0.5 * ( u(i) + uk1(i) )
         enddo
@@ -271,14 +273,13 @@ program ice
         L2norm = sqrt(DOT_PRODUCT(F_uk1,F_uk1))
 
         ! Soft conditions for convergence (turn off to be like MITgcm)
-        !
-        ! if (k .eq. 1) then
-        !  nl_target = gamma_nl*L2norm
-        !  !call output_ini_L2norm(ts, L2norm, expnb, fldr)
-        ! endif
+        if (k .eq. 1) then
+         nl_target = gamma_nl*L2norm
+         !call output_ini_L2norm(ts, L2norm, expnb, fldr)
+        endif
 
-        ! if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
-        ! if (L2norm .lt. nl_target) exit
+        if (L2norm .lt. nl_target .or. L2norm .lt. 1d-08) exit
+        if (L2norm .lt. nl_target) exit
 
         uk1 = u
 

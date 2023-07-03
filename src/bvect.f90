@@ -20,9 +20,13 @@ subroutine bvect(tauair, un1, Cw, b)
 
      h_at_u = ( h(i) + h(i-1) ) / 2d0
      a_at_u = ( A(i) + A(i-1) ) / 2d0
-     a_at_u=max(a_at_u, smallA)
+     a_at_u = max(a_at_u, smallA)
+     PRINT *, 'a_at_u'
+     PRINT *, a_at_u, smallA
+     PRINT *, 'A'
+     PRINT *, A(i), A(i-1)
 
-     b(i) = a_at_u*tauair(i) + a_at_u*Cw(i)*uwn2(i) - &
+     b(i) = a_at_u*tauair(i) + Cw(i)*uwn2(i) - &
             ( P_half(i) - P_half(i-1) ) / Deltax + ( rho * h_at_u * un1(i) ) / Deltat - &
             rho * h_at_u * ge * ( etawn1(i) - etawn1(i-1) ) / Deltax
 

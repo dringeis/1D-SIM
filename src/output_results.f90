@@ -78,7 +78,7 @@ subroutine output_results(ts, expnb, solver, utp, zeta, eta, Res, fldr)
   !     fldr, Dt, Dx, IMEX, adv,ts,expnb
   ! open (16, file = filename, status = 'unknown')
 
-  write (filename, '(A,"sig_norm_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
+  write (filename, '(A,"signorm_",i5.5,"s_",i3.3,"km_solv",i1.1,"_IMEX",i1.1,"_adv",i1.1,"_BDF2",i1.1,"_ts",i6.6,".",i2.2)') &
          fldr, Dt, Dx, solver, IMEX, adv, BDF2, ts, expnb
   open (17, file = filename, status = 'unknown')
 

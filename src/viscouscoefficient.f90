@@ -13,7 +13,7 @@ subroutine viscouscoefficient(utp, zeta, eta)
   double precision, intent(out):: zeta(0:nx+1), eta(0:nx+1)
   double precision :: dudx, deno, denonum, denomin
 
-  denomin=2d-09
+  denomin=2d-9
 
   do i = 1, nx ! for tracer points
 
@@ -42,6 +42,7 @@ subroutine viscouscoefficient(utp, zeta, eta)
 
     endif
 
+    ! zeta(i) = 2.5d8 * Pstar
     eta(i)  = zeta(i) * e_2
 
     if (rep_closure) then  ! replacement closure (Kreysher et al. 2000)

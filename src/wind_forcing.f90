@@ -15,7 +15,7 @@ subroutine wind_forcing (tauair, ts)
   double precision, intent(out) :: tauair(1:nx+1) ! air drag
 
   nf = 1
-  tau_f = 1d0
+  tau_f = 0.15
   ts_end = 1800
 
   speed = 10d0 ! [m/s]

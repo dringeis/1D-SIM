@@ -47,9 +47,9 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     Cw*u : water drag term
 !------------------------------------------------------------------------
 
-      a_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
-      a_at_u=max(a_at_u, smallA)
-      D(i) = D(i) + a_at_u*Cw(i)
+      ! a_at_u = ( Atp(i) + Atp(i-1) ) / 2d0
+      ! a_at_u=max(a_at_u, smallA)
+      D(i) = D(i) + Cw(i)
 
 !------------------------------------------------------------------------
 !     Cb*u : bottom drag term
@@ -90,7 +90,7 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
 !     -d ( (zeta+eta) du/dx ) / dx : rheology term
 !------------------------------------------------------------------------
 
-      B1 = B1 + scaling(i)*((zeta(i)+eta(i))    *utp(i+1) &
+      B1 = B1 + scaling(i)*((zeta(i)+eta(i))  *utp(i+1) &
           +  (zeta(i-1)+eta(i-1))*utp(i-1)) / Deltax2
 
       residual = B1/D(i) - utp(i)
@@ -113,9 +113,9 @@ subroutine SOR (b, utp, htp, Atp, zeta, eta, Cw, Cb, p_flag, ts)
      endif
     endif
 
-    utp(1)=utp(nx+1) ! periodic boundary condition
-    utp(2)=utp(nx)   ! periodic boundary condition
-    utp(3)=utp(nx-1) ! periodic boundary condition
+    ! utp(1)=utp(nx+1) ! periodic boundary condition
+    ! utp(2)=utp(nx)   ! periodic boundary condition
+    ! utp(3)=utp(nx-1) ! periodic boundary condition
 
   enddo
 
